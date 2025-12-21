@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import mainLogo from "../../assets/logos/main_logo.svg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,208 +10,105 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
+  const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="relative z-50 mb-[-7.5rem]">
-      {/* Navigation Bar Container */}
-      <div className="relative flex justify-center py-6">
-        {/* Frosted Glass Navigation Bar */}
-        <div
-          className="backdrop-blur-md rounded-full px-8 py-2 max-w-6xl w-full"
-          style={{
-            border: "1px solid #FFFFFF36",
-            boxShadow:
-              "0px 4px 4px 0px #FFFFFF26 inset, 0px 0px 16px 0px #FFFFFF0D inset",
-            background: "#060B27",
-          }}
-        >
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center">
-              <span className="text-xl font-outfit font-bold text-white">
-                FORKWARD.
-              </span>
-            </div>
+    <header className="w-full flex flex-col items-center bg-white relative z-50 shadow-sm">
+      {/* Background / Top Bar */}
+      <div className="w-full h-12 bg-blue-500 overflow-hidden relative">
+        <div className="max-w-[1440px] mx-auto h-full px-4 lg:px-0 flex items-center justify-between lg:justify-center relative">
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-8 pl-32">
-              <Link
-                to="/"
-                className={`font-poppins font-medium text-lg hover:scale-105 transition-transform ${isActive("/")
-                  ? "bg-gradient-to-r from-[#9945FF] to-[#14F195] bg-clip-text text-transparent"
-                  : "text-white/80 font-medium hover:text-white transition-colors"
-                  }`}
-              >
-                Home
-              </Link>
-              <Link
-                to="/philanthropy"
-                className={`font-poppins font-medium hover:scale-105 transition-transform ${isActive("/philanthropy")
-                  ? "bg-gradient-to-r from-[#9945FF] to-[#14F195] bg-clip-text text-transparent font-semibold text-lg"
-                  : "text-white/80 hover:text-white transition-colors"
-                  }`}
-              >
-                Philanthropy
-              </Link>
-              <Link
-                to="/faq"
-                className={`font-poppins font-medium hover:scale-105 transition-transform ${isActive("/faq")
-                  ? "bg-gradient-to-r from-[#9945FF] to-[#14F195] bg-clip-text text-transparent font-semibold text-lg"
-                  : "text-white/80 hover:text-white transition-colors"
-                  }`}
-              >
-                FAQ
-              </Link>
-              <Link
-                to="/support"
-                className={`font-poppins font-medium hover:scale-105 transition-transform ${isActive("/support")
-                  ? "bg-gradient-to-r from-[#9945FF] to-[#14F195] bg-clip-text text-transparent font-semibold text-lg"
-                  : "text-white/80 hover:text-white transition-colors"
-                  }`}
-              >
-                Support
-              </Link>
-              <Link
-                to="#"
-                className="text-white/80 font-poppins font-medium hover:text-white transition-colors"
-              >
-                Discord
-              </Link>
-            </nav>
-
-            {/* Action Buttons */}
-            <div className="hidden lg:flex items-center space-x-5">
-              {/* CONNECT WALLET Button */}
-              <button className="relative overflow-hidden rounded-full px-16 py-5 min-w-[190px] group">
-                {/* Gradient Border */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#9945FF] to-[#14F195] p-[1px]">
-                  {/* Inner Background */}
-                  <div
-                    className="w-full h-full px-6 py-3 rounded-full flex items-center justify-center"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, rgb(87, 63, 116) 0%, rgb(43, 119, 87) 100%)",
-                    }}
-                  >
-                    {/* Text Section */}
-                    <span
-                      className="text-sm font-bold tracking-wide text-white text-center"
-                      style={{ fontFamily: "'Outfit', sans-serif" }}
-                    >
-                      CONNECT WALLET
-                    </span>
-                  </div>
-                </div>
-              </button>
-
-              {/* User Icon Button */}
-              <Link
-                to="/admin/dashboard"
-                className="w-12 h-12 bg-gradient-to-r from-[#9945FF] to-[#14F195] rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-              >
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
-              </Link>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button onClick={toggleMenu} className="lg:hidden text-white p-2">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+          {/* Mobile: Simple Text or partial slider (Simplified for Mobile) */}
+          <div className="w-full h-full flex items-center justify-center relative">
+            {/* Previous Slide Button (Hidden on small mobile if needed, or kept) */}
+            <div className="hidden lg:flex size-6 rounded-xl outline outline-1 outline-offset-[-1px] outline-white cursor-pointer items-center justify-center absolute left-0 lg:left-[420px]">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.77447 10.4081C9.03978 8.57139 5.36631 6.73465 3.16223 5.99996C5.36631 5.26527 8.67243 4.16323 9.77447 1.5918" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
-            </button>
+            </div>
+
+            {/* Carousel Item */}
+            <div className="text-center whitespace-nowrap overflow-hidden text-ellipsis px-8">
+              <span className="text-white text-xs sm:text-base font-medium font-display leading-6">Enjoy Family Holiday Packages with </span>
+              <span className="text-white text-xs sm:text-base font-bold font-display leading-6 block sm:inline">Flexible Payment Options</span>
+            </div>
+
+            {/* Next Slide Button */}
+            <div className="hidden lg:flex size-6 rounded-xl outline outline-1 outline-offset-[-1px] outline-white cursor-pointer items-center justify-center absolute right-0 lg:left-[995px]">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1.57129 10.4081C2.30598 8.57139 5.97945 6.73465 8.18354 5.99996C5.97945 5.26527 2.67333 4.16323 1.57129 1.5918" stroke="white" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="lg:hidden absolute top-full left-4 right-4 mt-2 bg-[#1A1A2E]/95 backdrop-blur-sm border border-white/10 rounded-2xl">
-            <div className="px-6 py-6 space-y-4">
-              <Link
-                to="/"
-                className={`block font-poppins py-2 ${isActive("/")
-                  ? "bg-gradient-to-r from-[#9945FF] to-[#14F195] bg-clip-text text-transparent font-semibold text-lg"
-                  : "text-white/80 font-medium hover:text-white"
-                  }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link
-                to="/philanthropy"
-                className={`block font-poppins py-2 ${isActive("/philanthropy")
-                  ? "bg-gradient-to-r from-[#9945FF] to-[#14F195] bg-clip-text text-transparent font-semibold text-lg"
-                  : "text-white/80 font-medium hover:text-white"
-                  }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Philanthropy
-              </Link>
-              <Link
-                to="/faq"
-                className={`block font-poppins py-2 ${isActive("/faq")
-                  ? "bg-gradient-to-r from-[#9945FF] to-[#14F195] bg-clip-text text-transparent font-semibold text-lg"
-                  : "text-white/80 font-medium hover:text-white"
-                  }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                FAQ
-              </Link>
-              <Link
-                to="/support"
-                className={`block font-poppins py-2 ${isActive("/support")
-                  ? "bg-gradient-to-r from-[#9945FF] to-[#14F195] bg-clip-text text-transparent font-semibold text-lg"
-                  : "text-white/80 font-medium hover:text-white"
-                  }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Support
-              </Link>
-              <Link
-                to="#"
-                className="block text-white/80 font-poppins font-medium py-2 hover:text-white"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Discord
-              </Link>
-              <div className="pt-4 space-y-3">
-                <Link
-                  to="#"
-                  className="block bg-gradient-to-r from-[#9945FF] to-[#14F195] text-white px-6 py-3 rounded-full font-outfit font-semibold text-center"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  CONNECT WALLET
-                </Link>
-                <Link
-                  to="/profile"
-                  className="block bg-gradient-to-r from-[#9945FF] to-[#14F195] text-white px-6 py-3 rounded-full font-outfit font-semibold text-center"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  PROFILE
-                </Link>
-              </div>
+      {/* Navbar Container */}
+      <div className="w-full max-w-[1440px] h-16 sm:h-20 lg:h-24 flex items-center justify-between px-4 lg:px-8 mt-2">
+        {/* Logo */}
+        <Link to="/" className="w-24 sm:w-28 lg:w-32 shrink-0 block">
+          <img src={mainLogo} alt="Travel Ease Logo" className="w-full h-auto object-contain" />
+        </Link>
+
+        {/* Desktop Navigation Links */}
+        <div className="hidden lg:flex gap-8 items-center">
+          <Link to="/" className={`${isActive('/') ? 'text-blue-500' : 'text-stone-950'} text-base font-semibold font-poppins leading-4 tracking-wide whitespace-nowrap hover:text-blue-500 transition-colors`}>Home</Link>
+          <Link to="/taxi-listing" className={`${isActive('/taxi-listing') ? 'text-blue-500' : 'text-stone-950'} text-base font-semibold font-poppins leading-4 tracking-wide whitespace-nowrap hover:text-blue-500 transition-colors`}>Taxi Booking</Link>
+          <Link to="/hotel-listing" className={`${isActive('/hotel-listing') ? 'text-blue-500' : 'text-stone-950'} text-base font-semibold font-poppins leading-4 tracking-wide whitespace-nowrap hover:text-blue-500 transition-colors`}>Hotel Listing</Link>
+          <Link to="/contact" className={`${isActive('/contact') ? 'text-blue-500' : 'text-stone-950'} text-base font-semibold font-poppins leading-4 tracking-wide whitespace-nowrap hover:text-blue-500 transition-colors`}>Contact</Link>
+        </div>
+
+        {/* Desktop Help Section & Button */}
+        <div className="hidden lg:flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-2xl outline outline-1 outline-offset-[-1px] outline-gray-200 flex items-center justify-center shrink-0">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.5644 11.7424L13.3315 9.50954C12.5341 8.7121 11.1784 9.03111 10.8594 10.0678C10.6202 10.7855 9.82272 11.1842 9.10502 11.0247C7.51013 10.626 5.35702 8.55261 4.9583 6.87797C4.71907 6.16024 5.19754 5.36279 5.91524 5.12359C6.95192 4.80461 7.27089 3.44895 6.47345 2.65151L4.2406 0.418659C3.60264 -0.139553 2.64571 -0.139553 2.0875 0.418659L0.572347 1.93381C-0.942799 3.5287 0.731836 7.75516 4.47983 11.5032C8.22783 15.2512 12.4543 17.0056 14.0492 15.4106L15.5644 13.8955C16.1226 13.2575 16.1226 12.3006 15.5644 11.7424Z" fill="#110F0F" />
+              </svg>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-neutral-600 text-xs font-semibold font-display">Need Help?</span>
+              <span className="text-stone-950 text-sm font-semibold font-poppins font-bold">+91 345 533 865</span>
             </div>
           </div>
-        )}
+
+          <Link to="/booking" className="w-40 h-10 bg-blue-500 rounded-[10px] flex items-center justify-center hover:bg-blue-600 transition-colors">
+            <span className="text-white text-base font-semibold font-poppins leading-4 tracking-wide">Book Now</span>
+          </Link>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button onClick={toggleMenu} className="lg:hidden flex items-center justify-center p-2 text-stone-950 focus:outline-none">
+          {isMenuOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMenuOpen && (
+        <div className="lg:hidden absolute top-[100%] left-0 w-full bg-white shadow-lg py-4 px-4 flex flex-col gap-4 border-t z-40">
+          <Link to="/" onClick={() => setIsMenuOpen(false)} className={`${isActive('/') ? 'text-blue-500' : 'text-stone-950'} text-lg font-semibold font-poppins py-2 border-b border-gray-100`}>Home</Link>
+          <Link to="/taxi-listing" onClick={() => setIsMenuOpen(false)} className={`${isActive('/taxi-listing') ? 'text-blue-500' : 'text-stone-950'} text-lg font-semibold font-poppins py-2 border-b border-gray-100 hover:text-blue-500`}>Taxi Booking</Link>
+          <Link to="/hotel-listing" onClick={() => setIsMenuOpen(false)} className={`${isActive('/hotel-listing') ? 'text-blue-500' : 'text-stone-950'} text-lg font-semibold font-poppins py-2 border-b border-gray-100 hover:text-blue-500`}>Hotel Listing</Link>
+          <Link to="/contact" onClick={() => setIsMenuOpen(false)} className={`${isActive('/contact') ? 'text-blue-500' : 'text-stone-950'} text-lg font-semibold font-poppins py-2 border-b border-gray-100 hover:text-blue-500`}>Contact</Link>
+
+          <div className="flex flex-col gap-2 mt-2">
+            <span className="text-neutral-600 text-sm font-semibold font-display">Need Help?</span>
+            <span className="text-stone-950 text-base font-bold font-poppins">+91 345 533 865</span>
+          </div>
+
+          <Link to="/booking" onClick={() => setIsMenuOpen(false)} className="w-full h-12 bg-blue-500 rounded-[10px] flex items-center justify-center hover:bg-blue-600 transition-colors mt-2">
+            <span className="text-white text-base font-semibold font-poppins">Book Now</span>
+          </Link>
+        </div>
+      )}
     </header>
   );
 };

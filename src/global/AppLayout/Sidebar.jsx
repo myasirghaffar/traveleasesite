@@ -17,7 +17,6 @@ import {
   EvealuationlIcon,
   MessageIcon,
   RelationIcon,
-  BookIcon,
 } from "../../assets/icons";
 import { main_logo } from "../../assets/logos";
 
@@ -177,10 +176,10 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
     detectedRole === "admin"
       ? "admin"
       : detectedRole === "user"
-      ? "user"
-      : detectedRole === "contractor"
-      ? "contractor"
-      : null;
+        ? "user"
+        : detectedRole === "contractor"
+          ? "contractor"
+          : null;
 
   // Additional fallback for role detection based on URL
   const finalRoleName =
@@ -188,8 +187,8 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
     (location.pathname.startsWith("/user")
       ? "user"
       : location.pathname.startsWith("/contractor")
-      ? "contractor"
-      : "admin");
+        ? "contractor"
+        : "admin");
 
   const menuItems = getRoleBasedMenuItems(finalRoleName);
 
@@ -197,10 +196,10 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
   const finalMenuItems = menuItems?.main
     ? menuItems
     : location.pathname.startsWith("/user")
-    ? getRoleBasedMenuItems("user")
-    : location.pathname.startsWith("/contractor")
-    ? getRoleBasedMenuItems("contractor")
-    : getRoleBasedMenuItems("admin");
+      ? getRoleBasedMenuItems("user")
+      : location.pathname.startsWith("/contractor")
+        ? getRoleBasedMenuItems("contractor")
+        : getRoleBasedMenuItems("admin");
 
   // Utility function to render NavLink items
   const handleLogout = () => {
@@ -237,10 +236,9 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
         }}
         className={`
           flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] group transition-all duration-200 relative rounded-md cursor-pointer
-          ${
-            isActive
-              ? "bg-secondary text-white"
-              : "text-white/70 hover:bg-white/5 hover:text-white"
+          ${isActive
+            ? "bg-secondary text-white"
+            : "text-white/70 hover:bg-white/5 hover:text-white"
           }
           ${extraClasses}
         `}
@@ -253,9 +251,8 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
         {/* Only show icon if item has no parent (not a nested item) */}
         {!item.parent && item.icon && (
           <div
-            className={`w-5 h-5 flex items-center justify-center ${
-              isActive ? "text-white" : "text-white/70"
-            }`}
+            className={`w-5 h-5 flex items-center justify-center ${isActive ? "text-white" : "text-white/70"
+              }`}
           >
             <item.icon />
           </div>
@@ -328,16 +325,14 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
                       {/* Parent header */}
                       <div
                         onClick={() => toggleMenuExpansion(item.parent)}
-                        className={`flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] group transition-all duration-200 relative rounded-md cursor-pointer ${
-                          hasActiveChild
+                        className={`flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] group transition-all duration-200 relative rounded-md cursor-pointer ${hasActiveChild
                             ? "bg-secondary text-white"
                             : "text-white/70 hover:bg-white/5 hover:text-white"
-                        }`}
+                          }`}
                       >
                         <div
-                          className={`w-5 h-5 flex items-center justify-center ${
-                            hasActiveChild ? "text-white" : "text-white/70"
-                          }`}
+                          className={`w-5 h-5 flex items-center justify-center ${hasActiveChild ? "text-white" : "text-white/70"
+                            }`}
                         >
                           <TeacherIcon />
                         </div>
@@ -346,11 +341,9 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
                         </span>
                         <div className="ml-auto">
                           <svg
-                            className={`w-4 h-4 transition-transform duration-200 ${
-                              isExpanded ? "rotate-90" : ""
-                            } ${
-                              hasActiveChild ? "text-white" : "text-white/70"
-                            }`}
+                            className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""
+                              } ${hasActiveChild ? "text-white" : "text-white/70"
+                              }`}
                             fill="currentColor"
                             viewBox="0 0 20 20"
                           >
@@ -427,9 +420,8 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
 
       {/* Mobile Sidebar - only visible when toggled */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${
-          isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:hidden`}
+        className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:hidden`}
       >
         {renderSidebarContent()}
       </aside>

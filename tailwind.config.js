@@ -87,7 +87,47 @@ export default {
         "8xl": ["96px", { lineHeight: "1" }],
         "9xl": ["128px", { lineHeight: "1" }],
       },
+      fontFamily: {
+        poppins: ["Poppins", "sans-serif"],
+        sans: ["Roboto", "Arial", "sans-serif"],
+        display: ["Roboto", "sans-serif"],
+        serif: ["Roboto", "serif"],
+        comic: ["Comic Sans MS"],
+      },
       colors: {
+        stone: {
+          950: "#110F0F",
+        },
+        blue: {
+          500: "#1781FE",
+        },
+        neutral: {
+          600: "#525252",
+        },
+        gray: { // Overriding specific gray shades or adding to them
+          DEFAULT: "#A0A0A0", // Mid Gray - kept from previous
+          50: "#FAFAFA",
+          100: "#F5F5F5",
+          110: "#AAADAD",
+          150: "#EBEAEF",
+          200: "#E8E8E8", // Updated
+          250: "#202027",
+          300: "#D4D4D4",
+          350: "#F7F9FB",
+          400: "#BFBFBF",
+          410: "#A7A7A7",
+          450: "#CBCCCD",
+          500: "#A0A0A0", // Default
+          550: "#DEDEDE",
+          600: "#7A7A7A",
+          650: "#404040",
+          700: "#5C5C5C",
+          750: "#777777",
+          800: "#3D3D3D",
+          850: "#676D7C",
+          900: "#1F1F1F",
+          950: "#F5F4F9",
+        },
         primary: {
           DEFAULT: "#1D4ED8", // Blue
           50: "#EFF6FF",
@@ -114,36 +154,11 @@ export default {
           800: "#2A2A2A",
           900: "#2A2A2A",
         },
-        gray: {
-          DEFAULT: "#A0A0A0", // Mid Gray
-          50: "#FAFAFA",
-          100: "#F5F5F5",
-          110: "#AAADAD",
-          150: "#EBEAEF",
-          200: "#E5E5E5",
-          250: "#202027",
-          300: "#D4D4D4",
-          350: "#F7F9FB",
-          400: "#BFBFBF",
-          410: "#A7A7A7",
-          450: "#CBCCCD",
-          500: "#A0A0A0", // Default
-          550: "#DEDEDE",
-          600: "#7A7A7A",
-          650: "#404040",
-          700: "#5C5C5C",
-          750: "#777777",
-          800: "#3D3D3D",
-          850: "#676D7C",
-          900: "#1F1F1F",
-          950: "#F5F4F9",
-        },
         yellow: {
           DEFAULT: "#FFAE43", // Mid Gray
           100: "#FFAE43",
           150: "#FFAE4321",
           200: "#FFED9F",
-
           500: "#FFAE43", // Default
         },
         green: {
@@ -151,13 +166,6 @@ export default {
           100: "#4BD670",
           150: "#EFFFF1",
         },
-      },
-      spacing: {
-        64: "16rem",
-      },
-      fontFamily: {
-        poppins: ["Poppins", "sans-serif"],
-        sans: ["Poppins", "sans-serif"],
       },
     },
   },

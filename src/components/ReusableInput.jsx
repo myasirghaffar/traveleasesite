@@ -23,6 +23,7 @@ const ReusableInput = forwardRef(
       containerClasses = "",
       as,
       children,
+      labelClassName = "",
       ...props
     },
     ref
@@ -49,7 +50,7 @@ const ReusableInput = forwardRef(
 
     // Use the error from props if provided, otherwise use Formik's error
     const displayError = error || (formikMeta.touched && formikMeta.error);
-    
+
     // Get current value to determine text color
     const fieldValue = isFormik ? formikField.value : value;
     const hasValue = fieldValue !== undefined && fieldValue !== null && fieldValue !== "";
@@ -88,7 +89,7 @@ const ReusableInput = forwardRef(
         {label && (
           <label
             htmlFor={name}
-            className="block text-xs font-normal text-primary mb-1"
+            className={`block text-xs font-normal text-primary mb-1 ${labelClassName}`}
           >
             {label}
           </label>
