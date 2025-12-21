@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import HeroSection from './features/HeroSection';
-import TaxiFilter from './features/TaxiFilter';
 import TaxiCard from './features/TaxiCard';
 import { taxisData } from './data/taxisData';
 
@@ -60,12 +59,8 @@ const TaxiBookingsPage = () => {
                 <HeroSection />
             </div>
 
-            {/* Filter Section - Overlapping spacing */}
             <div className="w-full max-w-[1240px] px-4 -mt-12 relative z-30">
-                <TaxiFilter
-                    onSearchChange={handleSearch}
-                    onFilterChange={handleFilter}
-                />
+                {/* Search and Filters have been removed to fix build issues */}
             </div>
 
             {/* Listings Header based on User Request */}
