@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import HeroSection from './features/HeroSection';
 import TaxiCard from './features/TaxiCard';
 import { taxisData } from './data/taxisData';
+import ReusableFilter from '../../../components/ReusableFilter';
 
 const TaxiBookingsPage = () => {
     const [filteredTaxis, setFilteredTaxis] = useState(taxisData);
@@ -11,6 +12,41 @@ const TaxiBookingsPage = () => {
         priceRange: 'all',
         capacity: 'all'
     });
+
+    // Filter configurations
+    const filterOptions = [
+        {
+            key: 'vehicleType',
+            label: 'Vehicle Type',
+            options: [
+                { value: 'all', label: 'All Types' },
+                { value: 'Sedan', label: 'Sedan' },
+                { value: 'SUV', label: 'SUV' },
+                { value: 'Luxury', label: 'Luxury' },
+                { value: 'Van', label: 'Van' },
+            ]
+        },
+        {
+            key: 'priceRange',
+            label: 'Price Range',
+            options: [
+                { value: 'all', label: 'All Prices' },
+                { value: 'budget', label: 'Under $40' },
+                { value: 'mid', label: '$40 - $60' },
+                { value: 'premium', label: 'Over $60' },
+            ]
+        },
+        {
+            key: 'capacity',
+            label: 'Capacity',
+            options: [
+                { value: 'all', label: 'Any Capacity' },
+                { value: '2', label: '2+ Passengers' },
+                { value: '4', label: '4+ Passengers' },
+                { value: '6', label: '6+ Passengers' },
+            ]
+        }
+    ];
 
     const applyFilters = (term, currentFilters) => {
         let result = taxisData.filter(taxi =>
@@ -59,8 +95,14 @@ const TaxiBookingsPage = () => {
                 <HeroSection />
             </div>
 
-            <div className="w-full max-w-[1240px] px-4 -mt-12 relative z-30">
-                {/* Search and Filters have been removed to fix build issues */}
+            {/* Filter Section - Overlapping spacing */}
+            <div className="w-full max-w-[1240px] px-4 -mt-10 relative z-30">
+                <ReusableFilter
+                    searchPlaceholder="Search by location or taxi type..."
+                    filters={filterOptions}
+                    onSearchChange={handleSearch}
+                    onFilterChange={handleFilter}
+                />
             </div>
 
             {/* Listings Header based on User Request */}
@@ -103,3 +145,4 @@ const TaxiBookingsPage = () => {
 };
 
 export default TaxiBookingsPage;
+

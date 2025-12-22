@@ -50,18 +50,27 @@ const SearchSection = () => {
         <div className="relative w-full max-w-[1024px] mx-auto bg-white rounded-[30px] shadow-[0px_35px_70px_0px_rgba(0,0,0,0.15)] border border-gray-100 p-8 pt-10">
 
             {/* Tabs */}
-            <div className="absolute -top-6 left-8 flex space-x-4">
+            <div className="absolute -top-6 left-4 md:left-8 right-4 md:right-auto flex space-x-4 overflow-x-auto scrollbar-hide">
+                <style jsx>{`
+                    .scrollbar-hide::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .scrollbar-hide {
+                        -ms-overflow-style: none;
+                        scrollbar-width: none;
+                    }
+                `}</style>
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-full border transition-all duration-300 ${activeTab === tab.id
+                        className={`flex items-center gap-2 px-6 py-3 rounded-full border transition-all duration-300 flex-shrink-0 ${activeTab === tab.id
                             ? 'bg-white border-gray-200 shadow-sm'
                             : 'bg-white border-gray-200/50 hover:bg-gray-50'
                             }`}
                     >
                         <span className="w-5 h-5 flex items-center justify-center">{tab.icon}</span>
-                        <span className={`font-['Poppins'] font-semibold leading-4 ${activeTab === tab.id ? 'text-stone-950' : 'text-gray-500'
+                        <span className={`font-['Poppins'] font-semibold leading-4 whitespace-nowrap ${activeTab === tab.id ? 'text-stone-950' : 'text-gray-500'
                             }`}>
                             {tab.label}
                         </span>

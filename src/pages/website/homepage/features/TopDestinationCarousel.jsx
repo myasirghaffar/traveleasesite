@@ -70,6 +70,31 @@ const TopDestinationCarousel = () => {
         setDragOffset(0);
     };
 
+    const handleTouchStart = (e) => {
+        setIsDragging(true);
+        dragStart.current = e.touches[0].pageX;
+        setIsTransitioning(false);
+    };
+
+    const handleTouchMove = (e) => {
+        if (!isDragging) return;
+        const delta = e.touches[0].pageX - dragStart.current;
+        setDragOffset(delta);
+    };
+
+    const handleTouchEnd = () => {
+        if (!isDragging) return;
+        setIsDragging(false);
+
+        const threshold = 50;
+        if (Math.abs(dragOffset) > threshold) {
+            const direction = dragOffset > 0 ? -1 : 1;
+            setIsTransitioning(true);
+            setActiveIndex(prev => prev + direction);
+        }
+        setDragOffset(0);
+    };
+
     const handleDotClick = (index) => {
         if (isTransitioning) return;
         setIsTransitioning(true);
@@ -95,6 +120,9 @@ const TopDestinationCarousel = () => {
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
                     onMouseLeave={handleMouseUp}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
                 >
                     <div
                         ref={containerRef}

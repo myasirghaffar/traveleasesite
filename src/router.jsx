@@ -14,7 +14,9 @@ import AuthRedirect from "./utils/AuthRedirect";
 import ScrollToTop from "./components/ScrollToTop";
 
 // Dashboard imports
+// Dashboard imports
 import AdminDashboard from "./pages/adminRole/dashboard";
+import ManageHotels from "./pages/adminRole/hotelsmanage";
 import UserDashboard from "./pages/userRole/dashboard";
 import ContractorDashboard from "./pages/contractorRole/dashboard";
 import TaxiBookingsPage from "./pages/website/taxibookings";
@@ -56,6 +58,7 @@ const AppRouter = () => {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="hotels" element={<ManageHotels />} />
         </Route>
 
         {/* User Dashboard Routes - Using AppLayout */}

@@ -7,18 +7,16 @@ import { logout } from "../../store/slices/authSlice";
 import { persistor } from "../../store";
 import {
   DashboardIcon,
+  HotelsIcon,
+  BookingsIcon,
+  TaxiServicesIcon,
+  UsersIcon,
+  PaymentIcon,
+  SettingsIcon,
   LogoutIcon,
   XIcon,
-  StudentIcon,
-  TeacherIcon,
-  FinancialIcon,
-  ScheduleIcon,
-  CalendarIcon,
-  EvealuationlIcon,
-  MessageIcon,
-  RelationIcon,
-} from "../../assets/icons";
-import { main_logo } from "../../assets/logos";
+} from "../../assets/icons/icons";
+import { main_logo_sidebar } from "../../assets/logos";
 
 function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
   const dispatch = useDispatch();
@@ -56,102 +54,40 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
       admin: {
         main: [
           { path: "/admin/dashboard", name: "Dashboard", icon: DashboardIcon },
-          { path: "/admin/users", name: "User Management", icon: StudentIcon },
-          { path: "/admin/jobs", name: "Job Management", icon: TeacherIcon },
-          {
-            path: "/admin/bids",
-            name: "Bids Management",
-            icon: EvealuationlIcon,
-          },
-          {
-            path: "/admin/work-orders",
-            name: "Work Orders & Progress",
-            icon: ScheduleIcon,
-          },
-          {
-            path: "/admin/payments",
-            name: "Payment & Transfers",
-            icon: FinancialIcon,
-          },
-          {
-            path: "/admin/ratings",
-            name: "Ratings & Reviews",
-            icon: CalendarIcon,
-          },
-          {
-            path: "/admin/reports",
-            name: "Reports & Validations",
-            icon: RelationIcon,
-          },
+          { path: "/admin/hotels", name: "Hotels", icon: HotelsIcon },
+          { path: "/admin/bookings", name: "Bookings", icon: BookingsIcon },
+          { path: "/admin/taxi-services", name: "Taxi Services", icon: TaxiServicesIcon },
+          { path: "/admin/users", name: "Users", icon: UsersIcon },
+          { path: "/admin/payments", name: "Payment & Transaction", icon: PaymentIcon },
         ],
-        bottom: [],
+        bottom: [
+          { path: "/admin/settings", name: "Settings", icon: SettingsIcon },
+        ],
       },
       user: {
         main: [
           { path: "/user/dashboard", name: "Dashboard", icon: DashboardIcon },
-          { path: "/user/jobs", name: "Job Management", icon: TeacherIcon },
-          {
-            path: "/user/bids",
-            name: "Bids Management",
-            icon: EvealuationlIcon,
-          },
-          {
-            path: "/user/work-orders",
-            name: "Work Orders & Progress",
-            icon: ScheduleIcon,
-          },
-          {
-            path: "/user/payments",
-            name: "Payment & Transfers",
-            icon: FinancialIcon,
-          },
-          {
-            path: "/user/ratings",
-            name: "Ratings & Reviews",
-            icon: CalendarIcon,
-          },
+          { path: "/user/hotels", name: "Hotels", icon: HotelsIcon },
+          { path: "/user/bookings", name: "Bookings", icon: BookingsIcon },
+          { path: "/user/taxi-services", name: "Taxi Services", icon: TaxiServicesIcon },
+          { path: "/user/payments", name: "Payment & Transaction", icon: PaymentIcon },
         ],
-        bottom: [],
+        bottom: [
+          { path: "/user/settings", name: "Settings", icon: SettingsIcon },
+        ],
       },
       contractor: {
         main: [
-          {
-            path: "/contractor/dashboard",
-            name: "Dashboard",
-            icon: DashboardIcon,
-          },
-          {
-            path: "/contractor/jobs",
-            name: "Job Management",
-            icon: TeacherIcon,
-          },
-          {
-            path: "/contractor/bids",
-            name: "Bids Management",
-            icon: EvealuationlIcon,
-          },
-          {
-            path: "/contractor/work-orders",
-            name: "Work Orders & Progress",
-            icon: ScheduleIcon,
-          },
-          {
-            path: "/contractor/payments",
-            name: "Payment & Transfers",
-            icon: FinancialIcon,
-          },
-          {
-            path: "/contractor/ratings",
-            name: "Ratings & Reviews",
-            icon: CalendarIcon,
-          },
-          {
-            path: "/contractor/reports",
-            name: "Reports & Validations",
-            icon: RelationIcon,
-          },
+          { path: "/contractor/dashboard", name: "Dashboard", icon: DashboardIcon },
+          { path: "/contractor/hotels", name: "Hotels", icon: HotelsIcon },
+          { path: "/contractor/bookings", name: "Bookings", icon: BookingsIcon },
+          { path: "/contractor/taxi-services", name: "Taxi Services", icon: TaxiServicesIcon },
+          { path: "/contractor/users", name: "Users", icon: UsersIcon },
+          { path: "/contractor/payments", name: "Payment & Transaction", icon: PaymentIcon },
         ],
-        bottom: [],
+        bottom: [
+          { path: "/contractor/settings", name: "Settings", icon: SettingsIcon },
+        ],
       },
     };
 
@@ -235,9 +171,9 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
           navigate(item.path);
         }}
         className={`
-          flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] group transition-all duration-200 relative rounded-md cursor-pointer
+          flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] group transition-all duration-200 relative rounded-l-full rounded-md cursor-pointer
           ${isActive
-            ? "bg-secondary text-white"
+            ? "bg-white/10 text-[#1781FE]"
             : "text-white/70 hover:bg-white/5 hover:text-white"
           }
           ${extraClasses}
@@ -250,11 +186,8 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
 
         {/* Only show icon if item has no parent (not a nested item) */}
         {!item.parent && item.icon && (
-          <div
-            className={`w-5 h-5 flex items-center justify-center ${isActive ? "text-white" : "text-white/70"
-              }`}
-          >
-            <item.icon />
+          <div className="w-4 h-4 flex items-center justify-center">
+            <item.icon className={isActive ? "text-[#1781FE]" : "text-white"} />
           </div>
         )}
         <span className="text-base font-normal leading-5 font-poppins">
@@ -287,8 +220,8 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
     });
 
     return (
-      <div className="sidebar-content w-[18.5625rem] bg-primary-500 flex flex-col h-[100vh] relative pl-0 sm:pl-4 py-0 sm:py-4">
-        <div className="bg-primary-500 rounded-lg flex flex-col h-full">
+      <div className="sidebar-content w-[18.5625rem] bg-black flex flex-col h-[100vh] relative pl-0 sm:pl-4 py-0 sm:py-4">
+        <div className="bg-black rounded-lg flex flex-col h-full">
           {/* Mobile close button */}
           <button
             onClick={toggleSidebar}
@@ -300,7 +233,7 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
           {/* Brand Section */}
           <div className="py-1 px-6">
             <h1 className="text-white text-xl font-bold font-poppins tracking-wide">
-              <img src={main_logo} alt="Logo" className="w-32 h-32" />
+              <img src={main_logo_sidebar} alt="Logo" className="w-32 h-32" />
             </h1>
           </div>
 
@@ -326,8 +259,8 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
                       <div
                         onClick={() => toggleMenuExpansion(item.parent)}
                         className={`flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] group transition-all duration-200 relative rounded-md cursor-pointer ${hasActiveChild
-                            ? "bg-secondary text-white"
-                            : "text-white/70 hover:bg-white/5 hover:text-white"
+                          ? "bg-secondary text-white"
+                          : "text-white/70 hover:bg-white/5 hover:text-white"
                           }`}
                       >
                         <div
@@ -391,19 +324,28 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
             </div>
           </nav>
 
+          {/* Bottom Navigation (Settings) */}
+          <div className="mt-auto px-4 pb-2">
+            <div className="space-y-1">
+              {finalMenuItems?.bottom?.map((item, index) => (
+                <div key={index}>{renderNavLink(item)}</div>
+              ))}
+            </div>
+          </div>
+
           {/* User Section */}
-          <div className="p-4 fixed left-0  bottom-5 w-full md:static">
+          <div className="p-4">
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="flex items-center justify-between w-full h-[42px] pl-[10px] pr-4 gap-[10px] text-gray-700 rounded-lg bg-white hover:bg-white/90 transition-all duration-200"
+              className="flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
             >
-              <span className="text-sm font-medium leading-[1.5625rem] font-poppins">
+              <div className="w-4 h-4 flex items-center justify-center">
+                <LogoutIcon className="text-white" />
+              </div>
+              <span className="text-base font-normal leading-5 font-poppins">
                 Logout
               </span>
-              <div className="w-5 h-5 flex items-center justify-center">
-                <LogoutIcon color="text-gray-600 text-[1.4375rem]" />
-              </div>
             </button>
           </div>
         </div>

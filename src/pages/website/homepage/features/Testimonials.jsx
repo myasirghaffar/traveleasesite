@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TestimonialPrevIcon, TestimonialNextIcon, TestimonialStarIcon } from '../../../../assets/icons/icons';
 import mapBg from '../../../../assets/images/mapbg.png';
 
@@ -52,6 +52,9 @@ const testimonialsData = [
 
 const Testimonials = () => {
     const [activeIndex, setActiveIndex] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragOffset, setDragOffset] = useState(0);
+    const dragStart = useRef(0);
 
     const handlePrev = () => {
         setActiveIndex((prev) => (prev === 0 ? testimonialsData.length - 1 : prev - 1));
@@ -59,6 +62,58 @@ const Testimonials = () => {
 
     const handleNext = () => {
         setActiveIndex((prev) => (prev === testimonialsData.length - 1 ? 0 : prev + 1));
+    };
+
+    const handleMouseDown = (e) => {
+        setIsDragging(true);
+        dragStart.current = e.pageX;
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        const delta = e.pageX - dragStart.current;
+        setDragOffset(delta);
+    };
+
+    const handleMouseUp = () => {
+        if (!isDragging) return;
+        setIsDragging(false);
+
+        const threshold = 50;
+        if (Math.abs(dragOffset) > threshold) {
+            if (dragOffset > 0) {
+                handlePrev();
+            } else {
+                handleNext();
+            }
+        }
+        setDragOffset(0);
+    };
+
+    const handleTouchStart = (e) => {
+        setIsDragging(true);
+        dragStart.current = e.touches[0].pageX;
+    };
+
+    const handleTouchMove = (e) => {
+        if (!isDragging) return;
+        const delta = e.touches[0].pageX - dragStart.current;
+        setDragOffset(delta);
+    };
+
+    const handleTouchEnd = () => {
+        if (!isDragging) return;
+        setIsDragging(false);
+
+        const threshold = 50;
+        if (Math.abs(dragOffset) > threshold) {
+            if (dragOffset > 0) {
+                handlePrev();
+            } else {
+                handleNext();
+            }
+        }
+        setDragOffset(0);
     };
 
     useEffect(() => {
@@ -93,7 +148,16 @@ const Testimonials = () => {
                         <TestimonialPrevIcon />
                     </button>
 
-                    <div className="w-full max-w-[904px] h-[500px] md:h-[450px] bg-white rounded-[24px] md:rounded-[40px] shadow-[0_4px_25px_rgba(0,0,0,0.08)] px-6 py-12 md:px-20 md:py-16 mx-4 relative overflow-hidden flex flex-col items-center justify-center">
+                    <div
+                        className="w-full max-w-[904px] h-[500px] md:h-[450px] bg-white rounded-[24px] md:rounded-[40px] shadow-[0_4px_25px_rgba(0,0,0,0.08)] px-6 py-12 md:px-20 md:py-16 mx-4 relative overflow-hidden flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none"
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseUp}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                    >
                         <div className="relative w-full h-full flex items-center justify-center">
                             {testimonialsData.map((testimonial, index) => (
                                 <div
@@ -142,15 +206,7 @@ const Testimonials = () => {
                         <TestimonialNextIcon />
                     </button>
 
-                    {/* Mobile Navigation Controls */}
-                    <div className="flex md:hidden gap-6 mt-8">
-                        <button onClick={handlePrev} className="size-10 rounded-full border border-stone-950 flex items-center justify-center bg-white active:bg-stone-950 active:text-white">
-                            <TestimonialPrevIcon />
-                        </button>
-                        <button onClick={handleNext} className="size-10 rounded-full border border-stone-950 flex items-center justify-center bg-white active:bg-stone-950 active:text-white">
-                            <TestimonialNextIcon />
-                        </button>
-                    </div>
+
                 </div>
 
                 {/* Author Pagination Icons */}

@@ -1,262 +1,137 @@
-import React, { useState } from "react";
-import DashboardCardsContainer from "./features/dashboardCard";
-import BarGraph from "../../../components/BarGraph";
-import PieChart from "../../../components/PieChart";
-import Calendar from "../../../components/itechResuable/CalendarComp";
-import RevenueSection from "../../../components/itechResuable/Revenue";
-import LineChart from "../../../components/itechResuable/LineChart";
-import { BellIcon, BellIcon2 } from "../../../assets/icons/icons";
+import React from 'react';
+import HeroBanner from './features/HeroBanner';
+import StatCard from './features/StatCard';
+import BookingChart from './features/BookingChart';
 
-const AdminDashboard = () => {
-  // Sample data for the performance chart
-  const performanceData = [
-    { name: "JAN", presencas: 70, ausencias: 75 },
-    { name: "FEV", presencas: 78, ausencias: 85 },
-    { name: "MAR", presencas: 80, ausencias: 100 },
-    { name: "ABR", presencas: 95, ausencias: 80 },
-    { name: "MAI", presencas: 75, ausencias: 80 },
-  ];
+// Icon components (using the SVGs from the provided code)
+const HotelIcon = ({ className }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <g clipPath="url(#clip0_25_827)">
+      <path d="M0 1.25C0 0.558594 0.558594 0 1.25 0H18.75C19.4414 0 20 0.558594 20 1.25C20 1.94141 19.4414 2.5 18.75 2.5V17.5C19.4414 17.5 20 18.0586 20 18.75C20 19.4414 19.4414 20 18.75 20H11.875V18.125C11.875 17.0898 11.0352 16.25 10 16.25C8.96484 16.25 8.125 17.0898 8.125 18.125V20H1.25C0.558594 20 0 19.4414 0 18.75C0 18.0586 0.558594 17.5 1.25 17.5V2.5C0.558594 2.5 0 1.94141 0 1.25ZM3.75 4.375V5.625C3.75 5.96875 4.03125 6.25 4.375 6.25H5.625C5.96875 6.25 6.25 5.96875 6.25 5.625V4.375C6.25 4.03125 5.96875 3.75 5.625 3.75H4.375C4.03125 3.75 3.75 4.03125 3.75 4.375ZM9.375 3.75C9.03125 3.75 8.75 4.03125 8.75 4.375V5.625C8.75 5.96875 9.03125 6.25 9.375 6.25H10.625C10.9688 6.25 11.25 5.96875 11.25 5.625V4.375C11.25 4.03125 10.9688 3.75 10.625 3.75H9.375ZM13.75 4.375V5.625C13.75 5.96875 14.0312 6.25 14.375 6.25H15.625C15.9688 6.25 16.25 5.96875 16.25 5.625V4.375C16.25 4.03125 15.9688 3.75 15.625 3.75H14.375C14.0312 3.75 13.75 4.03125 13.75 4.375ZM4.375 7.5C4.03125 7.5 3.75 7.78125 3.75 8.125V9.375C3.75 9.71875 4.03125 10 4.375 10H5.625C5.96875 10 6.25 9.71875 6.25 9.375V8.125C6.25 7.78125 5.96875 7.5 5.625 7.5H4.375ZM8.75 8.125V9.375C8.75 9.71875 9.03125 10 9.375 10H10.625C10.9688 10 11.25 9.71875 11.25 9.375V8.125C11.25 7.78125 10.9688 7.5 10.625 7.5H9.375C9.03125 7.5 8.75 7.78125 8.75 8.125ZM14.375 7.5C14.0312 7.5 13.75 7.78125 13.75 8.125V9.375C13.75 9.71875 14.0312 10 14.375 10H15.625C15.9688 10 16.25 9.71875 16.25 9.375V8.125C16.25 7.78125 15.9688 7.5 15.625 7.5H14.375ZM12.8125 15C13.332 15 13.7617 14.5742 13.6328 14.0703C13.2188 12.4492 11.75 11.25 10 11.25C8.25 11.25 6.77734 12.4492 6.36719 14.0703C6.23828 14.5703 6.67188 15 7.1875 15H12.8125Z" fill="#2563EB" />
+    </g>
+    <defs>
+      <clipPath id="clip0_25_827">
+        <path d="M0 0H20V20H0V0Z" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);
 
-  // Sample data for the attendance pie chart
-  const attendanceData = [
-    { name: "Presente", value: 80, color: "#58398D" },
-    { name: "Ausente", value: 20, color: "#EA5B28" },
-  ];
+const BookingIcon = ({ className }) => (
+  <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <g clipPath="url(#clip0_25_840)">
+      <path d="M5 0C5.69141 0 6.25 0.558594 6.25 1.25V2.5H11.25V1.25C11.25 0.558594 11.8086 0 12.5 0C13.1914 0 13.75 0.558594 13.75 1.25V2.5H15.625C16.6602 2.5 17.5 3.33984 17.5 4.375V6.25H0V4.375C0 3.33984 0.839844 2.5 1.875 2.5H3.75V1.25C3.75 0.558594 4.30859 0 5 0ZM0 7.5H17.5V18.125C17.5 19.1602 16.6602 20 15.625 20H1.875C0.839844 20 0 19.1602 0 18.125V7.5ZM12.8516 11.9141C13.2188 11.5469 13.2188 10.9531 12.8516 10.5898C12.4844 10.2266 11.8906 10.2227 11.5273 10.5898L7.81641 14.3008L5.98047 12.4648C5.61328 12.0977 5.01953 12.0977 4.65625 12.4648C4.29297 12.832 4.28906 13.4258 4.65625 13.7891L7.15625 16.2891C7.52344 16.6562 8.11719 16.6562 8.48047 16.2891L12.8516 11.9141Z" fill="#9333EA" />
+    </g>
+    <defs>
+      <clipPath id="clip0_25_840">
+        <path d="M0 0H17.5V20H0V0Z" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);
 
-  // Sample data for the line chart
-  const myData = [
-    { month: "Jan", revenue: 550, expenses: 380 },
-    { month: "Fev", revenue: 850, expenses: 550 },
-    { month: "Mar", revenue: 520, expenses: 350 },
-    { month: "Abr", revenue: 650, expenses: 450 },
-    { month: "Mai", revenue: 750, expenses: 520 },
-    { month: "Jun", revenue: 650, expenses: 400 },
-    { month: "Jul", revenue: 700, expenses: 380 },
-    { month: "Ago", revenue: 850, expenses: 500 },
-    { month: "Set", revenue: 600, expenses: 600 },
-    { month: "Out", revenue: 720, expenses: 450 },
-    { month: "Nov", revenue: 600, expenses: 350 },
-    { month: "Dez", revenue: 950, expenses: 600 },
-  ];
+const TaxiPendingIcon = ({ className }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <g clipPath="url(#clip0_25_853)">
+      <path d="M7.5 0C6.80859 0 6.25 0.558594 6.25 1.25V2.5C6.25 2.50391 6.25 2.50391 6.25 2.50781C4.74219 2.59375 3.42578 3.57422 2.92188 5.01172L1.54688 8.9375C0.640625 9.3125 0 10.207 0 11.25V16.875V18.75C0 19.4414 0.558594 20 1.25 20H2.5C3.19141 20 3.75 19.4414 3.75 18.75V16.875H16.25V18.75C16.25 19.4414 16.8086 20 17.5 20H18.75C19.4414 20 20 19.4414 20 18.75V16.875V11.25C20 10.207 19.3594 9.3125 18.4531 8.9375L17.0781 5.01172C16.5742 3.57422 15.2578 2.58984 13.75 2.50781C13.75 2.50391 13.75 2.50391 13.75 2.5V1.25C13.75 0.558594 13.1914 0 12.5 0H7.5ZM6.46094 5H13.5391C14.0703 5 14.543 5.33594 14.7188 5.83594L15.7383 8.75H4.26172L5.28125 5.83594C5.45703 5.33594 5.92969 5 6.46094 5ZM3.75 11.25C4.08152 11.25 4.39946 11.3817 4.63388 11.6161C4.8683 11.8505 5 12.1685 5 12.5C5 12.8315 4.8683 13.1495 4.63388 13.3839C4.39946 13.6183 4.08152 13.75 3.75 13.75C3.41848 13.75 3.10054 13.6183 2.86612 13.3839C2.6317 13.1495 2.5 12.8315 2.5 12.5C2.5 12.1685 2.6317 11.8505 2.86612 11.6161C3.10054 11.3817 3.41848 11.25 3.75 11.25ZM15 12.5C15 12.1685 15.1317 11.8505 15.3661 11.6161C15.6005 11.3817 15.9185 11.25 16.25 11.25C16.5815 11.25 16.8995 11.3817 17.1339 11.6161C17.3683 11.8505 17.5 12.1685 17.5 12.5C17.5 12.8315 17.3683 13.1495 17.1339 13.3839C16.8995 13.6183 16.5815 13.75 16.25 13.75C15.9185 13.75 15.6005 13.6183 15.3661 13.3839C15.1317 13.1495 15 12.8315 15 12.5Z" fill="#D97706" />
+    </g>
+    <defs>
+      <clipPath id="clip0_25_853">
+        <path d="M0 0H20V20H0V0Z" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);
 
-  // Calculate revenue statistics from myData
-  const calculateRevenueStats = () => {
-    // Annual revenue (sum of all months)
-    const annualRevenue = myData.reduce((sum, item) => sum + item.revenue, 0);
+const TaxiActiveIcon = ({ className }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <g clipPath="url(#clip0_25_978)">
+      <path d="M7.5 0C6.80859 0 6.25 0.558594 6.25 1.25V2.5C6.25 2.50391 6.25 2.50391 6.25 2.50781C4.74219 2.59375 3.42578 3.57422 2.92188 5.01172L1.54688 8.9375C0.640625 9.3125 0 10.207 0 11.25V16.875V18.75C0 19.4414 0.558594 20 1.25 20H2.5C3.19141 20 3.75 19.4414 3.75 18.75V16.875H16.25V18.75C16.25 19.4414 16.8086 20 17.5 20H18.75C19.4414 20 20 19.4414 20 18.75V16.875V11.25C20 10.207 19.3594 9.3125 18.4531 8.9375L17.0781 5.01172C16.5742 3.57422 15.2578 2.58984 13.75 2.50781C13.75 2.50391 13.75 2.50391 13.75 2.5V1.25C13.75 0.558594 13.1914 0 12.5 0H7.5ZM6.46094 5H13.5391C14.0703 5 14.543 5.33594 14.7188 5.83594L15.7383 8.75H4.26172L5.28125 5.83594C5.45703 5.33594 5.92969 5 6.46094 5ZM3.75 11.25C4.08152 11.25 4.39946 11.3817 4.63388 11.6161C4.8683 11.8505 5 12.1685 5 12.5C5 12.8315 4.8683 13.1495 4.63388 13.3839C4.39946 13.6183 4.08152 13.75 3.75 13.75C3.41848 13.75 3.10054 13.6183 2.86612 13.3839C2.6317 13.1495 2.5 12.8315 2.5 12.5C2.5 12.1685 2.6317 11.8505 2.86612 11.6161C3.10054 11.3817 3.41848 11.25 3.75 11.25ZM15 12.5C15 12.1685 15.1317 11.8505 15.3661 11.6161C15.6005 11.3817 15.9185 11.25 16.25 11.25C16.5815 11.25 16.8995 11.3817 17.1339 11.6161C17.3683 11.8505 17.5 12.1685 17.5 12.5C17.5 12.8315 17.3683 13.1495 17.1339 13.3839C16.8995 13.6183 16.5815 13.75 16.25 13.75C15.9185 13.75 15.6005 13.6183 15.3661 13.3839C15.1317 13.1495 15 12.8315 15 12.5Z" fill="#DC2626" />
+    </g>
+    <defs>
+      <clipPath id="clip0_25_978">
+        <path d="M0 0H20V20H0V0Z" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);
 
-    // Monthly revenue (average of all months)
-    const monthlyRevenue = Math.round(annualRevenue / myData.length);
-
-    // Total debt (sum of all expenses)
-    const totalDebt = myData.reduce((sum, item) => sum + item.expenses, 0);
-
-    return {
-      annual: annualRevenue,
-      monthly: monthlyRevenue,
-      debt: totalDebt,
-    };
-  };
-
-  const revenueStats = calculateRevenueStats();
-
-  // Format numbers with commas
-  const formatNumber = (num) => {
-    return num.toLocaleString();
-  };
-
-  // Revenue cards data configuration
-  const revenueCardsData = [
+const Dashboard = () => {
+  // Static data for stats cards
+  const statsData = [
     {
-      value: "1,335",
-      label: "Anual",
-      bgColor: "#EFFFF1",
-      dotColor: "#4BD670",
-      textColor: "#4BD670",
+      icon: HotelIcon,
+      title: 'Total Hotels',
+      value: '128',
+      bgColor: 'bg-blue-100',
+      iconColor: 'text-blue-600',
     },
     {
-      value: "4,366",
-      label: "Mensal",
-      bgColor: "#FDF6D8",
-      dotColor: "#FFAE43",
-      textColor: "#FFAE43",
+      icon: BookingIcon,
+      title: 'Active Bookings',
+      value: '542',
+      bgColor: 'bg-purple-100',
+      iconColor: 'text-purple-600',
     },
     {
-      value: "208",
-      label: "Divida",
-      bgColor: "#FFEDED",
-      dotColor: "#FF414B",
-      textColor: "#FF414B",
+      icon: TaxiPendingIcon,
+      title: 'Pending Taxi Rides',
+      value: '73',
+      bgColor: 'bg-amber-100',
+      iconColor: 'text-amber-600',
+      badge: {
+        text: 'Pending',
+        bgColor: 'bg-orange-50',
+        textColor: 'text-orange-600',
+      },
+    },
+    {
+      icon: TaxiActiveIcon,
+      title: 'Total Taxi Rides',
+      value: '18',
+      bgColor: 'bg-red-600/20',
+      iconColor: 'text-red-600',
+      badge: {
+        text: 'Active',
+        bgColor: 'bg-red-50',
+        textColor: 'text-red-600',
+      },
     },
   ];
 
-  const handleMonthChange = (month) => {
-    console.log("Month changed:", month);
-    // Add your month change logic here
-  };
-
-  const handleCourseChange = (course) => {
-    console.log("Course changed:", course);
-    // Add your course change logic here
-  };
-
-  const handleAttendanceMonthChange = (month) => {
-    console.log("Attendance month changed:", month);
-    // Add your attendance month change logic here
-  };
-
-  const handleClassChange = (classOption) => {
-    console.log("Class changed:", classOption);
-    // Add your class change logic here
-  };
-
-  const handleRefreshProfile = () => {
-    console.log("Refreshing profile...");
-    // Add your refresh logic here
-  };
-  const defaultAgendaItems = [
-    {
-      id: 1,
-      icon: BellIcon,
-      iconBg: "bg-[#FFED9F]",
-      iconColor: "text-[#FCA52B]",
-      title: "Joga na proxima semana",
-      description:
-        "The school's Annual Sports Day will be held on May 12, 2024. Mark your",
-    },
-    {
-      id: 2,
-      icon: BellIcon2,
-      iconBg: "bg-[#D6DAFF]",
-      iconColor: "text-[#696FC1]",
-      title: "Summer Break Start Date",
-      description:
-        "Summer break begins on May 25, 2024. Have a wonderful holiday!",
-    },
-  ];
   return (
-    <div className="min-h-screen bg-gray-100 p-6 overflow-x-hidden">
-      <div className="space-y-6 max-w-full">
-        {/* Top Section with Left and Right Columns */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-          {/* Left Column - Main Content */}
-          <div className="xl:col-span-8 space-y-6">
-            {/* Welcome Card */}
-            <div className="rounded-[1.5rem]">
-              <DashboardCardsContainer />
-            </div>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Hero Banner */}
+        <HeroBanner />
 
-            {/* Three Cards Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-[35%_64%] gap-4 lg:gap-3">
-              {/* Pie Chart */}
-              <div className="w-full">
-                <PieChart
-                  title="Assiduidade"
-                  data={attendanceData}
-                  centerText="80%"
-                  colors={["#58398D", "#EA5B28"]}
-                  dropdownOptions={{
-                    month: [
-                      { label: "Abr 2025", value: "apr2025" },
-                      { label: "Mar 2025", value: "mar2025" },
-                      { label: "Fev 2025", value: "fev2025" },
-                      { label: "Jan 2025", value: "jan2025" },
-                    ],
-                    class: [
-                      { label: "Turma A", value: "classA" },
-                      { label: "Turma B", value: "classB" },
-                      { label: "Turma C", value: "classC" },
-                    ],
-                  }}
-                  onMonthChange={handleAttendanceMonthChange}
-                  onClassChange={handleClassChange}
-                />
-              </div>
+        {/* Summary Section */}
+        <div className="mb-8">
+          <h2 className="text-gray-900 text-4xl font-semibold font-['Outfit'] leading-9 mb-6">
+            Summary
+          </h2>
 
-              {/* Bar Graph - Made more responsive */}
-              <div className="w-full">
-                <BarGraph
-                  title="Desempenho"
-                  data={performanceData}
-                  dataKeys={["presencas", "ausencias"]}
-                  dataLabels={["Aprovado", "Reprovado"]}
-                  colors={["#58398D", "#EA5B28"]}
-                  height={246}
-                  dropdownOptions={{
-                    month: [
-                      { label: "Janeiro", value: "jan" },
-                      { label: "Fevereiro", value: "fev" },
-                      { label: "Março", value: "mar" },
-                      { label: "Abril", value: "abr" },
-                      { label: "Maio", value: "mai" },
-                    ],
-                    course: [
-                      { label: "Curso 1", value: "course1" },
-                      { label: "Curso 2", value: "course2" },
-                      { label: "Curso 3", value: "course3" },
-                    ],
-                  }}
-                  onMonthChange={handleMonthChange}
-                  onCourseChange={handleCourseChange}
-                />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-[1.5rem]">
-              <LineChart
-                title="Receita Anual"
-                data={myData}
-                dataKeys={["revenue", "expenses"]}
-                dataLabels={["Receita Mensal", "Dívida Mensal"]}
-                colors={["#EA5B28", "#58398D"]}
-                highlightPeriod={{ start: "Ago", end: "Set" }}
-                currency="MT"
-                dropdownOptions={{
-                  year: [
-                    { label: "2025 - 2026", value: "2025-2026" },
-                    { label: "2024 - 2025", value: "2024-2025" },
-                    { label: "2023 - 2024", value: "2023-2024" },
-                  ],
-                  period: [
-                    { label: "Anual", value: "annual" },
-                    { label: "Trimestral", value: "quarterly" },
-                    { label: "Mensal", value: "monthly" },
-                  ],
-                }}
-                onYearChange={(year) => console.log("Year changed:", year)}
-                onPeriodChange={(period) =>
-                  console.log("Period changed:", period)
-                }
+          {/* Stats Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {statsData.map((stat, index) => (
+              <StatCard
+                key={index}
+                icon={stat.icon}
+                title={stat.title}
+                value={stat.value}
+                bgColor={stat.bgColor}
+                iconColor={stat.iconColor}
+                badge={stat.badge}
               />
-            </div>
-          </div>
-
-          {/* Right Column - Calendar */}
-          <div className="xl:col-span-4 space-y-6">
-            <div className="bg-white  rounded-[1.5rem]">
-              <Calendar
-                initialDate={new Date()}
-                selectedDay={5}
-                onMonthChange={(d) => console.log("month:", d)}
-                onDaySelect={(d) => console.log("day:", d)}
-                selectedDayClasses="bg-secondary-500 text-white rounded-full"
-                dayClasses="text-gray-800"
-                showAgenda={true}
-                agendaTitle="Agenda"
-                agendaItems={defaultAgendaItems}
-              />
-            </div>
-
-            {/* Revenue Section - Using reusable component */}
-            <RevenueSection
-              title="Receita"
-              data={revenueCardsData}
-              showThreeDots={true}
-            />
+            ))}
           </div>
         </div>
+
+        {/* Booking Chart */}
+        <BookingChart />
       </div>
     </div>
   );
 };
 
-export default AdminDashboard;
+export default Dashboard;
