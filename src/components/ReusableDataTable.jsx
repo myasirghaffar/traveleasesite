@@ -11,40 +11,29 @@ const ReusableDataTable = ({
 }) => {
   // Format columns for react-data-table-component
   const formatColumns = columns.map((column) => {
-    const col = { ...column };
+    const col = {
+      ...column,
+      name: column.label,
+      selector: (row) => row[column.key],
+      // Support common width properties at the top level
+      width: column.width,
+      minWidth: column.minWidth || (column.style && column.style.minWidth),
+      maxWidth: column.maxWidth,
+      center: column.center || column.align === "center",
+      sortable: column.sortable !== false,
+    };
 
-    // Set selector for data access
-    col.selector = (row) => row[column.key];
-    col.name = column.label;
-
-    // Apply custom column styles if provided
-    if (column.style) {
-      col.style = column.style;
-    }
-
-    // Use custom cell renderer if provided, otherwise use default
+    // Use custom cell renderer if provided
     if (customCellRenderers[column.key]) {
       col.cell = (row) => customCellRenderers[column.key](row, column);
     } else if (column.render) {
-      // Use render function from column definition
       col.cell = (row) => column.render(row);
-    } else {
-      col.cell = (row) => (
-        <span
-          className="text-xs"
-          style={{
-            color: "#A0A0A0",
-            fontWeight: "600",
-            fontFamily: "Inter",
-          }}
-        >
-          {row[column.key]}
-        </span>
-      );
     }
+    // Note: Default library rendering is used if col.cell isn't set
 
     return col;
   });
+
 
   // Default styles for DataTable (matching snapshot)
   const defaultStyles = {
@@ -86,8 +75,8 @@ const ReusableDataTable = ({
         textOverflow: "ellipsis",
         textAlign: "left",
         display: "flex",
-        alignItems: "left",
-        justifyContent: "left",
+        alignItems: "center",
+        justifyContent: "flex-start",
         "&:last-child": {
           borderRight: "none",
         },
@@ -121,15 +110,15 @@ const ReusableDataTable = ({
         textOverflow: "ellipsis",
         textAlign: "left",
         display: "flex",
-        alignItems: "left",
-        // justifyContent: "center",
-        // borderRight: "1px solid #e5e7eb",
+        alignItems: "center",
+        justifyContent: "flex-start",
         cursor: "pointer",
         "&:last-child": {
           borderRight: "none",
         },
       },
     },
+
   };
 
   // Merge custom styles with default styles

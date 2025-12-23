@@ -2,7 +2,7 @@ import React from 'react';
 
 const StatCard = ({ icon: Icon, title, value, bgColor, iconColor, badge }) => {
     return (
-        <div className="w-full max-w-[256px] h-44 relative bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-gray-200">
+        <div className="w-full h-44 relative bg-white rounded-xl outline outline-1 outline-offset-[-1px] outline-gray-200">
             <div className="h-12 absolute left-[25px] top-[25px]">
                 <div className={`size-12 ${bgColor} rounded-lg flex items-center justify-center`}>
                     <Icon className={`w-5 h-5 ${iconColor}`} />

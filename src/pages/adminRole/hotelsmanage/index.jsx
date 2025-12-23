@@ -178,57 +178,55 @@ const ManageHotels = () => {
 
   // Columns Configuration
   const columns = [
-    { key: "hotel", label: "Hotel", style: { minWidth: "250px" } },
-    { key: "location", label: "Location", style: { minWidth: "150px" } },
-    { key: "category", label: "Category", style: { minWidth: "140px" } },
-    { key: "price", label: "Price", style: { minWidth: "100px" } },
-    { key: "availability", label: "Availability", style: { minWidth: "140px" } },
-    { key: "status", label: "Status", style: { minWidth: "100px" } },
-    { key: "actions", label: "Actions", style: { minWidth: "100px" } },
+    { key: "hotel", label: "Hotel", width: "280px" },
+    { key: "location", label: "Location", width: "180px", center: true },
+    { key: "category", label: "Category", width: "180px", center: true },
+    { key: "price", label: "Price", width: "140px", center: true },
+    { key: "availability", label: "Availability", width: "180px", center: true },
+    { key: "status", label: "Status", width: "140px", center: true },
+    { key: "actions", label: "Actions", width: "140px", center: true },
   ];
+
 
   // Custom Table Styles to match design (Light theme)
   const customTableStyles = {
     headRow: {
       style: {
-        backgroundColor: "#F9FAFB", // Very light gray header
-        color: "#6B7280", // Gray text
-        borderBottom: "1px solid #E5E7EB",
-        fontWeight: "600",
-        fontSize: "12px",
-        textTransform: "uppercase",
-        letterSpacing: "0.05em",
+        backgroundColor: "#F9FAFB",
+        color: "#64748B",
+        borderBottom: "1px solid #F1F5F9",
+        fontWeight: "700",
+        fontSize: "13px",
+        height: "60px",
       },
     },
     headCells: {
       style: {
-        paddingLeft: "24px",
-        paddingRight: "24px",
-        color: "#6B7280",
-        fontWeight: "600",
+        paddingLeft: "32px",
+        paddingRight: "32px",
       },
     },
     rows: {
       style: {
-        borderBottom: "1px solid #F3F4F6",
-        fontSize: "14px",
-        fontWeight: "500",
+        borderBottom: "1px solid #F1F5F9",
+        height: "72px",
         "&:hover": {
-          backgroundColor: "#F9FAFB",
+          backgroundColor: "#F8FAFC",
         },
       },
     },
     cells: {
       style: {
-        paddingLeft: "24px",
-        paddingRight: "24px",
+        paddingLeft: "32px",
+        paddingRight: "32px",
       },
     },
     tableWrapper: {
       style: {
-        borderRadius: "16px",
-        border: "1px solid #E5E7EB",
-        boxShadow: "none",
+        borderRadius: "24px",
+        border: "1px solid rgba(201, 201, 201, 1)",
+        boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)",
+        overflow: "hidden",
       },
     },
   };
@@ -261,7 +259,8 @@ const ManageHotels = () => {
             onFilterChange={(key, value) =>
               setFilters((prev) => ({ ...prev, [key]: value }))
             }
-            className="shadow-none border border-gray-100 !p-0 bg-transparent"
+            className="shadow-none !p-0 bg-transparent"
+
           />
         </div>
 
@@ -274,13 +273,17 @@ const ManageHotels = () => {
         </button>
       </div>
 
+
+
       {/* Table Section */}
-      <ReusableDataTable
-        columns={columns}
-        data={hotelsData} // In real app, filter this data
-        customCellRenderers={customCellRenderers}
-        customStyles={customTableStyles}
-      />
+      <div className="bg-white rounded-[24px] overflow-hidden">
+        <ReusableDataTable
+          columns={columns}
+          data={hotelsData}
+          customCellRenderers={customCellRenderers}
+          customStyles={customTableStyles}
+        />
+      </div>
 
       {/* Pagination Section */}
       <div className="flex items-center justify-between">

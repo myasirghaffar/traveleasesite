@@ -171,7 +171,7 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
           navigate(item.path);
         }}
         className={`
-          flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] group transition-all duration-200 relative rounded-l-full rounded-md cursor-pointer
+          flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] group transition-all duration-200 relative rounded-l-full cursor-pointer
           ${isActive
             ? "bg-white/10 text-[#1781FE]"
             : "text-white/70 hover:bg-white/5 hover:text-white"
@@ -179,18 +179,18 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
           ${extraClasses}
         `}
       >
-        {/* Active state left indicator bar */}
-        {/* {isActive && (
-          <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-[#14F195] to-[#9945FF] rounded-l-md"></div>
-        )} */}
+        {/* Active state right indicator bar */}
+        {isActive && (
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[5px] h-[40px] bg-[#1781FE] rounded-l-full shadow-[0_0_8px_rgba(23,129,254,0.6)]"></div>
+        )}
 
         {/* Only show icon if item has no parent (not a nested item) */}
         {!item.parent && item.icon && (
-          <div className="w-4 h-4 flex items-center justify-center">
+          <div className="w-5 h-5 flex items-center justify-center">
             <item.icon className={isActive ? "text-[#1781FE]" : "text-white"} />
           </div>
         )}
-        <span className="text-base font-normal leading-5 font-poppins">
+        <span className="text-[15px] font-medium leading-5 font-poppins">
           {item.name}
         </span>
         {item.badge && (
@@ -199,6 +199,7 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
           </span>
         )}
       </div>
+
     );
   };
 
@@ -238,7 +239,8 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
           </div>
 
           {/* Navigation Section */}
-          <nav className="flex-1 px-4">
+          <nav className="flex-1 pl-4 pr-0">
+
             <div className="space-y-1">
               {/* Render items in order, checking for parent groups */}
               {finalMenuItems?.main?.map((item, index) => {
@@ -315,39 +317,33 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
                 return null;
               })}
             </div>
-
-            {/* Bottom Navigation */}
-            <div className="space-y-1">
-              {finalMenuItems?.bottom?.map((item, index) => (
-                <div key={index}>{renderNavLink(item)}</div>
-              ))}
-            </div>
           </nav>
 
+
           {/* Bottom Navigation (Settings) */}
-          <div className="mt-auto px-4 pb-2">
-            <div className="space-y-1">
+          <div className="mt-auto pl-4 pr-0">
+
+            <div className="border-t border-white/10 mb-4 mx-2"></div>
+            <div className="space-y-0.5 pb-2">
               {finalMenuItems?.bottom?.map((item, index) => (
                 <div key={index}>{renderNavLink(item)}</div>
               ))}
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] text-white/70 hover:text-white hover:bg-white/5 rounded-l-full transition-all duration-200 group"
+              >
+                <div className="w-5 h-5 flex items-center justify-center">
+                  <LogoutIcon className="text-white group-hover:text-[#1781FE] transition-colors" />
+                </div>
+                <span className="text-[15px] font-medium leading-5 font-poppins">
+                  Logout
+                </span>
+              </button>
             </div>
           </div>
 
-          {/* User Section */}
-          <div className="p-4">
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center w-full h-[42px] pl-[10px] pr-4 gap-[10px] text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
-            >
-              <div className="w-4 h-4 flex items-center justify-center">
-                <LogoutIcon className="text-white" />
-              </div>
-              <span className="text-base font-normal leading-5 font-poppins">
-                Logout
-              </span>
-            </button>
-          </div>
         </div>
       </div>
     );

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
 
 const BookingChart = () => {
     const [activeTab, setActiveTab] = useState('annually');
@@ -69,50 +70,93 @@ const BookingChart = () => {
     };
 
     const currentData = getCurrentData();
-    const selectedPoint = currentData.dataPoints[currentData.selectedIndex];
+    const [hoveredIndex, setHoveredIndex] = useState(currentData.selectedIndex);
+
+    // Update hovered index when active tab changes
+    useEffect(() => {
+        setHoveredIndex(currentData.selectedIndex);
+    }, [activeTab, currentData.selectedIndex]);
+
+    // Safety check: if hoveredIndex is out of bounds for currentData (usually happens during tab transition),
+    // fallback to the current data's default selected index.
+    const safeHoveredIndex = hoveredIndex < currentData.dataPoints.length ? hoveredIndex : currentData.selectedIndex;
+    const selectedPoint = currentData.dataPoints[safeHoveredIndex];
+
+    // Helper to generate smooth cubic Bezier path
+    const getBezierPath = (points, isArea = false) => {
+        if (points.length < 2) return "";
+
+        const getPoint = (i) => ({
+            x: (i / (points.length - 1)) * 100,
+            y: 100 - points[i].percentage
+        });
+
+        let d = `M ${getPoint(0).x} ${getPoint(0).y}`;
+
+        for (let i = 0; i < points.length - 1; i++) {
+            const curr = getPoint(i);
+            const next = getPoint(i + 1);
+
+            // Tension for the curve (0.2 - 0.4 usually looks good)
+            const tension = 0.2;
+            const cp1x = curr.x + (next.x - curr.x) * tension;
+            const cp2x = next.x - (next.x - curr.x) * tension;
+
+            d += ` C ${cp1x} ${curr.y}, ${cp2x} ${next.y}, ${next.x} ${next.y}`;
+        }
+
+        if (isArea) {
+            d += ` L 100 100 L 0 100 Z`;
+        }
+
+        return d;
+    };
 
     return (
-        <div className="w-full h-[576px] relative bg-white rounded-3xl shadow-[0px_4px_4px_0px_rgba(0,0,0,0.08)] p-8">
+        <div className="w-full h-auto md:h-[576px] relative bg-white rounded-3xl shadow-[0px_4px_4px_0px_rgba(0,0,0,0.08)] p-6 md:p-8">
             {/* Header */}
-            <div className="flex justify-between items-start mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
                 <div>
-                    <div className="text-zinc-400 text-base font-normal font-['Inter'] uppercase tracking-wide mb-2">
+                    <div className="text-zinc-400 text-sm md:text-base font-normal font-['Inter'] uppercase tracking-wide mb-1 md:mb-2">
                         Revenue
                     </div>
-                    <h2 className="text-slate-800 text-4xl font-bold font-['Inter'] leading-[51.49px]">
+                    <h2 className="text-slate-800 text-2xl md:text-4xl font-bold font-['Inter'] leading-tight md:leading-[51.49px]">
                         Booking Quick Summary
                     </h2>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex gap-2 bg-slate-50 rounded-2xl p-1">
-                    <button
-                        onClick={() => setActiveTab('daily')}
-                        className={`px-4 py-2 text-base font-normal font-['Inter'] rounded-xl transition-colors ${activeTab === 'daily'
-                            ? 'bg-slate-800 text-white font-medium'
-                            : 'text-zinc-400 hover:bg-white'
-                            }`}
+                {/* Period Selector - Desktop Tabs */}
+                <div className="hidden md:flex gap-2 bg-slate-50 rounded-2xl p-1">
+                    {['daily', 'weekly', 'annually'].map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-4 py-2 text-base font-normal font-['Inter'] rounded-xl transition-colors capitalize ${activeTab === tab
+                                ? 'bg-slate-800 text-white font-medium'
+                                : 'text-zinc-400 hover:bg-white'
+                                }`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Period Selector - Mobile Dropdown */}
+                <div className="md:hidden w-full relative">
+                    <select
+                        value={activeTab}
+                        onChange={(e) => setActiveTab(e.target.value)}
+                        className="w-full appearance-none bg-slate-50 text-slate-800 text-base font-medium font-['Inter'] px-4 py-3 pr-10 rounded-xl border border-slate-100 outline-none focus:ring-2 focus:ring-slate-200 transition-all cursor-pointer"
                     >
-                        Daily
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('weekly')}
-                        className={`px-4 py-2 text-base font-normal font-['Inter'] rounded-xl transition-colors ${activeTab === 'weekly'
-                            ? 'bg-slate-800 text-white font-medium'
-                            : 'text-zinc-400 hover:bg-white'
-                            }`}
-                    >
-                        Weekly
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('annually')}
-                        className={`px-4 py-2 text-base font-normal font-['Inter'] rounded-xl transition-colors ${activeTab === 'annually'
-                            ? 'bg-slate-800 text-white font-medium'
-                            : 'text-zinc-400 hover:bg-white'
-                            }`}
-                    >
-                        Annually
-                    </button>
+                        <option value="daily">Daily View</option>
+                        <option value="weekly">Weekly View</option>
+                        <option value="annually">Annually View</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1.5L6 6.5L11 1.5" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
                 </div>
             </div>
 
@@ -130,88 +174,128 @@ const BookingChart = () => {
             {/* Chart Area */}
             <div className="relative h-[350px]">
                 {/* Y-axis labels */}
-                <div className="absolute left-0 top-0 bottom-12 flex flex-col justify-between text-right pr-4">
+                <div className="absolute left-0 top-0 bottom-12 flex flex-col justify-between text-right pr-3 md:pr-4">
                     {[...currentData.yAxisLabels].reverse().map((label, index) => (
-                        <span key={index} className="text-gray-500 text-lg font-normal font-['Inter']">
+                        <span key={index} className="text-gray-400 md:text-gray-500 text-sm md:text-lg font-normal font-['Inter']">
                             {label}
                         </span>
                     ))}
                 </div>
 
                 {/* Grid lines */}
-                <div className="absolute left-16 right-0 top-0 bottom-12 flex flex-col justify-between">
+                <div className="absolute left-16 right-0 top-0 bottom-12 flex flex-col justify-between pointer-events-none">
                     {[...Array(6)].map((_, index) => (
                         <div key={index} className="w-full h-px bg-slate-200"></div>
                     ))}
                 </div>
 
-                {/* Chart SVG */}
-                <svg className="absolute left-16 right-0 top-0 bottom-12 w-[calc(100%-4rem)] h-full" preserveAspectRatio="none">
-                    {/* Gradient fill */}
-                    <defs>
-                        <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#765DFF" stopOpacity="0.3" />
-                            <stop offset="46%" stopColor="#CFCAFF" stopOpacity="0.2" />
-                            <stop offset="100%" stopColor="white" stopOpacity="0" />
-                        </linearGradient>
-                    </defs>
+                {/* Chart Drawing Area */}
+                <div className="absolute left-16 right-0 top-0 bottom-12">
+                    {/* Chart SVG */}
+                    <svg
+                        className="w-full h-full cursor-crosshair overflow-visible"
+                        preserveAspectRatio="none"
+                        viewBox="0 0 100 100"
+                        onMouseLeave={() => setHoveredIndex(currentData.selectedIndex)}
+                    >
+                        <defs>
+                            <linearGradient id="paint0_linear_157_447" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop stopColor="#765DFF" />
+                                <stop offset="0.46679" stopColor="#CFCAFF" />
+                                <stop offset="1" stopColor="white" />
+                            </linearGradient>
+                        </defs>
 
-                    {/* Area fill */}
-                    <path
-                        d={`M 0 ${100 - currentData.dataPoints[0].percentage}% ${currentData.dataPoints.map((point, index) =>
-                            `L ${(index / (currentData.dataPoints.length - 1)) * 100}% ${100 - point.percentage}%`
-                        ).join(' ')} L 100% 100% L 0 100% Z`}
-                        fill="url(#chartGradient)"
+                        {/* Area fill with smooth curves */}
+                        <g style={{ mixBlendMode: 'multiply' }} opacity="0.33">
+                            <path
+                                d={getBezierPath(currentData.dataPoints, true)}
+                                fill="url(#paint0_linear_157_447)"
+                            />
+                        </g>
+
+                        {/* Main Chart Line with smooth curves */}
+                        <path
+                            d={getBezierPath(currentData.dataPoints, false)}
+                            fill="none"
+                            stroke="#4A3AFF"
+                            strokeWidth="3.21839"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            vectorEffect="non-scaling-stroke"
+                        />
+
+                        {/* Vertical Indicator Line */}
+                        <line
+                            x1={(safeHoveredIndex / (currentData.dataPoints.length - 1)) * 100}
+                            y1={100 - selectedPoint.percentage}
+                            x2={(safeHoveredIndex / (currentData.dataPoints.length - 1)) * 100}
+                            y2="100"
+                            stroke="#4A3AFF"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeDasharray="4 4"
+                            opacity="0.5"
+                            vectorEffect="non-scaling-stroke"
+                        />
+
+                        {/* Interactive hover zones */}
+                        {currentData.dataPoints.map((_, idx) => (
+                            <rect
+                                key={idx}
+                                x={(idx / (currentData.dataPoints.length - 1)) * 100 - (100 / (currentData.dataPoints.length * 2))}
+                                y="0"
+                                width={100 / (currentData.dataPoints.length - 1)}
+                                height="100"
+                                fill="transparent"
+                                onMouseMove={() => setHoveredIndex(idx)}
+                                className="outline-none"
+                            />
+                        ))}
+                    </svg>
+
+                    {/* Round Indicator Point (Outside SVG to prevent stretching) */}
+                    <div
+                        className="absolute w-3.5 h-3.5 rounded-full border-[2.5px] border-white bg-[#4A3AFF] shadow-[0_4px_8px_rgba(74,58,255,0.4)] z-20 pointer-events-none transition-all duration-200"
+                        style={{
+                            left: `${(safeHoveredIndex / (currentData.dataPoints.length - 1)) * 100}%`,
+                            top: `${100 - selectedPoint.percentage}%`,
+                            transform: 'translate(-50%, -50%)'
+                        }}
                     />
 
-                    {/* Line */}
-                    <path
-                        d={`M 0 ${100 - currentData.dataPoints[0].percentage}% ${currentData.dataPoints.map((point, index) =>
-                            `L ${(index / (currentData.dataPoints.length - 1)) * 100}% ${100 - point.percentage}%`
-                        ).join(' ')}`}
-                        fill="none"
-                        stroke="#4A3AFF"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-
-                    {/* Data point indicator for selected month */}
-                    <circle
-                        cx={`${(currentData.selectedIndex / (currentData.dataPoints.length - 1)) * 100}%`}
-                        cy={`${100 - selectedPoint.percentage}%`}
-                        r="10"
-                        fill="#4A3AFF"
-                        stroke="white"
-                        strokeWidth="3"
-                    />
-                </svg>
-
-                {/* Tooltip */}
-                <div
-                    className="absolute bg-[#1E1B39] rounded-lg px-4 py-3 text-white"
-                    style={{
-                        left: `${(currentData.selectedIndex / (currentData.dataPoints.length - 1)) * 100}%`,
-                        top: `${100 - selectedPoint.percentage - 20}%`,
-                        transform: 'translate(-50%, -100%)'
-                    }}
-                >
-                    <div className="text-slate-200 text-base font-normal font-['Inter'] mb-1">
-                        {activeTab === 'daily' ? '1,348 bookings' : activeTab === 'weekly' ? '5,420 bookings' : '1,348 sales'}
-                    </div>
-                    <div className="text-white text-lg font-medium font-['Inter']">
-                        ${selectedPoint.value.toLocaleString()}
-                    </div>
-                    {/* Arrow */}
-                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-                        <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#1E1B39]"></div>
+                    {/* Tooltip */}
+                    <div
+                        className="absolute bg-[#1E1B39] rounded-lg px-4 py-3 text-white transition-all duration-200 pointer-events-none z-30"
+                        style={{
+                            left: `${(safeHoveredIndex / (currentData.dataPoints.length - 1)) * 100}%`,
+                            top: `${100 - selectedPoint.percentage}%`,
+                            transform: 'translate(-50%, calc(-100% - 15px))'
+                        }}
+                    >
+                        <div className="text-slate-200 text-[13px] font-normal font-['Inter'] mb-1 whitespace-nowrap">
+                            {activeTab === 'annually' ? `${selectedPoint.value} sales` : `${selectedPoint.value} bookings`}
+                        </div>
+                        <div className="text-white text-base font-bold font-['Inter'] whitespace-nowrap">
+                            {selectedPoint.label} Summary
+                        </div>
+                        {/* Tooltip Arrow */}
+                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+                            <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#1E1B39]"></div>
+                        </div>
                     </div>
                 </div>
 
+
                 {/* X-axis labels */}
-                <div className="absolute left-16 right-0 bottom-0 flex justify-between">
+                <div className="absolute left-16 right-0 bottom-0 h-6">
                     {currentData.labels.map((label, index) => (
-                        <span key={index} className="text-gray-500 text-base font-normal font-['Inter'] uppercase tracking-wide">
+                        <span
+                            key={index}
+                            className={`absolute text-gray-400 md:text-gray-500 text-[10px] md:text-base font-normal font-['Inter'] uppercase tracking-wide transform -translate-x-1/2 whitespace-nowrap ${activeTab === 'annually' && index % 2 !== 0 ? 'hidden md:block' : ''
+                                }`}
+                            style={{ left: `${(index / (currentData.labels.length - 1)) * 100}%` }}
+                        >
                             {label}
                         </span>
                     ))}

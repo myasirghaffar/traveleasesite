@@ -69,8 +69,9 @@ const ReusableFilter = ({
           placeholder={searchPlaceholder}
           value={searchTerm}
           onChange={handleSearchChange}
-          className="w-full pl-12 pr-10 py-3 bg-gray-50/50 border border-gray-100 rounded-xl text-base font-['Roboto'] outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+          className="w-full pl-12 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm font-['Inter'] outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-slate-700 placeholder:text-slate-400 h-[50px]"
         />
+
         {searchTerm && (
           <button
             onClick={() => { setSearchTerm(""); onSearchChange?.(""); }}
@@ -87,9 +88,10 @@ const ReusableFilter = ({
           <div key={filter.key} className="relative reusable-filter-dropdown flex-1 md:flex-none min-w-[160px]">
             <button
               onClick={() => toggleDropdown(filter.key)}
-              className={`w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-xl text-base font-medium font-['Poppins'] transition-all hover:border-blue-500 ${selectedFilters[filter.key] ? 'border-blue-500 text-blue-600' : 'text-stone-950'
+              className={`w-full h-[50px] flex items-center justify-between px-5 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold font-['Inter'] transition-all hover:border-blue-500 ${selectedFilters[filter.key] ? 'border-blue-500 text-blue-600' : 'text-slate-700'
                 }`}
             >
+
               <span className="truncate">
                 {filter.options?.find(opt => opt.value === selectedFilters[filter.key])?.label || filter.label}
               </span>

@@ -100,14 +100,14 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Hero Banner */}
         <HeroBanner />
 
         {/* Summary Section */}
         <div className="mb-8">
-          <h2 className="text-gray-900 text-4xl font-semibold font-['Outfit'] leading-9 mb-6">
+          <h2 className="text-gray-900 text-2xl md:text-4xl font-semibold font-['Outfit'] leading-9 mb-6">
             Summary
           </h2>
 
