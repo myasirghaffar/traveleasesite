@@ -1,6 +1,6 @@
 const HeroSection = () => {
     return (
-        <section className="relative w-full mx-auto rounded-[45px] overflow-hidden min-h-[550px] md:min-h-[650px] flex items-center justify-center">
+        <section className="relative w-full lg:w-[94%] mx-auto rounded-[45px] overflow-hidden min-h-[500px] lg:min-h-[530px] flex items-center justify-center">
             {/* Background Image and Overlay */}
             <div className="absolute inset-0">
                 <img

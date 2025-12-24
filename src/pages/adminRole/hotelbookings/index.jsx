@@ -150,7 +150,7 @@ const HotelBookings = () => {
     headRow: {
       style: {
         backgroundColor: "#F9FAFB",
-        color: "#64748B",
+        color: "#64748B", 
         borderBottom: "1px solid #F1F5F9",
         fontWeight: "700",
         fontSize: "13px",

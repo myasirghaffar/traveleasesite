@@ -78,9 +78,9 @@ const Footer = () => {
           <div className="flex flex-col space-y-4">
             <h5 className="text-white text-xl font-semibold font-['Roboto'] mb-2">Resources</h5>
             <Link to="/" className="text-neutral-400 text-base font-medium font-['Roboto'] hover:text-white transition-colors">Home</Link>
-            <Link to="#" className="text-neutral-400 text-base font-medium font-['Roboto'] hover:text-white transition-colors">Hotel Listing</Link>
-            <Link to="#" className="text-neutral-400 text-base font-medium font-['Roboto'] hover:text-white transition-colors">Taxi</Link>
-            <Link to="#" className="text-neutral-400 text-base font-medium font-['Roboto'] hover:text-white transition-colors">Contact us</Link>
+            <Link to="/hotel-listing" className="text-neutral-400 text-base font-medium font-['Roboto'] hover:text-white transition-colors">Hotel Listing</Link>
+            <Link to="/taxi-listing" className="text-neutral-400 text-base font-medium font-['Roboto'] hover:text-white transition-colors">Taxi</Link>
+            <Link to="/contact" className="text-neutral-400 text-base font-medium font-['Roboto'] hover:text-white transition-colors">Contact us</Link>
           </div>
         </div>
       </div>

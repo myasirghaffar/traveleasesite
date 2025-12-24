@@ -72,7 +72,7 @@ const AddTaxi = ({ onCancel }) => {
             <div className="mx-auto">
                 <div className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-100 space-y-8">
 
-                    <div className="space-y-6">
+                    <div className="space-y-6"> 
                         <div className="space-y-2">
                             <InputLabel>Vehicle Name</InputLabel>
                             <InputField

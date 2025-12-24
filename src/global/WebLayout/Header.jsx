@@ -72,7 +72,7 @@ const Header = () => {
             </div>
           </div>
 
-          <Link to="/booking" className="w-40 h-10 bg-blue-500 rounded-[10px] flex items-center justify-center hover:bg-blue-600 transition-colors">
+          <Link to="/taxi-listing" className="w-40 h-10 bg-blue-500 rounded-[10px] flex items-center justify-center hover:bg-blue-600 transition-colors">
             <span className="text-white text-base font-semibold font-poppins leading-4 tracking-wide">Book Now</span>
           </Link>
         </div>
@@ -104,7 +104,7 @@ const Header = () => {
             <span className="text-stone-950 text-base font-bold font-poppins">+91 345 533 865</span>
           </div>
 
-          <Link to="/booking" onClick={() => setIsMenuOpen(false)} className="w-full h-12 bg-blue-500 rounded-[10px] flex items-center justify-center hover:bg-blue-600 transition-colors mt-2">
+          <Link to="/taxi-listing" onClick={() => setIsMenuOpen(false)} className="w-full h-12 bg-blue-500 rounded-[10px] flex items-center justify-center hover:bg-blue-600 transition-colors mt-2">
             <span className="text-white text-base font-semibold font-poppins">Book Now</span>
           </Link>
         </div>

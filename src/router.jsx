@@ -28,6 +28,7 @@ import ContractorDashboard from "./pages/contractorRole/dashboard";
 import TaxiBookingsPage from "./pages/website/taxibookings";
 import TaxiBookingPage from "./pages/website/taxibookings/features/TaxiBookingPage";
 import TaxiBookingForm from "./pages/website/taxibookings/features/TaxiBookingForm";
+import ContactPage from "./pages/website/contactpage";
 
 const AppRouter = () => {
   return (
@@ -44,6 +45,7 @@ const AppRouter = () => {
           <Route path="/taxi-listing" element={<TaxiBookingsPage />} />
           <Route path="/taxi-booking/:id" element={<TaxiBookingPage />} />
           <Route path="/taxi-checkout/:id" element={<TaxiBookingForm />} />
+          <Route path="/contact" element={<ContactPage />} />
         </Route>
 
         {/* Authentication Routes - No Layout (Full Page) */}
