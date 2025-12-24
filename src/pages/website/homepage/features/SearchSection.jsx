@@ -49,17 +49,8 @@ const SearchSection = () => {
     return (
         <div className="relative w-full max-w-[1024px] mx-auto bg-white rounded-[30px] shadow-[0px_35px_70px_0px_rgba(0,0,0,0.15)] border border-gray-100 p-8 pt-10">
 
-            {/* Tabs */}
-            <div className="absolute -top-6 left-4 md:left-8 right-4 md:right-auto flex space-x-4 overflow-x-auto scrollbar-hide">
-                <style jsx>{`
-                    .scrollbar-hide::-webkit-scrollbar {
-                        display: none;
-                    }
-                    .scrollbar-hide {
-                        -ms-overflow-style: none;
-                        scrollbar-width: none;
-                    }
-                `}</style>
+            {/* Tabs - Desktop */}
+            <div className="hidden md:flex absolute -top-6 left-8 space-x-4">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
@@ -76,6 +67,31 @@ const SearchSection = () => {
                         </span>
                     </button>
                 ))}
+            </div>
+
+            {/* Tabs - Mobile Dropdown */}
+            <div className="md:hidden absolute -top-6 left-4 right-4">
+                <div className="relative group">
+                    <div className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none z-10 scale-90">
+                        {activeTabData?.icon}
+                    </div>
+                    <select
+                        value={activeTab}
+                        onChange={(e) => setActiveTab(e.target.value)}
+                        className="w-full h-12 pl-12 pr-10 bg-white border border-gray-200 rounded-full shadow-lg font-['Poppins'] font-semibold text-stone-950 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    >
+                        {tabs.map((tab) => (
+                            <option key={tab.id} value={tab.id}>
+                                {tab.label}
+                            </option>
+                        ))}
+                    </select>
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1.5L6 6.5L11 1.5" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
+                </div>
             </div>
 
             {/* Form Fields */}

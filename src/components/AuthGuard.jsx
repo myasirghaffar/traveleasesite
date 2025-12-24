@@ -36,9 +36,8 @@ const AuthGuard = ({ children }) => {
 
     // Map roles to their expected route prefixes (only include routes that actually exist)
     const roleRouteMap = {
+      "admin": "/admin",
       "CTS Admin": "/admin",
-      "Company Owner": "/user", 
-      "Driver": "/contractor",
     };
 
     const expectedRoutePrefix = roleRouteMap[userRole];

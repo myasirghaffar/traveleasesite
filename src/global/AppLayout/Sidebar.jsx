@@ -64,78 +64,13 @@ function Sidebar({ isMobileSidebarOpen, toggleSidebar }) {
           { path: "/admin/settings", name: "Settings", icon: SettingsIcon },
         ],
       },
-      user: {
-        main: [
-          { path: "/user/dashboard", name: "Dashboard", icon: DashboardIcon },
-          { path: "/user/hotels", name: "Hotels", icon: HotelsIcon },
-          { path: "/user/bookings", name: "Bookings", icon: BookingsIcon },
-          { path: "/user/taxi-services", name: "Taxi Services", icon: TaxiServicesIcon },
-          { path: "/user/payments", name: "Payment & Transaction", icon: PaymentIcon },
-        ],
-        bottom: [
-          { path: "/user/settings", name: "Settings", icon: SettingsIcon },
-        ],
-      },
-      contractor: {
-        main: [
-          { path: "/contractor/dashboard", name: "Dashboard", icon: DashboardIcon },
-          { path: "/contractor/hotels", name: "Hotels", icon: HotelsIcon },
-          { path: "/contractor/bookings", name: "Bookings", icon: BookingsIcon },
-          { path: "/contractor/taxi-services", name: "Taxi Services", icon: TaxiServicesIcon },
-          { path: "/contractor/users", name: "Users", icon: UsersIcon },
-          { path: "/contractor/payments", name: "Payment & Transaction", icon: PaymentIcon },
-        ],
-        bottom: [
-          { path: "/contractor/settings", name: "Settings", icon: SettingsIcon },
-        ],
-      },
     };
 
-    return menu[role] || {};
-  };
-  const currentRole = useSelector((state) => state.auth.user?.role);
-
-  // Extract role from URL path as fallback
-  const getRoleFromPath = (pathname) => {
-    if (pathname.startsWith("/admin")) return "admin";
-    if (pathname.startsWith("/user")) return "user";
-    if (pathname.startsWith("/contractor")) return "contractor";
-    return null;
+    return menu.admin;
   };
 
-  // Use URL-based role detection first, then Redux role as fallback
-  const urlBasedRole = getRoleFromPath(location.pathname);
-  const detectedRole = urlBasedRole || currentRole;
-
-  // Map role values to menu keys
-  const roleName =
-    detectedRole === "admin"
-      ? "admin"
-      : detectedRole === "user"
-        ? "user"
-        : detectedRole === "contractor"
-          ? "contractor"
-          : null;
-
-  // Additional fallback for role detection based on URL
-  const finalRoleName =
-    roleName ||
-    (location.pathname.startsWith("/user")
-      ? "user"
-      : location.pathname.startsWith("/contractor")
-        ? "contractor"
-        : "admin");
-
-  const menuItems = getRoleBasedMenuItems(finalRoleName);
-
-  // Fallback for testing - if no role is detected, show appropriate menu based on URL
-  const finalMenuItems = menuItems?.main
-    ? menuItems
-    : location.pathname.startsWith("/user")
-      ? getRoleBasedMenuItems("user")
-      : location.pathname.startsWith("/contractor")
-        ? getRoleBasedMenuItems("contractor")
-        : getRoleBasedMenuItems("admin");
+  const menuItems = getRoleBasedMenuItems("admin");
+  const finalMenuItems = menuItems;
 
   // Utility function to render NavLink items
   const handleLogout = () => {

@@ -8,14 +8,7 @@ const AuthRedirect = () => {
   const currentRole = useSelector((state) => state.auth.user?.role);
 
   // Map roles to their correct route prefixes
-  const roleName =
-    currentRole === "CTS Admin"
-      ? "admin"
-      : currentRole === "Company Owner"
-      ? "user"
-      : currentRole === "Driver"
-      ? "contractor"
-      : null;
+  const roleName = currentRole === "admin" || currentRole === "CTS Admin" ? "admin" : null;
 
   useEffect(() => {
     if (isLoggedIn && roleName) {

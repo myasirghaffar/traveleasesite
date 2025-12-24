@@ -7,20 +7,6 @@ export const dummyUsers = [
     name: "Admin User",
     route: "admin",
   },
-  {
-    email: "user@example.com",
-    password: "user123",
-    role: "user",
-    name: "Regular User",
-    route: "user",
-  },
-  {
-    email: "contractor@example.com",
-    password: "contractor123",
-    role: "contractor",
-    name: "Contractor User",
-    route: "contractor",
-  },
 ];
 
 // Function to authenticate user

@@ -91,7 +91,7 @@ const BestBookingPlatform = () => {
                         <div className="absolute -top-8 sm:-top-12 md:-top-16 left-1/2 -translate-x-1/2 w-[98%] sm:w-[95%] max-w-[800px] z-20">
                             <div className="bg-white/80 backdrop-blur-md p-1.5 sm:p-2 rounded-full shadow-xl shadow-blue-500/10">
                                 <div className="bg-[#1781FE] rounded-full px-4 py-3 sm:px-6 sm:py-4 md:px-12 md:py-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-6">
-                                    <h4 className="text-white text-xs sm:text-sm md:text-lg font-medium font-['Roboto'] leading-tight text-center sm:text-left">
+                                    <h4 className="text-white text-[10px] sm:text-sm md:text-lg font-medium font-['Roboto'] leading-tight text-center sm:text-left">
                                         Need to Help? Don't Hesitate Friendly<br className="hidden md:block" /> Collaboarte with Experties
                                     </h4>
 
@@ -113,7 +113,7 @@ const BestBookingPlatform = () => {
                         </div>
 
                         {/* Banner Image */}
-                        <div className="relative w-full aspect-[4/3] sm:aspect-[2/1] md:aspect-[1232/580] rounded-[20px] sm:rounded-[40px] md:rounded-[60px] overflow-hidden shadow-2xl border-2 sm:border-4 border-white/50">
+                        <div className="relative w-full mt-10 sm:mt-0 aspect-[4/5] sm:aspect-[2/1] md:aspect-[1232/580] rounded-[20px] sm:rounded-[40px] md:rounded-[60px] overflow-hidden shadow-2xl border-2 sm:border-4 border-white/50">
                             <img
                                 src={backgroundImage}
                                 alt="Friends in nature"

@@ -21,8 +21,6 @@ const Login = () => {
       const userRole = auth.user.role;
       const roleRouteMap = {
         admin: "admin",
-        user: "user",
-        contractor: "contractor",
       };
 
       const rolePath = roleRouteMap[userRole] || "admin";
@@ -300,20 +298,6 @@ const Login = () => {
                   className="w-full bg-primary text-white py-2 px-3 rounded text-xs font-medium hover:bg-primary/90 transition-colors"
                 >
                   Auto Login as Admin
-                </button>
-                <button
-                  onClick={() => handleAutoLogin("user@example.com", "user123")}
-                  className="w-full bg-secondary text-white py-2 px-3 rounded text-xs font-medium hover:bg-secondary/90 transition-colors"
-                >
-                  Auto Login as User
-                </button>
-                <button
-                  onClick={() =>
-                    handleAutoLogin("contractor@example.com", "contractor123")
-                  }
-                  className="w-full bg-gray-600 text-white py-2 px-3 rounded text-xs font-medium hover:bg-gray-700 transition-colors"
-                >
-                  Auto Login as Contractor
                 </button>
               </div>
             </div>

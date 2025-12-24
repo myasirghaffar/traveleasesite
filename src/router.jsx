@@ -19,12 +19,10 @@ import ManageHotels from "./pages/adminRole/hotelsmanage";
 import ManageUsers from "./pages/adminRole/usermanage";
 import HotelBookings from "./pages/adminRole/hotelbookings";
 import ManageTaxi from "./pages/adminRole/taximanage";
+import PaymentPage from "./pages/adminRole/paymentpage";
 
 
 
-
-import UserDashboard from "./pages/userRole/dashboard";
-import ContractorDashboard from "./pages/contractorRole/dashboard";
 import TaxiBookingsPage from "./pages/website/taxibookings";
 import TaxiBookingPage from "./pages/website/taxibookings/features/TaxiBookingPage";
 import TaxiBookingForm from "./pages/website/taxibookings/features/TaxiBookingForm";
@@ -70,36 +68,13 @@ const AppRouter = () => {
           <Route path="users" element={<ManageUsers />} />
           <Route path="bookings" element={<HotelBookings />} />
           <Route path="taxi-services" element={<ManageTaxi />} />
+          <Route path="payments" element={<PaymentPage />} />
 
 
 
         </Route>
 
-        {/* User Dashboard Routes - Using AppLayout */}
-        <Route
-          path="/user"
-          element={
-            <AuthGuard>
-              <AppLayout />
-            </AuthGuard>
-          }
-        >
-          <Route index element={<UserDashboard />} />
-          <Route path="dashboard" element={<UserDashboard />} />
-        </Route>
 
-        {/* Contractor Dashboard Routes - Using AppLayout */}
-        <Route
-          path="/contractor"
-          element={
-            <AuthGuard>
-              <AppLayout />
-            </AuthGuard>
-          }
-        >
-          <Route index element={<ContractorDashboard />} />
-          <Route path="dashboard" element={<ContractorDashboard />} />
-        </Route>
 
         {/* Catch all route for 404 */}
         <Route
