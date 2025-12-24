@@ -1,4 +1,5 @@
 import React from 'react';
+import { IoMdSend } from "react-icons/io";
 
 const NewsletterBanner = () => {
     return (
@@ -24,8 +25,9 @@ const NewsletterBanner = () => {
                             placeholder="Enter your email address"
                             className="flex-1 px-6 h-12 bg-transparent outline-none text-stone-950 font-medium font-['Roboto']"
                         />
-                        <button className="bg-blue-500 text-white px-8 h-12 rounded-xl font-bold font-['Poppins'] hover:bg-stone-950 transition-colors whitespace-nowrap">
-                            Subscribe
+                        <button className="bg-blue-500 text-white px-4 md:px-8 h-12 rounded-xl font-bold font-['Poppins'] hover:bg-stone-950 transition-colors whitespace-nowrap flex items-center justify-center">
+                            <span className="hidden md:inline">Subscribe</span>
+                            <IoMdSend className="md:hidden text-xl" />
                         </button>
                     </div>
                 </div>

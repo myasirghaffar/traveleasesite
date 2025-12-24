@@ -16,10 +16,10 @@ const HeroSection = () => {
 
             {/* Content */}
             <div className="relative z-10 flex flex-col items-center justify-center px-4">
-                <h1 className="text-white text-5xl md:text-6xl font-extrabold font-['Poppins'] leading-tight text-center max-w-[800px] mb-4">
+                <h1 className="text-white text-3xl md:text-5xl font-extrabold font-['Poppins'] leading-tight text-center max-w-[800px] mb-4">
                     Contact Us
                 </h1>
-                <p className="text-white text-lg md:text-xl font-medium font-['Roboto'] leading-7 text-center max-w-[600px]">
+                <p className="text-white text-md md:text-xl font-medium font-['Roboto'] leading-7 text-center max-w-[600px]">
                     We're here to help you with your journey. Reach out to us anytime.
                 </p>
             </div>
