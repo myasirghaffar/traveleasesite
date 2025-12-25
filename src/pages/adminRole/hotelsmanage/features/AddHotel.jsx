@@ -134,7 +134,7 @@ const AddHotel = ({ onCancel }) => {
     );
 
     return (
-        <div className="w-full min-h-screen bg-[#F9FAFB] p-8 space-y-10 animate-in fade-in duration-500">
+        <div className="w-full min-h-screen p-8 space-y-10 animate-in fade-in duration-500">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-1">
@@ -165,7 +165,7 @@ const AddHotel = ({ onCancel }) => {
                 <div className="space-y-8">
 
                     {/* Hotel Information Section */}
-                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-100">
+                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200">
                         <SectionHeader icon={HotelBuildingIcon} title="Hotel Information" />
 
                         <div className="space-y-8">
@@ -255,7 +255,7 @@ const AddHotel = ({ onCancel }) => {
                     </section>
 
                     {/* Pricing & Availability Section */}
-                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-100">
+                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200">
                         <SectionHeader icon={PricingDollarIcon} title="Pricing & Availability" />
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -301,7 +301,7 @@ const AddHotel = ({ onCancel }) => {
                     </section>
 
                     {/* Images Section */}
-                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-100">
+                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200">
                         <SectionHeader icon={MediaImageIcon} title="Images" />
 
                         <div className="space-y-8">
@@ -327,7 +327,7 @@ const AddHotel = ({ onCancel }) => {
                                         </>
                                     ) : (
                                         <>
-                                            <div className="p-5 bg-white rounded-2xl shadow-sm mb-5 group-hover:scale-110 transition-transform border border-slate-100">
+                                            <div className="p-5 bg-white rounded-2xl shadow-sm mb-5 group-hover:scale-110 transition-transform border border-slate-200">
                                                 <CloudUploadIcon className="w-10 h-10 text-blue-500" />
                                             </div>
                                             <p className="text-slate-900 font-bold text-lg mb-1">Upload Hotel Image</p>
@@ -378,7 +378,7 @@ const AddHotel = ({ onCancel }) => {
 
 
                     {/* Rooms Section */}
-                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-100 space-y-8">
+                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200 space-y-8">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2.5">
                                 <StarRatingIcon className="w-5 h-5 text-blue-600" />
@@ -393,10 +393,10 @@ const AddHotel = ({ onCancel }) => {
                         </div>
 
                         {rooms.length > 0 && (
-                            <div className="p-8 rounded-[24px] border border-slate-100 bg-slate-50/20">
+                            <div className="p-8 rounded-[24px] border border-slate-200 bg-slate-50/20">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {rooms.map((room, idx) => (
-                                        <div key={idx} className="p-6 rounded-[16px] bg-white border border-slate-100 shadow-sm relative group">
+                                        <div key={idx} className="p-6 rounded-[16px] bg-white border border-slate-200 shadow-sm relative group">
                                             <button
                                                 onClick={() => setRooms(prev => prev.filter((_, i) => i !== idx))}
                                                 className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors"
@@ -437,7 +437,7 @@ const AddHotel = ({ onCancel }) => {
                     </section>
 
                     {/* Amenities Section */}
-                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-100">
+                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200">
                         <SectionHeader icon={AmenitiesStarIcon} title="Amenities" />
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
@@ -455,7 +455,7 @@ const AddHotel = ({ onCancel }) => {
                                     onClick={() => handleAmenityToggle(amenity.key)}
                                     className={`flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all ${formData.amenities[amenity.key]
                                         ? 'border-blue-500 bg-blue-50/50 text-blue-700'
-                                        : 'border-slate-100 bg-white text-slate-600 hover:border-slate-200 hover:bg-slate-50'
+                                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-200 hover:bg-slate-50'
                                         }`}
                                 >
                                     <amenity.icon className={`w-6 h-6 ${formData.amenities[amenity.key] ? 'text-blue-600' : 'text-slate-400'}`} />
@@ -472,10 +472,10 @@ const AddHotel = ({ onCancel }) => {
                 <div className="space-y-8 h-fit sticky top-8">
 
                     {/* Card Preview */}
-                    <div className="bg-white rounded-[24px] p-8 shadow-sm border border-slate-100">
+                    <div className="bg-white rounded-[24px] p-8 shadow-sm border border-slate-200">
                         <h3 className="text-xl font-bold text-slate-900 border-b border-slate-50 pb-6 mb-8">Preview</h3>
 
-                        <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-2xl shadow-slate-200/40">
+                        <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/40">
                             <div className="h-48 bg-slate-100 flex items-center justify-center overflow-hidden">
                                 {coverImage ? (
                                     <img src={coverImage} alt="Preview" className="w-full h-full object-cover" />

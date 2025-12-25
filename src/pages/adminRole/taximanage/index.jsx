@@ -77,7 +77,7 @@ const ManageTaxi = () => {
     ),
     userName: (row) => (
       <div className="flex items-center gap-3 py-2">
-        <img src={row.userImage} alt={row.userName} className="w-10 h-10 rounded-full border border-slate-100 shadow-sm" />
+        <img src={row.userImage} alt={row.userName} className="w-10 h-10 rounded-full border border-slate-200 shadow-sm" />
         <span className="text-slate-700 font-bold text-[14px]">{row.userName}</span>
       </div>
     ),
@@ -116,7 +116,7 @@ const ManageTaxi = () => {
     driver: (row) => (
       row.driver ? (
         <div className="flex items-center gap-2">
-          <img src={row.driver.image} alt={row.driver.name} className="w-8 h-8 rounded-full border border-slate-100" />
+          <img src={row.driver.image} alt={row.driver.name} className="w-8 h-8 rounded-full border border-slate-200" />
           <span className="text-slate-600 text-[13px] font-semibold">{row.driver.name}</span>
         </div>
       ) : (
@@ -129,51 +129,24 @@ const ManageTaxi = () => {
   };
 
   const columns = [
-    { key: "id", label: "Ride ID", width: "120px" },
-    { key: "userName", label: "User Name", width: "220px" },
-    { key: "route", label: "Pickup → Drop-off", width: "280px" },
-    { key: "vehicleType", label: "Vehicle Type", width: "140px", center: true },
-    { key: "dateTime", label: "Date & Time", width: "160px" },
-    { key: "status", label: "Status", width: "150px", center: true },
-    { key: "driver", label: "Driver Assigned", width: "200px" },
+    { key: "id", label: "Ride ID", width: "100px" },
+    { key: "userName", label: "User Name", width: "200px" },
+    { key: "route", label: "Pickup → Drop-off", width: "240px" },
+    { key: "vehicleType", label: "Vehicle Type", width: "120px", center: true },
+    { key: "dateTime", label: "Date & Time", width: "120px" },
+    { key: "status", label: "Status", width: "110px", center: true },
+    { key: "driver", label: "Driver Assigned", width: "140px" },
     { key: "actions", label: "Actions", width: "120px", center: true },
   ];
 
-  const customTableStyles = {
-    headRow: {
-      style: {
-        backgroundColor: "#F9FAFB",
-        color: "#64748B",
-        borderBottom: "1px solid #F1F5F9",
-        fontWeight: "700",
-        fontSize: "12px",
-        height: "60px",
-      },
-    },
-    headCells: { style: { paddingLeft: "24px", paddingRight: "24px" } },
-    rows: {
-      style: {
-        borderBottom: "1px solid #F1F5F9",
-        height: "72px",
-        "&:hover": { backgroundColor: "#F8FAFC" },
-      },
-    },
-    cells: { style: { paddingLeft: "24px", paddingRight: "24px" } },
-    tableWrapper: {
-      style: {
-        borderRadius: "0px",
-        border: "none",
-        boxShadow: "none",
-      },
-    },
-  };
+
 
   if (isAdding) {
     return <AddTaxi onCancel={() => setIsAdding(false)} />;
   }
 
   return (
-    <div className="w-full p-8 min-h-screen space-y-10 animate-in fade-in duration-500 bg-[#F9FAFB]">
+    <div className="w-full p-8 min-h-screen space-y-10 animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -194,7 +167,7 @@ const ManageTaxi = () => {
       </div>
 
       {/* Filter Card */}
-      <div className="bg-white rounded-[24px] p-8 border border-slate-100 shadow-sm relative">
+      <div className="bg-white rounded-[24px] p-8 border border-slate-200 shadow-sm relative">
         <button onClick={() => { }} className="absolute top-8 right-8 text-blue-600 font-bold text-sm">Reset Filters</button>
         <h2 className="text-slate-900 font-bold text-lg mb-6">Filter Bookings</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
@@ -242,7 +215,7 @@ const ManageTaxi = () => {
           { label: "Active Rides", value: "67", icon: Route, iconColor: "text-green-500", bgColor: "bg-green-50", valueColor: "text-green-600" },
           { label: "Completed Today", value: "89", icon: CheckCircle, iconColor: "text-blue-500", bgColor: "bg-blue-50", valueColor: "text-blue-600" }
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm flex items-center justify-between">
+          <div key={idx} className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-slate-400 text-sm font-bold">{stat.label}</p>
               <h3 className={`text-3xl font-black ${stat.valueColor || 'text-slate-900'}`}>{stat.value}</h3>
@@ -255,7 +228,7 @@ const ManageTaxi = () => {
       </div>
 
       {/* Table Section */}
-      <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-white text-slate-900 font-bold text-lg">
           <div className="flex items-center gap-4">
             <span>Taxi Requests</span>
@@ -270,7 +243,6 @@ const ManageTaxi = () => {
           columns={columns}
           data={taxiData.slice((currentPage - 1) * 10, currentPage * 10)}
           customCellRenderers={customCellRenderers}
-          customStyles={customTableStyles}
         />
 
         <div className="p-8 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">

@@ -81,7 +81,7 @@ const HotelBookingForm = () => {
     );
 
     return (
-        <div className="min-h-screen bg-[#F9FAFB] pb-20 pt-12">
+        <div className="min-h-screen pb-20 pt-12">
             <div className="max-w-[1240px] mx-auto px-4 lg:px-8">
                 {renderStep1Header()}
 
@@ -108,7 +108,7 @@ const HotelBookingForm = () => {
                                                         type="text"
                                                         placeholder="John Doe"
                                                         required
-                                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
+                                                        className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
                                                         value={formData.fullName}
                                                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                                                     />
@@ -128,7 +128,7 @@ const HotelBookingForm = () => {
                                                             type="email"
                                                             placeholder="john@example.com"
                                                             required
-                                                            className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
+                                                            className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
                                                             value={formData.email}
                                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                                         />
@@ -146,7 +146,7 @@ const HotelBookingForm = () => {
                                                             type="tel"
                                                             placeholder="+1 (555) 000-0000"
                                                             required
-                                                            className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
+                                                            className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
                                                             value={formData.phone}
                                                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                         />
@@ -173,7 +173,7 @@ const HotelBookingForm = () => {
                                                         <input
                                                             type="date"
                                                             required
-                                                            className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
+                                                            className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
                                                             value={formData.checkIn}
                                                             onChange={(e) => setFormData({ ...formData, checkIn: e.target.value })}
                                                         />
@@ -190,7 +190,7 @@ const HotelBookingForm = () => {
                                                         <input
                                                             type="date"
                                                             required
-                                                            className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
+                                                            className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
                                                             value={formData.checkOut}
                                                             onChange={(e) => setFormData({ ...formData, checkOut: e.target.value })}
                                                         />
@@ -207,7 +207,7 @@ const HotelBookingForm = () => {
                                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                                                     </span>
                                                     <select
-                                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter'] appearance-none"
+                                                        className="w-full bg-white border border-gray-200 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter'] appearance-none"
                                                         value={formData.guests}
                                                         onChange={(e) => setFormData({ ...formData, guests: e.target.value })}
                                                     >
@@ -240,14 +240,26 @@ const HotelBookingForm = () => {
                                                 {['stripe', 'paypal', 'credit-card'].map((method) => (
                                                     <button
                                                         key={method}
+                                                        type="button"
                                                         onClick={() => setFormData({ ...formData, paymentMethod: method })}
-                                                        className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${formData.paymentMethod === method ? 'border-blue-500 bg-blue-50 shadow-md shadow-blue-500/10' : 'border-gray-100 hover:border-blue-200 bg-white'}`}
+                                                        className={`flex flex-col items-center justify-center p-8 rounded-2xl border-2 transition-all ${formData.paymentMethod === method ? 'border-blue-500 bg-blue-50 shadow-md shadow-blue-500/10' : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'}`}
                                                     >
-                                                        {method === 'stripe' && <span className="text-2xl font-bold text-[#635BFF] font-['Inter']">stripe</span>}
-                                                        {method === 'paypal' && <span className="text-2xl font-bold text-[#003087] font-['Inter']">Pay<span className="text-[#009CDE]">Pal</span></span>}
+                                                        {method === 'stripe' && <span className="text-3xl font-bold text-[#635BFF] font-['Inter']">stripe</span>}
+                                                        {method === 'paypal' && (
+                                                            <div className="flex flex-col items-center gap-1">
+                                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 0 0-.794.68l-.04.22-.63 3.993-.028.15a.806.806 0 0 1-.795.68H8.334a.68.68 0 0 1-.672-.78l.001-.005.002-.01.63-3.993.04-.22a.805.805 0 0 1 .794-.68h.5c3.238 0 5.774-1.314 6.514-5.12.256-1.313.192-2.446-.3-3.327z" fill="#139AD6" />
+                                                                    <path d="M18.76 8.05c-.152-.043-.307-.082-.465-.117a7.374 7.374 0 0 0-1.475-.142h-4.667a.805.805 0 0 0-.794.68l-.952 6.04-.028.177a.805.805 0 0 1 .794-.68h.5c3.238 0 5.774-1.314 6.514-5.12.256-1.313.192-2.446-.3-3.327a3.995 3.995 0 0 0-.127-.51z" fill="#263B80" />
+                                                                </svg>
+                                                                <span className="text-sm font-bold text-gray-900 mt-1">Paypal</span>
+                                                            </div>
+                                                        )}
                                                         {method === 'credit-card' && (
                                                             <div className="flex flex-col items-center gap-2">
-                                                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-900"><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+                                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-900">
+                                                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                                                    <line x1="1" y1="10" x2="23" y2="10" />
+                                                                </svg>
                                                                 <span className="text-sm font-bold text-gray-900">Credit Card</span>
                                                             </div>
                                                         )}
@@ -266,7 +278,7 @@ const HotelBookingForm = () => {
                                                         type="text"
                                                         placeholder="Card Number"
                                                         required
-                                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
+                                                        className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
                                                         value={formData.cardNumber}
                                                         onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
                                                     />
@@ -277,7 +289,7 @@ const HotelBookingForm = () => {
                                                     </label>
                                                     <div className="relative group">
                                                         <select
-                                                            className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter'] appearance-none"
+                                                            className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter'] appearance-none"
                                                             value={formData.cardType}
                                                             onChange={(e) => setFormData({ ...formData, cardType: e.target.value })}
                                                         >
@@ -298,7 +310,7 @@ const HotelBookingForm = () => {
                                                     <input
                                                         type="text"
                                                         placeholder="CVC"
-                                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 px-4 text-gray-900 outline-none transition-all font-['Inter']"
+                                                        className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
                                                         value={formData.cvc}
                                                         onChange={(e) => setFormData({ ...formData, cvc: e.target.value })}
                                                     />
@@ -308,7 +320,7 @@ const HotelBookingForm = () => {
                                                     <input
                                                         type="text"
                                                         placeholder="Month"
-                                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 px-4 text-gray-900 outline-none transition-all font-['Inter']"
+                                                        className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
                                                         value={formData.expMonth}
                                                         onChange={(e) => setFormData({ ...formData, expMonth: e.target.value })}
                                                     />
@@ -318,7 +330,7 @@ const HotelBookingForm = () => {
                                                     <input
                                                         type="text"
                                                         placeholder="Year"
-                                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl py-4 px-4 text-gray-900 outline-none transition-all font-['Inter']"
+                                                        className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
                                                         value={formData.expYear}
                                                         onChange={(e) => setFormData({ ...formData, expYear: e.target.value })}
                                                     />

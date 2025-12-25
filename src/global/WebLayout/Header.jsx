@@ -16,30 +16,37 @@ const Header = () => {
     <header className="w-full flex flex-col items-center bg-white relative z-50 shadow-sm">
       {/* Background / Top Bar */}
       <div className="w-full h-12 bg-blue-500 overflow-hidden relative">
-        <div className="max-w-[1440px] mx-auto h-full px-4 lg:px-0 flex items-center justify-between lg:justify-center relative">
+        <div className="max-w-[1440px] mx-auto h-full px-4 lg:px-8 flex items-center justify-center gap-4">
 
-          {/* Mobile: Simple Text or partial slider (Simplified for Mobile) */}
-          <div className="w-full h-full flex items-center justify-center relative">
-            {/* Previous Slide Button (Hidden on small mobile if needed, or kept) */}
-            <div className="hidden lg:flex size-6 rounded-xl outline outline-1 outline-offset-[-1px] outline-white cursor-pointer items-center justify-center absolute left-0 lg:left-[420px]">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9.77447 10.4081C9.03978 8.57139 5.36631 6.73465 3.16223 5.99996C5.36631 5.26527 8.67243 4.16323 9.77447 1.5918" stroke="white" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </div>
+          {/* Previous Slide Button - Only visible on large screens */}
+          <button
+            className="hidden xl:flex size-7 rounded-full bg-white/10 cursor-pointer items-center justify-center hover:bg-white/20 transition-colors shrink-0"
+            aria-label="Previous slide"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9.77447 10.4081C9.03978 8.57139 5.36631 6.73465 3.16223 5.99996C5.36631 5.26527 8.67243 4.16323 9.77447 1.5918" stroke="white" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
 
-            {/* Carousel Item */}
-            <div className="text-center whitespace-nowrap overflow-hidden text-ellipsis px-8">
-              <span className="text-white text-xs sm:text-base font-medium font-display leading-6">Enjoy Family Holiday Packages with </span>
-              <span className="text-white text-xs sm:text-base font-bold font-display leading-6 block sm:inline">Flexible Payment Options</span>
-            </div>
-
-            {/* Next Slide Button */}
-            <div className="hidden lg:flex size-6 rounded-xl outline outline-1 outline-offset-[-1px] outline-white cursor-pointer items-center justify-center absolute right-0 lg:left-[995px]">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1.57129 10.4081C2.30598 8.57139 5.97945 6.73465 8.18354 5.99996C5.97945 5.26527 2.67333 4.16323 1.57129 1.5918" stroke="white" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </div>
+          {/* Carousel Item - Responsive text */}
+          <div className="text-center px-2 sm:px-4">
+            <span className="text-white text-xs sm:text-sm lg:text-base font-medium font-display leading-tight">
+              Enjoy Family Holiday Packages with{' '}
+            </span>
+            <span className="text-white text-xs sm:text-sm lg:text-base font-bold font-display leading-tight">
+              Flexible Payment Options
+            </span>
           </div>
+
+          {/* Next Slide Button - Only visible on large screens */}
+          <button
+            className="hidden xl:flex size-7 rounded-full bg-white/10 cursor-pointer items-center justify-center hover:bg-white/20 transition-colors shrink-0"
+            aria-label="Next slide"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1.57129 10.4081C2.30598 8.57139 5.97945 6.73465 8.18354 5.99996C5.97945 5.26527 2.67333 4.16323 1.57129 1.5918" stroke="white" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
       </div>
 

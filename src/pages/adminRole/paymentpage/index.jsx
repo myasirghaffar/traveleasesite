@@ -11,11 +11,13 @@ import {
   Filter
 } from "lucide-react";
 import ReusableDataTable from "../../../components/ReusableDataTable";
+import ReusablePagination from "../../../components/ReusablePagination";
 
 const PaymentPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [itemsPerPage] = useState(10);
 
   // Mock Payment Data
   const paymentsData = [
@@ -94,7 +96,7 @@ const PaymentPage = () => {
         <img
           src={row.avatar}
           alt={row.customer}
-          className="w-10 h-10 rounded-full object-cover border border-slate-100 shadow-sm"
+          className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm"
         />
         <div className="flex flex-col">
           <span className="text-slate-900 font-bold text-[14px] font-['Inter']">
@@ -144,41 +146,32 @@ const PaymentPage = () => {
 
   // Columns Configuration
   const columns = [
-    { key: "id", label: "Transaction ID", width: "150px" },
-    { key: "customer", label: "Customer", width: "250px" },
-    { key: "amount", label: "Amount", width: "150px" },
-    { key: "date", label: "Date", width: "150px" },
+    { key: "id", label: "Transaction ID", width: "120px" },
+    { key: "customer", label: "Customer", width: "220px" },
+    { key: "amount", label: "Amount", width: "120px" },
+    { key: "date", label: "Date", width: "120px" },
     { key: "method", label: "Method", width: "180px" },
-    { key: "type", label: "Type", width: "140px" },
+    { key: "type", label: "Type", width: "100px" },
     { key: "status", label: "Status", width: "130px", center: true },
     { key: "actions", label: "Actions", width: "130px", center: true },
   ];
 
-  const customTableStyles = {
-    headRow: {
-      style: {
-        backgroundColor: "#F8FAFC",
-        color: "#64748B",
-        fontWeight: "700",
-        fontSize: "13px",
-        height: "56px",
-        borderBottom: "1px solid #E2E8F0",
-      },
-    },
-    headCells: {
-      style: {
-        color: "#64748B",
-      },
-    },
-    rows: {
-      style: {
-        height: "72px",
-        "&:hover": {
-          backgroundColor: "#F1F5F9",
-        },
-      },
-    },
-  };
+
+  // Filtering and Pagination Logic
+  const filteredData = paymentsData.filter(payment => {
+    const matchesSearch = payment.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      payment.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      payment.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "All" || payment.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="w-full p-8 min-h-screen space-y-8 animate-in fade-in duration-500">
@@ -205,7 +198,7 @@ const PaymentPage = () => {
           { label: "Pending Payments", value: "$1,200.00", trend: "3 Orders", color: "amber" },
           { label: "Refunds Processed", value: "$3,450.00", trend: "15 Txns", color: "orange" },
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-2">
+          <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
             <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{stat.label}</span>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-extrabold text-slate-800">{stat.value}</span>
@@ -218,7 +211,7 @@ const PaymentPage = () => {
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4">
         <div className="flex flex-1 items-center gap-4 w-full md:w-auto">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -247,38 +240,26 @@ const PaymentPage = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white overflow-hidden">
         <ReusableDataTable
           columns={columns}
-          data={paymentsData}
+          data={currentData}
           customCellRenderers={customCellRenderers}
-          customStyles={customTableStyles}
         />
       </div>
 
-      {/* Pagination */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <span className="text-slate-500 text-sm font-medium">
-          Showing 1-6 of 128 transactions
+      {/* Pagination Section */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+        <span className="text-slate-500 text-sm font-medium font-['Inter'] text-center sm:text-left">
+          Showing {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} transactions
         </span>
-        <div className="flex items-center gap-2">
-          <button className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 transition-all">
-            <ChevronLeft size={20} />
-          </button>
-          {[1, 2, 3, "...", 22].map((page, idx) => (
-            <button
-              key={idx}
-              className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold text-sm transition-all ${page === 1
-                ? "bg-[#1781FE] text-white shadow-lg shadow-blue-100"
-                : "text-slate-500 hover:bg-slate-100"
-                }`}
-            >
-              {page}
-            </button>
-          ))}
-          <button className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 transition-all">
-            <ChevronRight size={20} />
-          </button>
+        <div className="w-auto">
+          <ReusablePagination
+            currentPage={currentPage}
+            totalPages={totalPages || 1}
+            onPageChange={setCurrentPage}
+            theme="light"
+          />
         </div>
       </div>
     </div>

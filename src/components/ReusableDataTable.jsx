@@ -46,37 +46,32 @@ const ReusableDataTable = ({
     },
     tableWrapper: {
       style: {
-        borderRadius: "12px 12px 0px 0px",
-        overflow: "hidden",
         backgroundColor: "#ffffff",
-        boxShadow:
-          "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-        border: "1px solid #D1D1D1",
       },
     },
     headRow: {
       style: {
-        backgroundColor: "#58398D", // primary-500 color
-        minHeight: "60px",
-        borderBottom: "none",
+        backgroundColor: "#F9FAFB", // primary-500 color
+        minHeight: "50px",
+        borderBottom: "1px solid #E5E7EB !important",
         fontFamily: '"Poppins", sans-serif',
       },
     },
     headCells: {
       style: {
         padding: "16px 12px",
-        fontWeight: "400",
-        color: "#ffffff",
-        fontSize: "14px",
+        fontWeight: "600",
+        color: "#6B7280",
+        fontSize: "12px",
         fontFamily: '"Poppins", sans-serif',
         borderBottom: "none",
         whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
-        textAlign: "left",
+        textAlign: "center",
         display: "flex",
         alignItems: "center",
-        justifyContent: "flex-start",
+        justifyContent: "center",
         "&:last-child": {
           borderRight: "none",
         },
@@ -86,11 +81,11 @@ const ReusableDataTable = ({
       style: {
         fontSize: "12px",
         fontWeight: "400",
-        minHeight: "60px",
+        minHeight: "50px",
         backgroundColor: "#ffffff",
         color: "#A0A0A0",
         transition: "all 0.2s ease",
-        borderBottom: "2px solid #D1D1D1 !important",
+        borderBottom: "1px solid #E5E7EB !important",
         "&:hover": {
           backgroundColor: "#f9fafb",
         },
@@ -104,7 +99,7 @@ const ReusableDataTable = ({
         padding: "12px 12px",
         fontSize: "12px",
         fontWeight: "600",
-        fontFamily: "Inter",
+        fontFamily: '"Inter", sans-serif',
         whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
@@ -150,20 +145,27 @@ const ReusableDataTable = ({
       style: {
         color: "#A0A0A0",
         backgroundColor: "#FFFFFF",
-        borderBottom: "2px solid #D1D1D1",
+        borderBottom: "1px solid #E5E7EB",
       },
     },
   ];
 
   return (
-    <div className="overflow-x-auto bg-white">
+    <div className="overflow-x-auto bg-white border border-[#E5E7EB] rounded-[24px] shadow-sm overflow-hidden">
       <style>
         {`
           .rdt_TableRow {
-            border-bottom: 3px solid #D1D1D1 !important;
+            border-bottom: 1px solid #E5E7EB !important;
           }
           .rdt_TableRow:last-child {
             border-bottom: none !important;
+          }
+           .rdt_Table {
+            background-color: transparent !important;
+          }
+          .rdt_TableHeadRow {
+             background-color: #F9FAFB !important;
+              border-bottom: 1px solid #E5E7EB !important;
           }
         `}
       </style>

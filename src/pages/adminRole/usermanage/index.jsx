@@ -108,7 +108,7 @@ const ManageUsers = () => {
         <img
           src={row.image}
           alt={row.name}
-          className="w-10 h-10 rounded-full object-cover border border-slate-100 shadow-sm"
+          className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm"
         />
         <div className="flex flex-col">
           <span className="text-slate-900 font-bold text-[14px] font-['Inter']">
@@ -167,58 +167,17 @@ const ManageUsers = () => {
 
   // Columns Configuration
   const columns = [
-    { key: "name", label: "User Name", width: "240px" },
-    { key: "email", label: "Email", width: "250px" },
-    { key: "phone", label: "Phone", width: "180px" },
+    { key: "name", label: "User Name", width: "220px" },
+    { key: "email", label: "Email", width: "200px" },
+    { key: "phone", label: "Phone", width: "150px" },
     { key: "regDate", label: "Registration Date", width: "180px", center: true },
-    { key: "bookings", label: "Total Bookings", width: "180px", center: true },
-    { key: "status", label: "Status", width: "140px", center: true },
-    { key: "actions", label: "Actions", width: "140px", center: true },
+    { key: "bookings", label: "Total Bookings", width: "130px", center: true },
+    { key: "status", label: "Status", width: "120px", center: true },
+    { key: "actions", label: "Actions", width: "120px", center: true },
   ];
 
 
-  // Custom Table Styles
-  const customTableStyles = {
-    headRow: {
-      style: {
-        backgroundColor: "#F9FAFB",
-        color: "#64748B",
-        borderBottom: "1px solid #F1F5F9",
-        fontWeight: "700",
-        fontSize: "13px",
-        height: "60px",
-      },
-    },
-    headCells: {
-      style: {
-        paddingLeft: "32px",
-        paddingRight: "32px",
-      },
-    },
-    rows: {
-      style: {
-        borderBottom: "1px solid #F1F5F9",
-        height: "72px",
-        "&:hover": {
-          backgroundColor: "#F8FAFC",
-        },
-      },
-    },
-    cells: {
-      style: {
-        paddingLeft: "32px",
-        paddingRight: "32px",
-      },
-    },
-    tableWrapper: {
-      style: {
-        borderRadius: "24px",
-        border: "1px solid rgba(201, 201, 201, 1)",
-        boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)",
-        overflow: "hidden",
-      },
-    },
-  };
+
 
   return (
     <div className="w-full p-8 min-h-screen space-y-10 animate-in fade-in duration-500">
@@ -235,8 +194,8 @@ const ManageUsers = () => {
       </div>
 
       {/* Controls Section */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex-1 w-full md:w-auto">
+      <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+        <div className="w-full md:w-auto">
           <ReusableFilter
             searchPlaceholder="Search users..."
             filters={filterOptions}
@@ -258,7 +217,6 @@ const ManageUsers = () => {
           columns={columns}
           data={currentData}
           customCellRenderers={customCellRenderers}
-          customStyles={customTableStyles}
         />
       </div>
 

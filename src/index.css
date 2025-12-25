@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Poppins:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
@@ -13,7 +13,7 @@
   h5,
   h6 {
     font-weight: 500;
-    font-family: 'Poppins', sans-serif !important;
+    font-family: 'Poppins', sans-serif;
   }
 }
 
@@ -76,22 +76,6 @@ body {
   /* overflow: hidden; */
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: 'Poppins', sans-serif;
-}
-
-p,
-span,
-a,
-small,
-label {
-  font-family: 'Poppins', sans-serif;
-}
 
 /* Custom input styling to ensure only bottom borders */
 .login-input-bottom-border {

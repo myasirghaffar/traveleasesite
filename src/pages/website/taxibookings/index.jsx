@@ -113,6 +113,7 @@ const TaxiBookingsPage = () => {
                     filters={filterOptions}
                     onSearchChange={handleSearch}
                     onFilterChange={handleFilter}
+                    className="full-width-filters"
                 />
             </div>
 

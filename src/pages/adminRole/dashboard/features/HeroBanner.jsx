@@ -9,10 +9,10 @@ const HeroBanner = () => {
                 className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30 flex flex-col items-center md:items-start justify-center px-6 md:px-12 text-center md:text-left">
-                <h1 className="text-white text-3xl md:text-5xl font-semibold font-['Outfit'] leading-tight md:leading-[62px] mb-2 md:mb-4">
+                <h1 className="text-white text-3xl md:text-5xl font-semibold font-outfit">
                     Admin Dashboard
                 </h1>
-                <p className="text-white text-sm md:text-xl font-medium md:font-semibold font-['Outfit'] leading-relaxed md:leading-10 max-w-lg md:max-w-none">
+                <p className="text-white text-sm md:text-xl font-medium leading-relaxed md:leading-10 max-w-lg md:max-w-none">
                     Manage hotels, bookings, users, and taxi services — all in one place.
                 </p>
             </div>

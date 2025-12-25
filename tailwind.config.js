@@ -89,6 +89,7 @@ export default {
       },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
+        outfit: ["Outfit", "sans-serif"],
         sans: ["Roboto", "Arial", "sans-serif"],
         display: ["Roboto", "sans-serif"],
         serif: ["Roboto", "serif"],

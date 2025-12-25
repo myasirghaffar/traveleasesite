@@ -58,11 +58,12 @@ const ReusableFilter = ({
   };
 
   const isTransparent = className.includes("bg-transparent");
+  const isFullWidth = className.includes("full-width-filters");
 
   return (
-    <div className={`w-full ${isTransparent ? "" : "bg-white shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]"} rounded-[20px] p-4 md:p-6 flex flex-col md:flex-row items-center gap-4 ${className}`}>
+    <div className={`flex flex-col md:flex-row items-center gap-4 ${isTransparent ? "" : "w-full bg-white shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]"} rounded-[20px] p-4 md:p-6 ${className}`}>
       {/* Search Input Group */}
-      <div className="relative flex-1 w-full">
+      <div className={`relative w-full ${isFullWidth ? "" : "md:w-[320px]"}`}>
         <div className="absolute left-4 top-1/2 -translate-y-1/2">
           <Search className="w-5 h-5 text-gray-400" />
         </div>
@@ -85,9 +86,9 @@ const ReusableFilter = ({
       </div>
 
       {/* Dynamic Dropdowns */}
-      <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+      <div className={`flex flex-wrap items-center gap-3 ${isFullWidth ? "w-full" : "w-full md:w-auto"}`}>
         {filters.map((filter) => (
-          <div key={filter.key} className="relative reusable-filter-dropdown flex-1 md:flex-none min-w-[160px]">
+          <div key={filter.key} className={`relative reusable-filter-dropdown ${isFullWidth ? "flex-1" : "flex-1 md:flex-none"} min-w-[160px]`}>
             <button
               onClick={() => toggleDropdown(filter.key)}
               className={`w-full h-[50px] flex items-center justify-between px-5 py-3 ${isTransparent ? "bg-transparent" : "bg-white"} border border-slate-300 rounded-xl text-sm font-bold font-['Inter'] transition-all hover:border-blue-500 ${selectedFilters[filter.key] ? 'border-blue-500 text-blue-600' : 'text-slate-700'

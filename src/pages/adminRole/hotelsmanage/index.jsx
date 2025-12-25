@@ -119,7 +119,7 @@ const ManageHotels = () => {
       </div>
     ),
     category: (row) => (
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-center">
         <div className="flex">
           {[...Array(5)].map((_, i) => (
             <Star
@@ -130,9 +130,6 @@ const ManageHotels = () => {
             />
           ))}
         </div>
-        <span className="text-gray-500 text-xs ml-1 font-['Inter']">
-          {row.rating}-Star
-        </span>
       </div>
     ),
     price: (row) => (
@@ -178,9 +175,9 @@ const ManageHotels = () => {
 
   // Columns Configuration
   const columns = [
-    { key: "hotel", label: "Hotel", width: "280px" },
-    { key: "location", label: "Location", width: "180px", center: true },
-    { key: "category", label: "Category", width: "180px", center: true },
+    { key: "hotel", label: "Hotel", width: "250px" },
+    { key: "location", label: "Location", width: "150px", center: true },
+    { key: "category", label: "Category", width: "140px", center: true },
     { key: "price", label: "Price", width: "140px", center: true },
     { key: "availability", label: "Availability", width: "180px", center: true },
     { key: "status", label: "Status", width: "140px", center: true },
@@ -188,48 +185,7 @@ const ManageHotels = () => {
   ];
 
 
-  // Custom Table Styles to match design (Light theme)
-  const customTableStyles = {
-    headRow: {
-      style: {
-        backgroundColor: "#F9FAFB",
-        color: "#64748B",
-        borderBottom: "1px solid #F1F5F9",
-        fontWeight: "700",
-        fontSize: "13px",
-        height: "60px",
-      },
-    },
-    headCells: {
-      style: {
-        paddingLeft: "32px",
-        paddingRight: "32px",
-      },
-    },
-    rows: {
-      style: {
-        borderBottom: "1px solid #F1F5F9",
-        height: "72px",
-        "&:hover": {
-          backgroundColor: "#F8FAFC",
-        },
-      },
-    },
-    cells: {
-      style: {
-        paddingLeft: "32px",
-        paddingRight: "32px",
-      },
-    },
-    tableWrapper: {
-      style: {
-        borderRadius: "24px",
-        border: "1px solid rgba(201, 201, 201, 1)",
-        boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)",
-        overflow: "hidden",
-      },
-    },
-  };
+
 
   // Filtering and Pagination Logic
   const filteredData = hotelsData.filter(hotel => {
@@ -266,8 +222,8 @@ const ManageHotels = () => {
       </div>
 
       {/* Controls Section */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex-1 w-full md:w-auto">
+      <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+        <div className="w-full md:w-auto">
           <ReusableFilter
             searchPlaceholder="Search hotels..."
             filters={filterOptions}
@@ -282,7 +238,7 @@ const ManageHotels = () => {
 
         <button
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-colors font-medium text-sm font-['Inter'] shadow-sm whitespace-nowrap"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-colors font-medium text-sm font-['Inter'] shadow-sm whitespace-nowrap w-full md:w-auto justify-center"
         >
           <PlusIcon className="w-4 h-4" />
           Add New Hotel
@@ -297,7 +253,6 @@ const ManageHotels = () => {
           columns={columns}
           data={currentData}
           customCellRenderers={customCellRenderers}
-          customStyles={customTableStyles}
         />
       </div>
 

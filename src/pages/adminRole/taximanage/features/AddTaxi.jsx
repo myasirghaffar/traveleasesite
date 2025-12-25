@@ -56,7 +56,7 @@ const AddTaxi = ({ onCancel }) => {
     );
 
     return (
-        <div className="w-full min-h-screen bg-[#F9FAFB] p-8 space-y-6 animate-in fade-in duration-500">
+        <div className="w-full min-h-screen p-8 space-y-6 animate-in fade-in duration-500">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -70,9 +70,9 @@ const AddTaxi = ({ onCancel }) => {
             </div>
 
             <div className="mx-auto">
-                <div className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-100 space-y-8">
+                <div className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200 space-y-8">
 
-                    <div className="space-y-6"> 
+                    <div className="space-y-6">
                         <div className="space-y-2">
                             <InputLabel>Vehicle Name</InputLabel>
                             <InputField
@@ -136,7 +136,7 @@ const AddTaxi = ({ onCancel }) => {
                         </div>
 
                         {/* Pricing Boxed Section */}
-                        <div className="bg-slate-50/50 rounded-2xl p-8 space-y-6 border border-slate-100">
+                        <div className="bg-slate-50/50 rounded-2xl p-8 space-y-6 border border-slate-200">
                             <h3 className="text-slate-800 font-bold text-[17px]">Pricing Information</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">

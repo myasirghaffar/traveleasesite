@@ -146,7 +146,7 @@ const BookingChart = () => {
                     <select
                         value={activeTab}
                         onChange={(e) => setActiveTab(e.target.value)}
-                        className="w-full appearance-none bg-slate-50 text-slate-800 text-base font-medium font-['Inter'] px-4 py-3 pr-10 rounded-xl border border-slate-100 outline-none focus:ring-2 focus:ring-slate-200 transition-all cursor-pointer"
+                        className="w-full appearance-none bg-slate-50 text-slate-800 text-base font-medium font-['Inter'] px-4 py-3 pr-10 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200 transition-all cursor-pointer"
                     >
                         <option value="daily">Daily View</option>
                         <option value="weekly">Weekly View</option>

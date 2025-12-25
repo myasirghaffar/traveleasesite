@@ -113,7 +113,7 @@ const BestBookingPlatform = () => {
                         </div>
 
                         {/* Banner Image */}
-                        <div className="relative w-full mt-10 sm:mt-0 aspect-[4/5] sm:aspect-[2/1] md:aspect-[1232/580] rounded-[20px] sm:rounded-[40px] md:rounded-[60px] overflow-hidden shadow-2xl border-2 sm:border-4 border-white/50">
+                        <div className="relative w-full mt-24 sm:mt-0 aspect-[16/9] sm:aspect-[2/1] md:aspect-[1232/490] rounded-[20px] sm:rounded-[40px] md:rounded-[60px] overflow-hidden shadow-2xl border-2 sm:border-4 border-white/50">
                             <img
                                 src={backgroundImage}
                                 alt="Friends in nature"

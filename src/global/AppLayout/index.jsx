@@ -37,7 +37,7 @@ function AppLayout() {
   }, [isMobileSidebarOpen]);
 
   return (
-    <div className="flex h-screen w-full max-w-[100vw]  bg-gray-100">
+    <div className="flex h-screen w-full max-w-[100vw]">
       {/* Sidebar */}
       <div className="fixed h-screen z-50">
         <Sidebar
@@ -56,7 +56,7 @@ function AppLayout() {
 
         {/* Main Content */}
         <main className="flex-1 scrollbar-custom text-text-black md:pl-[18.5625rem]  pt-[5rem]">
-          <div className="h-full bg-gray-100">
+          <div className="h-full">
             <Outlet key={location.pathname} />
           </div>
         </main>

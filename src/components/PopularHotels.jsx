@@ -131,18 +131,20 @@ const PopularHotels = ({ data = hotelsData, displayTitle = true }) => {
                                 />
 
                                 {/* Tags Overlay */}
-                                <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
-                                    {hotel.tags?.includes('sale') && (
+                                {hotel.tags?.includes('sale') && (
+                                    <div className="absolute top-3 left-3">
                                         <div className="bg-[#FF3B30] text-white px-3 py-1.5 rounded-full text-xs font-bold font-['Poppins'] shadow-lg">
                                             Sale on!
                                         </div>
-                                    )}
-                                    {hotel.tags?.includes('adventure') && (
+                                    </div>
+                                )}
+                                {hotel.tags?.includes('adventure') && (
+                                    <div className="absolute top-3 right-3">
                                         <div className="bg-[#FFD600] text-stone-950 px-3 py-1.5 rounded-full text-xs font-bold font-['Poppins'] shadow-lg">
                                             Adventure Tour
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Content */}

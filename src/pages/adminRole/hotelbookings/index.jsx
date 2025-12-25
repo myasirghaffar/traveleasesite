@@ -79,7 +79,7 @@ const HotelBookings = () => {
         <img
           src={row.userImage}
           alt={row.userName}
-          className="w-10 h-10 rounded-full object-cover border border-slate-100 shadow-sm"
+          className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm"
         />
         <span className="text-slate-700 font-bold text-[14px] font-['Inter']">
           {row.userName}
@@ -135,58 +135,17 @@ const HotelBookings = () => {
 
   // Columns Configuration
   const columns = [
-    { key: "id", label: "Booking ID", width: "140px" },
-    { key: "userName", label: "User Name", width: "240px" },
-    { key: "hotelName", label: "Hotel Name", width: "200px" },
+    { key: "id", label: "Booking ID", width: "110px" },
+    { key: "userName", label: "User Name", width: "200px" },
+    { key: "hotelName", label: "Hotel Name", width: "150px" },
     { key: "dates", label: "Check-in / Check-out", width: "180px" },
-    { key: "totalPrice", label: "Total Price", width: "140px", center: true },
-    { key: "status", label: "Status", width: "160px", center: true },
+    { key: "totalPrice", label: "Total Price", width: "110px", center: true },
+    { key: "status", label: "Status", width: "130px", center: true },
     { key: "payment", label: "Payment", width: "150px", center: true },
     { key: "actions", label: "Actions", width: "140px", center: true },
   ];
 
-  // Custom Table Styles (Updated to match ManageHotels)
-  const customTableStyles = {
-    headRow: {
-      style: {
-        backgroundColor: "#F9FAFB",
-        color: "#64748B",
-        borderBottom: "1px solid #F1F5F9",
-        fontWeight: "700",
-        fontSize: "13px",
-        height: "60px",
-      },
-    },
-    headCells: {
-      style: {
-        paddingLeft: "32px",
-        paddingRight: "32px",
-      },
-    },
-    rows: {
-      style: {
-        borderBottom: "1px solid #F1F5F9",
-        height: "72px",
-        "&:hover": {
-          backgroundColor: "#F8FAFC",
-        },
-      },
-    },
-    cells: {
-      style: {
-        paddingLeft: "32px",
-        paddingRight: "32px",
-      },
-    },
-    tableWrapper: {
-      style: {
-        borderRadius: "24px",
-        border: "1px solid rgba(201, 201, 201, 1)",
-        boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.05)",
-        overflow: "hidden",
-      },
-    },
-  };
+
 
   const handleReset = () => {
     setFilters({
@@ -212,7 +171,7 @@ const HotelBookings = () => {
       </div>
 
       {/* Filter Section Card */}
-      <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm">
+      <div className="bg-white rounded-[24px] p-6 border border-slate-200 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
@@ -275,7 +234,7 @@ const HotelBookings = () => {
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-white rounded-[24px] overflow-hidden border border-slate-100 shadow-sm">
+      <div className="bg-white rounded-[24px] overflow-hidden border border-slate-200 shadow-sm">
         <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between bg-white text-slate-900 font-bold text-lg">
           Booking Records
           <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all active:scale-95 group">
@@ -288,7 +247,6 @@ const HotelBookings = () => {
           columns={columns}
           data={bookingsData.slice((currentPage - 1) * 10, currentPage * 10)}
           customCellRenderers={customCellRenderers}
-          customStyles={customTableStyles}
         />
       </div>
 

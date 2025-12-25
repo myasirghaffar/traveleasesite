@@ -107,7 +107,7 @@ const Dashboard = () => {
 
         {/* Summary Section */}
         <div className="mb-8">
-          <h2 className="text-gray-900 text-2xl md:text-4xl font-semibold font-['Outfit'] leading-9 mb-6">
+          <h2 className="text-gray-900 text-2xl md:text-4xl font-semibold leading-9 mb-6">
             Summary
           </h2>
 
