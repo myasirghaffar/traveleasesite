@@ -108,8 +108,8 @@ const TopDestinationCarousel = () => {
     const translationCalc = `translateX(calc(-${activeIndex} * (100% / ${visibleItems} + ${gapWidth / visibleItems}px) + ${dragOffset}px))`;
 
     return (
-        <section className="w-full py-16 px-4 md:px-8 overflow-hidden select-none">
-            <div className="max-w-[1200px] mx-auto">
+        <section className="w-full py-16 px-4 md:px-8 select-none">
+            <div className="max-w-[1200px] mx-auto overflow-hidden">
                 <h2 className="text-stone-950 text-3xl md:text-4xl font-semibold font-['Poppins'] text-center mb-12">
                     Top Destinations
                 </h2>

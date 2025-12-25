@@ -95,15 +95,7 @@ const TaxiBookingsPage = () => {
                 <HeroSection />
             </div>
 
-            {/* Filter Section - Overlapping spacing */}
-            <div className="w-full max-w-[1240px] px-4 -mt-10 relative z-30">
-                <ReusableFilter
-                    searchPlaceholder="Search by location or taxi type..."
-                    filters={filterOptions}
-                    onSearchChange={handleSearch}
-                    onFilterChange={handleFilter}
-                />
-            </div>
+
 
             {/* Listings Header based on User Request */}
             <div className="max-w-[1240px] w-full px-4 md:px-8 mt-24 text-center">
@@ -113,6 +105,15 @@ const TaxiBookingsPage = () => {
                 <p className="text-neutral-600 text-lg md:text-xl font-normal font-['Roboto'] leading-relaxed max-w-[700px] mx-auto">
                     Choose from our available drivers in your area. Professional drivers and well-maintained vehicles for a safe trip.
                 </p>
+            </div>
+            {/* Filter Section - Overlapping spacing */}
+            <div className="w-full max-w-[1240px] px-4 mt-5 relative z-30">
+                <ReusableFilter
+                    searchPlaceholder="Search by location or taxi type..."
+                    filters={filterOptions}
+                    onSearchChange={handleSearch}
+                    onFilterChange={handleFilter}
+                />
             </div>
 
             {/* Taxi Cards Grid */}

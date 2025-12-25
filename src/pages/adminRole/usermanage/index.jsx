@@ -10,11 +10,13 @@ import {
 } from "lucide-react";
 import ReusableDataTable from "../../../components/ReusableDataTable";
 import ReusablePagination from "../../../components/ReusablePagination";
+import ReusableFilter from "../../../components/ReusableFilter";
 
 const ManageUsers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [itemsPerPage] = useState(10);
 
   // Mock User Data
   const usersData = [
@@ -70,6 +72,35 @@ const ManageUsers = () => {
     }
   ];
 
+  // Filter Options for ReusableFilter
+  const filterOptions = [
+    {
+      key: "status",
+      label: "All Status",
+      options: [
+        { value: "", label: "All Status" },
+        { value: "Active", label: "Active" },
+        { value: "Blocked", label: "Blocked" },
+      ],
+    },
+  ];
+
+  // Filtering and Pagination Logic
+  const filteredData = usersData.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = !statusFilter || user.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   // Custom Cell Renderers
   const customCellRenderers = {
     name: (row) => (
@@ -112,8 +143,8 @@ const ManageUsers = () => {
     status: (row) => (
       <span
         className={`px-3 py-1 rounded-full text-[12px] font-bold font-['Inter'] ${row.status === "Active"
-          ? "bg-green-50 text-green-500"
-          : "bg-red-50 text-red-400"
+          ? "bg-green-150 text-green-600"
+          : "bg-red-50 text-red-600"
           }`}
       >
         {row.status}
@@ -204,35 +235,18 @@ const ManageUsers = () => {
       </div>
 
       {/* Controls Section */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between px-2">
-        <div className="flex flex-1 items-center gap-4 w-full md:w-auto">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-[50px] pl-11 pr-5 rounded-xl border border-slate-200 bg-white text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none font-medium text-sm"
-            />
-          </div>
-          <div className="relative">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-[50px] px-5 pr-10 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none appearance-none cursor-pointer"
-            >
-              <option value="">All Status</option>
-              <option value="Active">Active</option>
-              <option value="Blocked">Blocked</option>
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-              <ChevronLeft className="-rotate-90" size={16} />
-            </div>
-          </div>
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="flex-1 w-full md:w-auto">
+          <ReusableFilter
+            searchPlaceholder="Search users..."
+            filters={filterOptions}
+            onSearchChange={setSearchTerm}
+            onFilterChange={(key, value) => setStatusFilter(value)}
+            className="shadow-none !p-0 bg-transparent"
+          />
         </div>
 
-        <button className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-6 py-3 rounded-xl transition-all font-bold text-sm shadow-sm active:scale-95">
+        <button className="flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-600 px-6 py-3 rounded-xl transition-all font-bold text-sm shadow-sm active:scale-95 whitespace-nowrap">
           <Download size={18} className="text-slate-400" />
           Export
         </button>
@@ -242,35 +256,24 @@ const ManageUsers = () => {
       <div className="bg-white rounded-[24px] overflow-hidden">
         <ReusableDataTable
           columns={columns}
-          data={usersData}
+          data={currentData}
           customCellRenderers={customCellRenderers}
           customStyles={customTableStyles}
         />
       </div>
 
       {/* Pagination Section */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-2">
-        <span className="text-slate-500 text-sm font-medium font-['Inter']">
-          Showing users 1-5 of 47
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+        <span className="text-slate-500 text-sm font-medium font-['Inter'] text-center sm:text-left">
+          Showing {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} results
         </span>
-        <div className="flex items-center gap-2">
-          <button className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 transition-all">
-            <ChevronLeft size={20} />
-          </button>
-          {[1, 2, 3, "...", 10].map((page, idx) => (
-            <button
-              key={idx}
-              className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold text-sm transition-all ${page === 1
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                : "text-slate-500 hover:bg-slate-100"
-                }`}
-            >
-              {page}
-            </button>
-          ))}
-          <button className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 transition-all">
-            <ChevronRight size={20} />
-          </button>
+        <div className="w-auto">
+          <ReusablePagination
+            currentPage={currentPage}
+            totalPages={totalPages || 1}
+            onPageChange={setCurrentPage}
+            theme="light"
+          />
         </div>
       </div>
     </div>

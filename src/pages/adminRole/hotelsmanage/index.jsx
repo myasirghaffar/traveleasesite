@@ -157,8 +157,8 @@ const ManageHotels = () => {
     status: (row) => (
       <span
         className={`px-3 py-1 rounded-full text-xs font-medium font-['Inter'] ${row.status === "Active"
-          ? "bg-green-100 text-green-700"
-          : "bg-red-100 text-red-700"
+          ? "bg-green-150 text-green-600"
+          : "bg-red-50 text-red-600"
           }`}
       >
         {row.status}
@@ -231,6 +231,22 @@ const ManageHotels = () => {
     },
   };
 
+  // Filtering and Pagination Logic
+  const filteredData = hotelsData.filter(hotel => {
+    const matchesSearch = hotel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      hotel.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !filters.category || hotel.rating.toString() === filters.category;
+    const matchesStatus = !filters.status || hotel.status.toLowerCase() === filters.status.toLowerCase();
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   if (isAdding) {
     return <AddHotel onCancel={() => setIsAdding(false)} />;
   }
@@ -279,21 +295,21 @@ const ManageHotels = () => {
       <div className="bg-white rounded-[24px] overflow-hidden">
         <ReusableDataTable
           columns={columns}
-          data={hotelsData}
+          data={currentData}
           customCellRenderers={customCellRenderers}
           customStyles={customTableStyles}
         />
       </div>
 
       {/* Pagination Section */}
-      <div className="flex items-center justify-between">
-        <span className="text-gray-500 text-sm font-['Inter']">
-          Showing users 1-5 of 47
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+        <span className="text-slate-500 text-sm font-medium font-['Inter'] text-center sm:text-left">
+          Showing {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} results
         </span>
         <div className="w-auto">
           <ReusablePagination
             currentPage={currentPage}
-            totalPages={10}
+            totalPages={totalPages || 1}
             onPageChange={setCurrentPage}
             theme="light"
           />

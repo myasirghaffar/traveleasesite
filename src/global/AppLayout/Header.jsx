@@ -41,10 +41,10 @@ function Header({ toggleSidebar }) {
 
           {/* Notification Bell */}
           <div className="relative">
-            <div className="w-12 h-12 bg-gray-50 rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
-              <NotificationIcon2 className="w-6 h-6 text-gray-600" />
+            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors border border-gray-100/50">
+              <NotificationIcon2 className="w-6 h-6 text-gray-400" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-lime-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-1.5 -right-1.5 bg-[#3DF21E] text-white text-[11px] font-black rounded-full w-[22px] h-[22px] flex items-center justify-center shadow-sm">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}

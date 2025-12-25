@@ -49,24 +49,26 @@ const HotelListingsPage = () => {
                 <HeroSection />
             </div>
 
+
+
+            {/* Listings Header */}
+            <div className="max-w-[1240px] w-full px-4 md:px-8 mt-24 text-center">
+                <h2 className="text-stone-950 text-4xl md:text-5xl font-bold font-['Poppins'] leading-tight mb-4 tracking-tight">
+                    Available Hotels
+                </h2>
+                <p className="text-neutral-600 text-lg md:text-xl font-normal font-['Roboto'] leading-relaxed max-w-[700px] mx-auto">
+                    A curated list of luxury stays and comfortable budget hotels for your next trip.
+                </p>
+            </div>
+
             {/* Filter Section - Overlapping spacing */}
-            <div className="w-full max-w-[1240px] px-4 -mt-10 relative z-30">
+            <div className="w-full max-w-[1240px] px-4 mt-5 relative z-30">
                 <ReusableFilter
                     searchPlaceholder="Search by Hotel Name..."
                     filters={filterOptions}
                     onSearchChange={handleSearch}
                     onFilterChange={handleFilter}
                 />
-            </div>
-
-            {/* Listings Header */}
-            <div className="max-w-[1240px] w-full px-4 md:px-8 mt-24 text-center">
-                <h2 className="text-stone-950 text-3xl md:text-4xl font-semibold font-['Poppins'] leading-tight mb-4">
-                    Available Hotels
-                </h2>
-                <p className="text-neutral-600 text-lg font-normal font-['Roboto'] leading-7 max-w-[600px] mx-auto">
-                    A curated list of luxury stays and comfortable budget hotels for your next trip.
-                </p>
             </div>
 
             {/* Hotel Cards Grid - Reusing PopularHotels structure but with filtered data */}

@@ -57,8 +57,10 @@ const ReusableFilter = ({
     setOpenDropdowns((prev) => ({ ...prev, [key]: false }));
   };
 
+  const isTransparent = className.includes("bg-transparent");
+
   return (
-    <div className={`w-full bg-white rounded-[20px] shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)] p-4 md:p-6 flex flex-col md:flex-row items-center gap-4 ${className}`}>
+    <div className={`w-full ${isTransparent ? "" : "bg-white shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]"} rounded-[20px] p-4 md:p-6 flex flex-col md:flex-row items-center gap-4 ${className}`}>
       {/* Search Input Group */}
       <div className="relative flex-1 w-full">
         <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -69,7 +71,7 @@ const ReusableFilter = ({
           placeholder={searchPlaceholder}
           value={searchTerm}
           onChange={handleSearchChange}
-          className="w-full pl-12 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-sm font-['Inter'] outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-slate-700 placeholder:text-slate-400 h-[50px]"
+          className={`w-full pl-12 pr-10 py-3 ${isTransparent ? "bg-transparent" : "bg-white"} border border-slate-300 rounded-xl text-sm font-['Inter'] outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-slate-700 placeholder:text-slate-400 h-[50px]`}
         />
 
         {searchTerm && (
@@ -88,7 +90,7 @@ const ReusableFilter = ({
           <div key={filter.key} className="relative reusable-filter-dropdown flex-1 md:flex-none min-w-[160px]">
             <button
               onClick={() => toggleDropdown(filter.key)}
-              className={`w-full h-[50px] flex items-center justify-between px-5 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold font-['Inter'] transition-all hover:border-blue-500 ${selectedFilters[filter.key] ? 'border-blue-500 text-blue-600' : 'text-slate-700'
+              className={`w-full h-[50px] flex items-center justify-between px-5 py-3 ${isTransparent ? "bg-transparent" : "bg-white"} border border-slate-300 rounded-xl text-sm font-bold font-['Inter'] transition-all hover:border-blue-500 ${selectedFilters[filter.key] ? 'border-blue-500 text-blue-600' : 'text-slate-700'
                 }`}
             >
 

@@ -268,19 +268,19 @@ const ManageTaxi = () => {
 
         <ReusableDataTable
           columns={columns}
-          data={taxiData}
+          data={taxiData.slice((currentPage - 1) * 10, currentPage * 10)}
           customCellRenderers={customCellRenderers}
           customStyles={customTableStyles}
         />
 
-        <div className="p-8 border-t border-slate-50 flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="text-slate-500 text-sm font-medium font-['Inter']">
-            Showing 1 to 3 of 247 entries
+        <div className="p-8 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-slate-500 text-sm font-medium font-['Inter'] text-center sm:text-left">
+            Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, taxiData.length)} of {taxiData.length} results
           </span>
           <div className="w-auto">
             <ReusablePagination
               currentPage={currentPage}
-              totalPages={25}
+              totalPages={Math.ceil(taxiData.length / 10)}
               onPageChange={setCurrentPage}
               theme="light"
             />

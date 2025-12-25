@@ -62,11 +62,11 @@ const ReusablePagination = ({
   const safeTotalPages = Math.max(1, totalPages);
 
   const containerClass = isLight
-    ? "flex items-center justify-center lg:justify-end gap-2"
+    ? "flex items-center justify-between gap-4 flex-wrap"
     : "flex items-center justify-center p-3 lg:p-6 bg-[#171D41] rounded-lg";
 
   const buttonBaseClass = isLight
-    ? "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium"
+    ? "bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 text-sm font-medium"
     : "bg-gradient-to-r from-[#9945FF] to-[#14F195] text-white hover:shadow-lg hover:scale-105 active:scale-95";
 
   const activePageClass = isLight
@@ -74,65 +74,61 @@ const ReusablePagination = ({
     : "bg-gradient-to-r from-[#9945FF] to-[#14F195] text-white shadow-lg";
 
   const inactivePageClass = isLight
-    ? "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+    ? "bg-white border-slate-300 text-slate-600 hover:bg-slate-50"
     : "text-white hover:bg-[#2A2A3E] hover:text-white active:scale-95";
 
   const disabledClass = isLight
-    ? "bg-gray-50 text-gray-300 cursor-not-allowed"
+    ? "bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed"
     : "bg-[#2A2A3E] text-[#AEB9E1] cursor-not-allowed opacity-50";
 
   return (
-    <div className={isLight ? "w-full flex justify-end mt-4" : containerClass}>
-      <div className={`flex flex-col lg:flex-row justify-between items-center ${isLight ? "gap-2" : "w-full gap-3 lg:gap-6"}`}>
-        {/* Previous Button */}
-        <button
-          onClick={() => handlePageChange(safeCurrentPage - 1)}
-          disabled={safeCurrentPage === 1}
-          className={`flex items-center gap-1 lg:gap-2 px-3 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium transition-all duration-200 w-full lg:w-auto justify-center border ${safeCurrentPage === 1
-              ? disabledClass
-              : isLight ? "bg-white border-gray-200 text-gray-600 hover:bg-gray-50" : buttonBaseClass
-            }`}
-        >
-          <ChevronLeft className="w-3 h-3 lg:w-4 lg:h-4" />
-          {/* <span className="font-medium">Previous</span> */}
-        </button>
+    <div className={`flex items-center gap-2 ${isLight ? "" : containerClass}`}>
+      {/* Previous Button */}
+      <button
+        onClick={() => handlePageChange(safeCurrentPage - 1)}
+        disabled={safeCurrentPage === 1}
+        className={`flex items-center justify-center w-9 h-9 lg:w-10 lg:h-10 rounded-xl border transition-all duration-200 ${safeCurrentPage === 1
+          ? disabledClass
+          : isLight ? buttonBaseClass : buttonBaseClass
+          }`}
+      >
+        <ChevronLeft className="w-4 h-4" />
+      </button>
 
-        {/* Page Numbers */}
-        <div className="flex items-center gap-1 lg:gap-2 order-first lg:order-none">
-          {getVisiblePages().map((page, index) => (
-            <React.Fragment key={index}>
-              {page === "..." ? (
-                <span className={`px-2 lg:px-3 py-1 lg:py-2 font-medium text-sm lg:text-lg ${isLight ? "text-gray-400" : "text-[#AEB9E1]"}`}>
-                  ...
-                </span>
-              ) : (
-                <button
-                  onClick={() => handlePageChange(page)}
-                  className={`px-3 lg:px-4 py-1 lg:py-2 rounded-lg text-xs lg:text-sm font-medium transition-all duration-200 min-w-[36px] lg:min-w-[40px] h-[36px] lg:h-[40px] flex items-center justify-center border ${safeCurrentPage === page
-                      ? activePageClass
-                      : inactivePageClass
-                    }`}
-                >
-                  {page}
-                </button>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-
-        {/* Next Button */}
-        <button
-          onClick={() => handlePageChange(safeCurrentPage + 1)}
-          disabled={safeCurrentPage === safeTotalPages}
-          className={`flex items-center gap-1 lg:gap-2 px-3 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium transition-all duration-200 w-full lg:w-auto justify-center border ${safeCurrentPage === safeTotalPages
-              ? disabledClass
-              : isLight ? "bg-white border-gray-200 text-gray-600 hover:bg-gray-50" : buttonBaseClass
-            }`}
-        >
-          {/* <span className="font-medium">Next</span> */}
-          <ChevronRight className="w-3 h-3 lg:w-4 lg:h-4" />
-        </button>
+      {/* Page Numbers */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        {getVisiblePages().map((page, index) => (
+          <React.Fragment key={index}>
+            {page === "..." ? (
+              <span className={`px-1.5 py-2 font-medium text-sm ${isLight ? "text-slate-400" : "text-[#AEB9E1]"}`}>
+                ...
+              </span>
+            ) : (
+              <button
+                onClick={() => handlePageChange(page)}
+                className={`w-9 h-9 lg:w-10 lg:h-10 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center border ${safeCurrentPage === page
+                  ? activePageClass
+                  : inactivePageClass
+                  }`}
+              >
+                {page}
+              </button>
+            )}
+          </React.Fragment>
+        ))}
       </div>
+
+      {/* Next Button */}
+      <button
+        onClick={() => handlePageChange(safeCurrentPage + 1)}
+        disabled={safeCurrentPage === safeTotalPages}
+        className={`flex items-center justify-center w-9 h-9 lg:w-10 lg:h-10 rounded-xl border transition-all duration-200 ${safeCurrentPage === safeTotalPages
+          ? disabledClass
+          : isLight ? buttonBaseClass : buttonBaseClass
+          }`}
+      >
+        <ChevronRight className="w-4 h-4" />
+      </button>
     </div>
   );
 };

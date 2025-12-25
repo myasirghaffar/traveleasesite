@@ -150,7 +150,7 @@ const HotelBookings = () => {
     headRow: {
       style: {
         backgroundColor: "#F9FAFB",
-        color: "#64748B", 
+        color: "#64748B",
         borderBottom: "1px solid #F1F5F9",
         fontWeight: "700",
         fontSize: "13px",
@@ -286,21 +286,21 @@ const HotelBookings = () => {
 
         <ReusableDataTable
           columns={columns}
-          data={bookingsData}
+          data={bookingsData.slice((currentPage - 1) * 10, currentPage * 10)}
           customCellRenderers={customCellRenderers}
           customStyles={customTableStyles}
         />
       </div>
 
       {/* Pagination Section */}
-      <div className="flex items-center justify-between px-2">
-        <span className="text-slate-500 text-sm font-['Inter'] font-medium">
-          Showing 1 to 4 of 47 results
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
+        <span className="text-slate-500 text-sm font-medium font-['Inter'] text-center sm:text-left">
+          Showing {bookingsData.length > 0 ? (currentPage - 1) * 10 + 1 : 0} to {Math.min(currentPage * 10, bookingsData.length)} of {bookingsData.length} results
         </span>
         <div className="w-auto">
           <ReusablePagination
             currentPage={currentPage}
-            totalPages={10}
+            totalPages={Math.ceil(bookingsData.length / 10) || 1}
             onPageChange={setCurrentPage}
             theme="light"
           />
