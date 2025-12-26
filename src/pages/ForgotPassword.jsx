@@ -10,6 +10,8 @@ import {
   Globe,
   ChevronDown,
 } from "lucide-react";
+import { useForgetPasswordMutation, useResetPasswordMutation } from "../services/Api";
+import { toast } from "react-toastify";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -20,20 +22,29 @@ const ForgotPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [forgetPassword, { isLoading: isSendingCode }] = useForgetPasswordMutation();
+  const [resetPassword, { isLoading: isResetting }] = useResetPasswordMutation();
 
   // Handle email submission
   const handleSendCode = async (e) => {
     e.preventDefault();
     if (!email) return;
 
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await forgetPassword({ data: { email } }).unwrap();
+      toast.success("Reset code sent to your email", {
+        position: "top-right",
+        autoClose: 3000,
+      });
       setCurrentStep(2);
-    }, 1000);
+    } catch (error) {
+      const errorMessage = error?.data?.error || error?.data?.message || "Failed to send reset code";
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
+    }
   };
 
   // Handle code input
@@ -57,39 +68,65 @@ const ForgotPassword = () => {
     const code = resetCode.join("");
     if (code.length !== 5) return;
 
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setCurrentStep(3);
-    }, 1000);
+    // Just move to next step - actual verification happens in reset password
+    setCurrentStep(3);
   };
 
   // Handle password reset
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    if (newPassword !== confirmPassword || newPassword.length < 6) return;
+    if (newPassword !== confirmPassword || newPassword.length < 6) {
+      toast.error("Passwords do not match or are too short", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
 
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const otp = resetCode.join("");
+      await resetPassword({ 
+        data: { 
+          email, 
+          otp, 
+          newPassword 
+        } 
+      }).unwrap();
+      
       setIsSuccess(true);
+      toast.success("Password reset successfully!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+      
       // Redirect to login after successful password reset
       setTimeout(() => {
         navigate("/login");
       }, 2000);
-    }, 1000);
+    } catch (error) {
+      const errorMessage = error?.data?.error || error?.data?.message || "Failed to reset password";
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
+    }
   };
 
   // Handle resend code
-  const handleResendCode = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      // Show success message
-      console.log("Code resent successfully");
-    }, 1000);
+  const handleResendCode = async () => {
+    try {
+      await forgetPassword({ data: { email } }).unwrap();
+      toast.success("Reset code resent to your email", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } catch (error) {
+      const errorMessage = error?.data?.error || error?.data?.message || "Failed to resend code";
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
+    }
   };
 
   return (
@@ -144,10 +181,10 @@ const ForgotPassword = () => {
 
                 <button
                   type="submit"
-                  disabled={isLoading || !email}
+                  disabled={isSendingCode || !email}
                   className="w-full bg-gradient-to-r from-[#9945FF] to-[#14F195] text-white py-3 rounded-lg font-medium hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? "Sending..." : "Send Code"}
+                  {isSendingCode ? "Sending..." : "Send Code"}
                 </button>
 
                 <Link
@@ -215,19 +252,19 @@ const ForgotPassword = () => {
 
                 <button
                   type="submit"
-                  disabled={isLoading || resetCode.join("").length !== 5}
+                  disabled={resetCode.join("").length !== 5}
                   className="w-full bg-gradient-to-r from-[#9945FF] to-[#14F195] text-white py-3 rounded-lg font-medium hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? "Verifying..." : "Continue"}
+                  Continue
                 </button>
 
                 <button
                   type="button"
                   onClick={handleResendCode}
-                  disabled={isLoading}
+                  disabled={isSendingCode}
                   className="w-full border border-green-500 text-green-600 py-3 rounded-lg font-medium hover:bg-green-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? "Sending..." : "Resend Code"}
+                  {isSendingCode ? "Sending..." : "Resend Code"}
                 </button>
               </form>
 
@@ -326,13 +363,13 @@ const ForgotPassword = () => {
                   <button
                     type="submit"
                     disabled={
-                      isLoading ||
+                      isResetting ||
                       newPassword !== confirmPassword ||
                       newPassword.length < 6
                     }
                     className="w-full bg-gradient-to-r from-[#9945FF] to-[#14F195] text-white py-3 rounded-lg font-medium hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? "Resetting..." : "Reset Password"}
+                    {isResetting ? "Resetting..." : "Reset Password"}
                   </button>
                 </form>
               )}

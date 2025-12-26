@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Car,
   Clock,
@@ -15,7 +15,7 @@ import ReusableDataTable from "../../../components/ReusableDataTable";
 import ReusablePagination from "../../../components/ReusablePagination";
 import { PlusIcon } from "../../../assets/icons/icons";
 import AddTaxi from "./features/AddTaxi";
-
+import { useGetTaxiServicesQuery } from "../../../services/Api";
 
 const ManageTaxi = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,51 +24,32 @@ const ManageTaxi = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [vehicleFilter, setVehicleFilter] = useState("");
 
-  // Mock Taxi Data
-  const taxiData = [
-    {
-      id: "TX001",
-      userName: "Sarah Johnson",
-      userImage: "https://i.pravatar.cc/150?u=sarah",
-      pickup: "Downtown Mall",
-      dropoff: "Airport Terminal",
-      distance: "12.5 km",
-      time: "25 min",
-      vehicleType: "Sedan",
-      dateTime: "Dec 9, 2024",
-      hour: "2:30 PM",
-      status: "Pending",
-      driver: null
-    },
-    {
-      id: "TX002",
-      userName: "Mike Chen",
-      userImage: "https://i.pravatar.cc/150?u=mike",
-      pickup: "Central Station",
-      dropoff: "Business District",
-      distance: "8.2 km",
-      time: "18 min",
-      vehicleType: "SUV",
-      dateTime: "Dec 9, 2024",
-      hour: "3:15 PM",
-      status: "Confirmed",
-      driver: { name: "Alex Driver", image: "https://i.pravatar.cc/150?u=alex" }
-    },
-    {
-      id: "TX003",
-      userName: "Emma Wilson",
-      userImage: "https://i.pravatar.cc/150?u=emma",
-      pickup: "Hotel Plaza",
-      dropoff: "Shopping Center",
-      distance: "5.8 km",
-      time: "12 min",
-      vehicleType: "Premium",
-      dateTime: "Dec 9, 2024",
-      hour: "1:45 PM",
-      status: "Completed",
-      driver: { name: "John Driver", image: "https://i.pravatar.cc/150?u=john" }
-    }
-  ];
+  const { data, isLoading, error } = useGetTaxiServicesQuery({
+    page: currentPage,
+    limit: 10,
+    search: searchTerm,
+    status: statusFilter || undefined,
+    vehicleType: vehicleFilter || undefined,
+  });
+
+  // Transform API data to match component format
+  const taxiData = useMemo(() => {
+    if (!data?.data?.taxiServices) return [];
+    return data.data.taxiServices.map(taxi => ({
+      id: taxi.id.toString(),
+      userName: taxi.driver_name || "Unknown Driver",
+      userImage: taxi.driver_image || `https://i.pravatar.cc/150?u=${taxi.id}`,
+      pickup: taxi.current_location || "Available",
+      dropoff: taxi.destination || "On Demand",
+      distance: `${taxi.distance || 0} km`,
+      time: `${taxi.estimated_time || 0} min`,
+      vehicleType: taxi.vehicle_type || "Sedan",
+      dateTime: new Date(taxi.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      hour: new Date(taxi.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      status: taxi.status === 'active' ? "Confirmed" : taxi.status === 'pending' ? "Pending" : "Completed",
+      driver: taxi.driver_name ? { name: taxi.driver_name, image: taxi.driver_image || `https://i.pravatar.cc/150?u=${taxi.id}` } : null
+    }));
+  }, [data]);
 
   // Custom Cell Renderers
   const customCellRenderers = {
@@ -239,20 +220,30 @@ const ManageTaxi = () => {
           </div>
         </div>
 
-        <ReusableDataTable
-          columns={columns}
-          data={taxiData.slice((currentPage - 1) * 10, currentPage * 10)}
-          customCellRenderers={customCellRenderers}
-        />
+        {isLoading ? (
+          <div className="p-8 text-center">
+            <p className="text-gray-500">Loading taxi bookings...</p>
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <p className="text-red-500">Error loading taxi bookings. Please try again.</p>
+          </div>
+        ) : (
+          <ReusableDataTable
+            columns={columns}
+            data={taxiData}
+            customCellRenderers={customCellRenderers}
+          />
+        )}
 
         <div className="p-8 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-slate-500 text-sm font-medium font-['Inter'] text-center sm:text-left">
-            Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, taxiData.length)} of {taxiData.length} results
+            Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, taxiData.length)} of {data?.data?.pagination?.total || taxiData.length} results
           </span>
           <div className="w-auto">
             <ReusablePagination
               currentPage={currentPage}
-              totalPages={Math.ceil(taxiData.length / 10)}
+              totalPages={data?.data?.pagination?.totalPages || Math.ceil(taxiData.length / 10)}
               onPageChange={setCurrentPage}
               theme="light"
             />

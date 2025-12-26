@@ -117,7 +117,7 @@ const PopularHotels = ({ data = hotelsData, displayTitle = true }) => {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                    {data.map((hotel) => (
+                    {data && data.length > 0 ? data.map((hotel) => (
                         <div
                             key={hotel.id}
                             className="group bg-white rounded-[20px] border border-gray-200 p-3 transition-all duration-300 hover:shadow-xl"
@@ -191,7 +191,11 @@ const PopularHotels = ({ data = hotelsData, displayTitle = true }) => {
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    )) : (
+                        <div className="col-span-3 text-center py-12">
+                            <p className="text-gray-500">No hotels available at the moment.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </section>

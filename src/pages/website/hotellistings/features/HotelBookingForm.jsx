@@ -9,7 +9,8 @@ import {
     ReliableSupportIcon,
     XIcon
 } from '../../../../assets/icons/icons';
-import { hotelsData } from '../../../../components/PopularHotels';
+import { useGetHotelByIdQuery, useCreateBookingMutation } from '../../../../services/Api';
+import { toast } from 'react-toastify';
 
 const HotelBookingForm = () => {
     const { id } = useParams();
@@ -30,8 +31,19 @@ const HotelBookingForm = () => {
         expYear: ''
     });
 
-    // Find hotel by ID or use default if not found
-    const hotel = hotelsData.find(h => h.id === parseInt(id)) || hotelsData[0];
+    const { data: hotelData, isLoading: isLoadingHotel, error: hotelError } = useGetHotelByIdQuery(id);
+    const [createBooking, { isLoading: isCreatingBooking }] = useCreateBookingMutation();
+
+    // Transform API data
+    const hotel = hotelData?.data ? {
+        id: hotelData.data.id,
+        name: hotelData.data.name,
+        location: hotelData.data.city || hotelData.data.location || 'Unknown',
+        rating: hotelData.data.rating?.toString() || '4.5',
+        reviews: hotelData.data.reviews_count?.toString() || '0',
+        price: hotelData.data.min_price?.toString() || hotelData.data.price_per_night?.toString() || '100',
+        image: hotelData.data.cover_image || hotelData.data.images?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+    } : null;
 
     const breadcrumbItems = [
         { label: "Home", path: "/" },
@@ -39,13 +51,40 @@ const HotelBookingForm = () => {
         { label: "Booking", path: "#", isActive: true },
     ];
 
-    const handleNext = (e) => {
+    const handleNext = async (e) => {
         e.preventDefault();
-        if (step === 1) setStep(2);
-        else {
-            // Final submit logic here
-            alert("Booking Confirmed!");
-            navigate('/');
+        if (step === 1) {
+            setStep(2);
+        } else {
+            // Final submit - create booking
+            try {
+                const bookingData = {
+                    hotel_id: parseInt(id),
+                    check_in_date: formData.checkIn,
+                    check_out_date: formData.checkOut,
+                    number_of_guests: parseInt(formData.guests),
+                    guest_name: formData.fullName,
+                    guest_email: formData.email,
+                    guest_phone: formData.phone,
+                    payment_method: formData.paymentMethod,
+                };
+
+                const result = await createBooking({ data: bookingData }).unwrap();
+                
+                if (result?.data) {
+                    toast.success('Booking confirmed successfully!', {
+                        position: 'top-right',
+                        autoClose: 3000,
+                    });
+                    navigate('/');
+                }
+            } catch (error) {
+                const errorMessage = error?.data?.error || error?.data?.message || 'Failed to create booking. Please try again.';
+                toast.error(errorMessage, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                });
+            }
         }
     };
 
@@ -79,6 +118,30 @@ const HotelBookingForm = () => {
             </p>
         </div>
     );
+
+    if (isLoadingHotel) {
+        return (
+            <div className="min-h-screen pb-20 pt-12 flex items-center justify-center">
+                <p className="text-gray-500">Loading hotel details...</p>
+            </div>
+        );
+    }
+
+    if (hotelError || !hotel) {
+        return (
+            <div className="min-h-screen pb-20 pt-12 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-500 mb-4">Error loading hotel details.</p>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="text-blue-500 hover:underline"
+                    >
+                        Back to listings
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen pb-20 pt-12">
@@ -339,9 +402,10 @@ const HotelBookingForm = () => {
 
                                             <button
                                                 onClick={handleNext}
-                                                className="w-full md:w-auto bg-blue-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98]"
+                                                disabled={isCreatingBooking}
+                                                className="w-full md:w-auto bg-blue-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                                Pay Now
+                                                {isCreatingBooking ? 'Processing...' : 'Pay Now'}
                                             </button>
                                         </div>
                                     </section>
@@ -428,7 +492,8 @@ const HotelBookingForm = () => {
                                     <div className="space-y-4">
                                         <button
                                             onClick={handleNext}
-                                            className="w-full bg-blue-500 text-white py-4 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] flex items-center justify-center gap-2"
+                                            disabled={!formData.checkIn || !formData.checkOut || !formData.fullName || !formData.email}
+                                            className="w-full bg-blue-500 text-white py-4 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <CheckCircleIcon className="w-5 h-5 text-white" />
                                             Confirm Booking

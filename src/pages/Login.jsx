@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../store/slices/authSlice";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { authenticateUser } from "../data/dummyUsers";
+import { useLoginMutation } from "../services/Api";
 
 import loginForm from "../assets/images/login-form.png";
 
@@ -14,6 +14,7 @@ const Login = () => {
   const { auth } = useSelector((state) => state);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [login, { isLoading: isLoggingIn }] = useLoginMutation();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -43,21 +44,22 @@ const Login = () => {
     setError(null);
 
     try {
-      // Authenticate user with dummy data
-      const authenticatedUser = authenticateUser(email, password);
-
-      if (authenticatedUser) {
+      const result = await login({ data: { email, password } }).unwrap();
+      
+      if (result?.data) {
+        const { user, token } = result.data;
+        
         // Set user data in Redux store
         dispatch(
           setUser({
-            role: authenticatedUser.role,
-            email: authenticatedUser.email,
-            name: authenticatedUser.name,
+            ...user,
+            token,
+            name: user.full_name || user.first_name || user.email,
           })
         );
 
         // Show success toast
-        toast.success(`Welcome, ${authenticatedUser.name}!`, {
+        toast.success(`Welcome, ${user.full_name || user.email}!`, {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -67,21 +69,16 @@ const Login = () => {
         });
 
         // Navigate to the appropriate dashboard
-        navigate(`/${authenticatedUser.route}/dashboard`);
-      } else {
-        // Show error toast for invalid credentials
-        toast.error("Auto login failed. Please try again.", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        const roleRouteMap = {
+          admin: "admin",
+          user: "website",
+        };
+        const rolePath = roleRouteMap[user.role] || "website";
+        navigate(`/${rolePath}/dashboard`);
       }
     } catch (error) {
-      // Show error toast for any unexpected errors
-      toast.error("An error occurred during auto login. Please try again.", {
+      const errorMessage = error?.data?.error || error?.data?.message || "Auto login failed. Please try again.";
+      toast.error(errorMessage, {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -97,21 +94,22 @@ const Login = () => {
     const { email, password } = data;
 
     try {
-      // Authenticate user with dummy data
-      const authenticatedUser = authenticateUser(email, password);
-
-      if (authenticatedUser) {
+      const result = await login({ data: { email, password } }).unwrap();
+      
+      if (result?.data) {
+        const { user, token } = result.data;
+        
         // Set user data in Redux store
         dispatch(
           setUser({
-            role: authenticatedUser.role,
-            email: authenticatedUser.email,
-            name: authenticatedUser.name,
+            ...user,
+            token,
+            name: user.full_name || user.first_name || user.email,
           })
         );
 
         // Show success toast
-        toast.success(`Welcome, ${authenticatedUser.name}!`, {
+        toast.success(`Welcome, ${user.full_name || user.email}!`, {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -120,22 +118,18 @@ const Login = () => {
           draggable: true,
         });
 
-        // Navigate to the appropriate dashboard
-        navigate(`/${authenticatedUser.route}/dashboard`);
-      } else {
-        // Show error toast for invalid credentials
-        toast.error("Incorrect email or password. Please try again.", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        // Navigate to the appropriate dashboard based on role
+        const roleRouteMap = {
+          admin: "admin",
+          user: "website",
+        };
+        const rolePath = roleRouteMap[user.role] || "website";
+        navigate(`/${rolePath}/dashboard`);
       }
     } catch (error) {
-      // Show error toast for any unexpected errors
-      toast.error("An error occurred during login. Please try again.", {
+      const errorMessage = error?.data?.error || error?.data?.message || "An error occurred during login. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage, {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -272,11 +266,11 @@ const Login = () => {
 
             {/* Login Button */}
             <button
-              disabled={auth.loading}
+              disabled={isLoggingIn || auth.loading}
               type="submit"
               className="w-full bg-gradient-to-r from-primary to-primary/80 text-white py-3 font-medium rounded-lg text-base hover:from-primary/90 hover:to-primary/70 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {auth.loading ? "Logging in..." : "Login Now"}
+              {isLoggingIn || auth.loading ? "Logging in..." : "Login Now"}
             </button>
             {/* Test Accounts Info */}
             <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Download,
   ChevronLeft,
@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import ReusableDataTable from "../../../components/ReusableDataTable";
 import ReusablePagination from "../../../components/ReusablePagination";
+import { useGetAdminBookingsQuery, useDeleteBookingMutation } from "../../../services/Api";
+import { toast } from "react-toastify";
 
 const HotelBookings = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,54 +20,31 @@ const HotelBookings = () => {
     toDate: "",
     payment: ""
   });
+  
+  const { data, isLoading, error, refetch } = useGetAdminBookingsQuery({
+    page: currentPage,
+    limit: 10,
+    status: filters.status || undefined,
+    startDate: filters.fromDate || undefined,
+    endDate: filters.toDate || undefined,
+  });
+  const [deleteBooking] = useDeleteBookingMutation();
 
-  // Mock Booking Data
-  const bookingsData = [
-    {
-      id: "BK001",
-      userName: "Sarah Johnson",
-      userImage: "https://i.pravatar.cc/150?u=sarah",
-      hotelName: "Grand Plaza Hotel",
-      checkIn: "Dec 15, 2024",
-      checkOut: "Dec 18, 2024",
-      totalPrice: 450.00,
-      status: "Confirmed",
-      payment: "Paid"
-    },
-    {
-      id: "BK002",
-      userName: "Michael Chen",
-      userImage: "https://i.pravatar.cc/150?u=michael",
-      hotelName: "Ocean View Resort",
-      checkIn: "Dec 20, 2024",
-      checkOut: "Dec 25, 2024",
-      totalPrice: 1250.00,
-      status: "Pending",
-      payment: "Pending"
-    },
-    {
-      id: "BK003",
-      userName: "Emily Davis",
-      userImage: "https://i.pravatar.cc/150?u=emily",
-      hotelName: "Mountain Lodge",
-      checkIn: "Dec 10, 2024",
-      checkOut: "Dec 12, 2024",
-      totalPrice: 320.00,
-      status: "Cancelled",
-      payment: "Refunded"
-    },
-    {
-      id: "BK004",
-      userName: "Robert Wilson",
-      userImage: "https://i.pravatar.cc/150?u=robert",
-      hotelName: "City Center Inn",
-      checkIn: "Dec 22, 2024",
-      checkOut: "Dec 24, 2024",
-      totalPrice: 180.00,
-      status: "Confirmed",
-      payment: "Paid"
-    }
-  ];
+  // Transform API data to match component format
+  const bookingsData = useMemo(() => {
+    if (!data?.data?.bookings) return [];
+    return data.data.bookings.map(booking => ({
+      id: booking.id.toString(),
+      userName: booking.user?.full_name || booking.user?.email || "Unknown User",
+      userImage: booking.user?.profile_picture || booking.user?.avatar_url || `https://i.pravatar.cc/150?u=${booking.user_id}`,
+      hotelName: booking.hotel?.name || "Unknown Hotel",
+      checkIn: new Date(booking.check_in_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      checkOut: new Date(booking.check_out_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      totalPrice: parseFloat(booking.total_amount || 0),
+      status: booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1) || "Pending",
+      payment: booking.payment_status === 'paid' ? "Paid" : booking.payment_status === 'pending' ? "Pending" : "Refunded"
+    }));
+  }, [data]);
 
   // Custom Cell Renderers
   const customCellRenderers = {
@@ -126,8 +105,21 @@ const HotelBookings = () => {
         {row.payment}
       </span>
     ),
-    actions: () => (
-      <button className="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg">
+    actions: (row) => (
+      <button 
+        className="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"
+        onClick={async () => {
+          if (window.confirm(`Are you sure you want to delete booking #${row.id}?`)) {
+            try {
+              await deleteBooking(row.id).unwrap();
+              toast.success('Booking deleted successfully');
+              refetch();
+            } catch (error) {
+              toast.error(error?.data?.message || 'Failed to delete booking');
+            }
+          }
+        }}
+      >
         <X size={18} strokeWidth={2.5} />
       </button>
     ),
@@ -243,22 +235,32 @@ const HotelBookings = () => {
           </button>
         </div>
 
-        <ReusableDataTable
-          columns={columns}
-          data={bookingsData.slice((currentPage - 1) * 10, currentPage * 10)}
-          customCellRenderers={customCellRenderers}
-        />
+        {isLoading ? (
+          <div className="p-8 text-center">
+            <p className="text-gray-500">Loading bookings...</p>
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <p className="text-red-500">Error loading bookings. Please try again.</p>
+          </div>
+        ) : (
+          <ReusableDataTable
+            columns={columns}
+            data={bookingsData}
+            customCellRenderers={customCellRenderers}
+          />
+        )}
       </div>
 
       {/* Pagination Section */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
         <span className="text-slate-500 text-sm font-medium font-['Inter'] text-center sm:text-left">
-          Showing {bookingsData.length > 0 ? (currentPage - 1) * 10 + 1 : 0} to {Math.min(currentPage * 10, bookingsData.length)} of {bookingsData.length} results
+          Showing {bookingsData.length > 0 ? (currentPage - 1) * 10 + 1 : 0} to {Math.min(currentPage * 10, bookingsData.length)} of {data?.data?.pagination?.total || bookingsData.length} results
         </span>
         <div className="w-auto">
           <ReusablePagination
             currentPage={currentPage}
-            totalPages={Math.ceil(bookingsData.length / 10) || 1}
+            totalPages={data?.data?.pagination?.totalPages || Math.ceil(bookingsData.length / 10) || 1}
             onPageChange={setCurrentPage}
             theme="light"
           />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     LocationIcon,
@@ -7,22 +7,34 @@ import {
     StarRatingIcon,
     CheckCircleIcon
 } from '../../../../assets/icons/icons';
-import { taxisData } from '../data/taxisData';
+import { useGetTaxiByIdQuery, useCalculateFareMutation, useCreateTaxiBookingMutation } from '../../../../services/Api';
+import { toast } from 'react-toastify';
 
 const TaxiBookingForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    // Find taxi by ID or use default if not found
-    const taxi = taxisData.find(t => t.id === parseInt(id)) || taxisData[0];
+    const { data: taxiData, isLoading: isLoadingTaxi, error: taxiError } = useGetTaxiByIdQuery(id);
+    const [calculateFare, { isLoading: isCalculatingFare }] = useCalculateFareMutation();
+    const [createTaxiBooking, { isLoading: isCreatingBooking }] = useCreateTaxiBookingMutation();
+
+    // Transform API data
+    const taxi = taxiData?.data ? {
+        id: taxiData.data.id,
+        name: taxiData.data.vehicle_model || taxiData.data.vehicle_type || 'Taxi',
+        type: taxiData.data.vehicle_type || 'Sedan',
+        price: taxiData.data.price_per_km || taxiData.data.base_fare || 50,
+        image: taxiData.data.image || 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&q=80&w=800',
+    } : null;
 
     const [selectedVehicle, setSelectedVehicle] = useState('sedan');
     const [formData, setFormData] = useState({
-        pickup: 'Jinnah International Airport, Karachi',
-        dropoff: 'Clifton Beach, Karachi',
-        date: '2025-03-12',
-        time: '15:45'
+        pickup: '',
+        dropoff: '',
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().slice(0, 5)
     });
+    const [estimatedFare, setEstimatedFare] = useState(null);
 
     const vehicleTypes = [
         { id: 'sedan', name: 'Sedan', description: 'Toyota Corolla (AC)', price: 1250 },
@@ -31,11 +43,90 @@ const TaxiBookingForm = () => {
         { id: 'mini', name: 'Mini', description: 'Suzuki WagonR', price: 950 }
     ];
 
-    const handleBooking = (e) => {
+    // Calculate fare when pickup/dropoff changes
+    useEffect(() => {
+        if (formData.pickup && formData.dropoff && id) {
+            const calculateFareAsync = async () => {
+                try {
+                    const result = await calculateFare({
+                        data: {
+                            taxi_id: parseInt(id),
+                            pickup_location: formData.pickup,
+                            dropoff_location: formData.dropoff,
+                            vehicle_type: selectedVehicle
+                        }
+                    }).unwrap();
+                    if (result?.data?.estimated_fare) {
+                        setEstimatedFare(result.data.estimated_fare);
+                    }
+                } catch (error) {
+                    // Silently fail - user can still proceed
+                    console.error('Failed to calculate fare:', error);
+                }
+            };
+            const timeoutId = setTimeout(calculateFareAsync, 500);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [formData.pickup, formData.dropoff, selectedVehicle, id, calculateFare]);
+
+    const handleBooking = async (e) => {
         e.preventDefault();
-        alert(`Booking Confirmed for ${taxi.name} (${selectedVehicle})!`);
-        navigate('/taxi-listing');
+        if (!formData.pickup || !formData.dropoff || !formData.date || !formData.time) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
+        try {
+            const bookingData = {
+                taxi_id: parseInt(id),
+                pickup_location: formData.pickup,
+                dropoff_location: formData.dropoff,
+                pickup_date: formData.date,
+                pickup_time: formData.time,
+                vehicle_type: selectedVehicle,
+            };
+
+            const result = await createTaxiBooking({ data: bookingData }).unwrap();
+            
+            if (result?.data) {
+                toast.success('Taxi booking confirmed successfully!', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                });
+                navigate('/taxi-listing');
+            }
+        } catch (error) {
+            const errorMessage = error?.data?.error || error?.data?.message || 'Failed to create booking. Please try again.';
+            toast.error(errorMessage, {
+                position: 'top-right',
+                autoClose: 5000,
+            });
+        }
     };
+
+    if (isLoadingTaxi) {
+        return (
+            <div className="min-h-screen bg-gray-50/50 py-12 px-4 lg:px-8 font-['Inter'] flex items-center justify-center">
+                <p className="text-gray-500">Loading taxi details...</p>
+            </div>
+        );
+    }
+
+    if (taxiError || !taxi) {
+        return (
+            <div className="min-h-screen bg-gray-50/50 py-12 px-4 lg:px-8 font-['Inter'] flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-500 mb-4">Error loading taxi details.</p>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="text-blue-500 hover:underline"
+                    >
+                        Back to listings
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50/50 py-12 px-4 lg:px-8 font-['Inter']">
@@ -92,6 +183,8 @@ const TaxiBookingForm = () => {
                                 <input
                                     type="date"
                                     value={formData.date}
+                                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                    min={new Date().toISOString().split('T')[0]}
                                     className="w-full h-12 px-4 bg-white border border-gray-300 rounded-lg text-black outline-none"
                                 />
                             </div>
@@ -106,6 +199,7 @@ const TaxiBookingForm = () => {
                                 <input
                                     type="time"
                                     value={formData.time}
+                                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                                     className="w-full h-12 px-4 bg-white border border-gray-300 rounded-lg text-black outline-none"
                                 />
                             </div>
@@ -142,19 +236,28 @@ const TaxiBookingForm = () => {
                         {/* Estimated Fare Box */}
                         <div className="bg-gray-50 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between border border-gray-100">
                             <span className="text-[#111827] text-base font-semibold">Estimated Fare:</span>
-                            <span className="text-[#1781FE] text-2xl font-bold">
-                                PKR {vehicleTypes.find(v => v.id === selectedVehicle).price} – {vehicleTypes.find(v => v.id === selectedVehicle).price + 200}
-                            </span>
+                            {isCalculatingFare ? (
+                                <span className="text-[#1781FE] text-lg">Calculating...</span>
+                            ) : estimatedFare ? (
+                                <span className="text-[#1781FE] text-2xl font-bold">
+                                    ${estimatedFare.toFixed(2)}
+                                </span>
+                            ) : (
+                                <span className="text-[#1781FE] text-2xl font-bold">
+                                    ${vehicleTypes.find(v => v.id === selectedVehicle)?.price || 0} – ${(vehicleTypes.find(v => v.id === selectedVehicle)?.price || 0) + 200}
+                                </span>
+                            )}
                         </div>
 
                         <button
                             type="submit"
-                            className="w-full bg-[#1781FE] text-white h-14 rounded-xl text-lg font-bold flex items-center justify-center gap-3 hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20 active:scale-[0.98]"
+                            disabled={isCreatingBooking || !formData.pickup || !formData.dropoff || !formData.date || !formData.time}
+                            className="w-full bg-[#1781FE] text-white h-14 rounded-xl text-lg font-bold flex items-center justify-center gap-3 hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
                             </svg>
-                            Book Taxi
+                            {isCreatingBooking ? 'Booking...' : 'Book Taxi'}
                         </button>
 
                         <p className="text-center text-gray-500 text-sm mt-4">

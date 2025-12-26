@@ -1,10 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import HeroSection from './features/HeroSection';
-import PopularHotels, { hotelsData } from '../../../components/PopularHotels';
+import PopularHotels from '../../../components/PopularHotels';
 import ReusableFilter from '../../../components/ReusableFilter';
+import { useGetHotelsQuery } from '../../../services/Api';
 
 const HotelListingsPage = () => {
-    const [filteredHotels, setFilteredHotels] = useState(hotelsData);
+    const { data, isLoading, error } = useGetHotelsQuery({ status: 'active' });
+    const [filteredHotels, setFilteredHotels] = useState([]);
+    
+    // Transform API data to match component format
+    const hotelsData = useMemo(() => {
+        if (!data?.data?.hotels) return [];
+        return data.data.hotels.map(hotel => ({
+            id: hotel.id,
+            name: hotel.name,
+            location: hotel.city || hotel.location || 'Unknown',
+            rating: hotel.rating?.toString() || '4.5',
+            reviews: hotel.reviews_count?.toString() || '0',
+            price: hotel.min_price?.toString() || hotel.price_per_night?.toString() || '100',
+            image: hotel.cover_image || hotel.images?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+            tags: hotel.is_featured ? ['sale'] : []
+        }));
+    }, [data]);
+
+    useEffect(() => {
+        if (hotelsData.length > 0) {
+            setFilteredHotels(hotelsData);
+        }
+    }, [hotelsData]);
 
     // Filter configurations
     const filterOptions = [
@@ -31,15 +54,34 @@ const HotelListingsPage = () => {
 
     const handleSearch = (term) => {
         const filtered = hotelsData.filter(hotel =>
-            hotel.name.toLowerCase().includes(term.toLowerCase())
+            hotel.name.toLowerCase().includes(term.toLowerCase()) ||
+            hotel.location.toLowerCase().includes(term.toLowerCase())
         );
         setFilteredHotels(filtered);
     };
 
     const handleFilter = (key, value) => {
-        // Implementation for filtering logic would go here
-        // For now just showing the UI updates
-        console.log(`Filtering by ${key}: ${value}`);
+        let filtered = [...hotelsData];
+        
+        if (key === 'location' && value !== 'all') {
+            filtered = filtered.filter(hotel => 
+                hotel.location.toLowerCase().includes(value.toLowerCase())
+            );
+        }
+        
+        if (key === 'priceRange' && value !== 'all') {
+            if (value === 'budget') {
+                filtered = filtered.filter(hotel => parseFloat(hotel.price) < 150);
+            } else if (value === 'mid') {
+                filtered = filtered.filter(hotel => 
+                    parseFloat(hotel.price) >= 150 && parseFloat(hotel.price) <= 250
+                );
+            } else if (value === 'luxury') {
+                filtered = filtered.filter(hotel => parseFloat(hotel.price) > 250);
+            }
+        }
+        
+        setFilteredHotels(filtered);
     };
 
     return (
@@ -74,7 +116,21 @@ const HotelListingsPage = () => {
 
             {/* Hotel Cards Grid - Reusing PopularHotels structure but with filtered data */}
             <div className="max-w-[1240px] w-full mt-12 px-4">
-                <PopularHotels displayTitle={false} data={filteredHotels} />
+                {isLoading ? (
+                    <div className="text-center py-20">
+                        <p className="text-gray-500">Loading hotels...</p>
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-20">
+                        <p className="text-red-500">Error loading hotels. Please try again.</p>
+                    </div>
+                ) : filteredHotels.length > 0 ? (
+                    <PopularHotels displayTitle={false} data={filteredHotels} />
+                ) : (
+                    <div className="text-center py-20">
+                        <p className="text-gray-500">No hotels found.</p>
+                    </div>
+                )}
             </div>
         </div>
     );

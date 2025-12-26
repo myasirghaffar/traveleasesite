@@ -2,6 +2,7 @@ import React from 'react';
 import HeroBanner from './features/HeroBanner';
 import StatCard from './features/StatCard';
 import BookingChart from './features/BookingChart';
+import { useGetAdminDashboardStatsQuery } from '../../../services/Api';
 
 // Icon components (using the SVGs from the provided code)
 const HotelIcon = ({ className }) => (
@@ -57,26 +58,28 @@ const TaxiActiveIcon = ({ className }) => (
 );
 
 const Dashboard = () => {
-  // Static data for stats cards
+  const { data, isLoading, error } = useGetAdminDashboardStatsQuery();
+  
+  // Transform API data to match component format
   const statsData = [
     {
       icon: HotelIcon,
       title: 'Total Hotels',
-      value: '128',
+      value: data?.data?.total_hotels?.toString() || '0',
       bgColor: 'bg-blue-100',
       iconColor: 'text-blue-600',
     },
     {
       icon: BookingIcon,
       title: 'Active Bookings',
-      value: '542',
+      value: data?.data?.active_bookings?.toString() || data?.data?.total_bookings?.toString() || '0',
       bgColor: 'bg-purple-100',
       iconColor: 'text-purple-600',
     },
     {
       icon: TaxiPendingIcon,
       title: 'Pending Taxi Rides',
-      value: '73',
+      value: data?.data?.pending_taxi_rides?.toString() || '0',
       bgColor: 'bg-amber-100',
       iconColor: 'text-amber-600',
       badge: {
@@ -88,7 +91,7 @@ const Dashboard = () => {
     {
       icon: TaxiActiveIcon,
       title: 'Total Taxi Rides',
-      value: '18',
+      value: data?.data?.total_taxi_rides?.toString() || '0',
       bgColor: 'bg-red-600/20',
       iconColor: 'text-red-600',
       badge: {
@@ -113,17 +116,27 @@ const Dashboard = () => {
 
           {/* Stats Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {statsData.map((stat, index) => (
-              <StatCard
-                key={index}
-                icon={stat.icon}
-                title={stat.title}
-                value={stat.value}
-                bgColor={stat.bgColor}
-                iconColor={stat.iconColor}
-                badge={stat.badge}
-              />
-            ))}
+            {isLoading ? (
+              <div className="col-span-4 text-center py-8">
+                <p className="text-gray-500">Loading dashboard stats...</p>
+              </div>
+            ) : error ? (
+              <div className="col-span-4 text-center py-8">
+                <p className="text-red-500">Error loading dashboard stats. Please try again.</p>
+              </div>
+            ) : (
+              statsData.map((stat, index) => (
+                <StatCard
+                  key={index}
+                  icon={stat.icon}
+                  title={stat.title}
+                  value={stat.value}
+                  bgColor={stat.bgColor}
+                  iconColor={stat.iconColor}
+                  badge={stat.badge}
+                />
+              ))
+            )}
           </div>
         </div>
 

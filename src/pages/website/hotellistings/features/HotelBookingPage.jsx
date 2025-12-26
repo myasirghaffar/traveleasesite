@@ -17,14 +17,49 @@ import {
     SizeIcon,
     CheckCircleIcon
 } from '../../../../assets/icons/icons';
-import { hotelsData } from '../../../../components/PopularHotels';
+import { useGetHotelByIdQuery, useGetRoomsQuery } from '../../../../services/Api';
 
 const HotelBookingPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    
+    const { data: hotelData, isLoading: isLoadingHotel, error: hotelError } = useGetHotelByIdQuery(id);
+    const { data: roomsData, isLoading: isLoadingRooms } = useGetRoomsQuery(
+        { hotelId: id },
+        { skip: !id }
+    );
 
-    // Find hotel by ID or use default if not found
-    const hotel = hotelsData.find(h => h.id === parseInt(id)) || hotelsData[0];
+    // Transform API data
+    const hotel = hotelData?.data ? {
+        id: hotelData.data.id,
+        name: hotelData.data.name,
+        location: hotelData.data.city || hotelData.data.location || 'Unknown',
+        rating: hotelData.data.rating?.toString() || '4.5',
+        reviews: hotelData.data.reviews_count?.toString() || '0',
+        price: hotelData.data.min_price?.toString() || hotelData.data.price_per_night?.toString() || '100',
+        image: hotelData.data.cover_image || hotelData.data.images?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+    } : null;
+    
+    // Transform rooms data
+    const rooms = roomsData?.data?.rooms?.map(room => ({
+        name: room.name || 'Standard Room',
+        specs: [
+            { icon: <BedIcon />, label: room.bed_type || 'Standard Bed' },
+            { icon: <GuestsIcon />, label: `${room.max_occupancy || 2} Guests` },
+            { icon: <SizeIcon />, label: `${room.size || 25} m²` }
+        ],
+        price: room.price_per_night || 100
+    })) || [
+        {
+            name: 'Deluxe King Room',
+            specs: [
+                { icon: <BedIcon />, label: 'King Bed' },
+                { icon: <GuestsIcon />, label: '2 Guests' },
+                { icon: <SizeIcon />, label: '35 m²' }
+            ],
+            price: 120
+        }
+    ];
 
     const amenities = [
         { icon: <WifiIcon />, label: 'Free WiFi' },
@@ -36,39 +71,33 @@ const HotelBookingPage = () => {
         { icon: <AirportShuttleIcon />, label: 'Airport Shuttle' },
     ];
 
-    const rooms = [
-        {
-            name: 'Deluxe King Room',
-            specs: [
-                { icon: <BedIcon />, label: 'King Bed' },
-                { icon: <GuestsIcon />, label: '2 Guests' },
-                { icon: <SizeIcon />, label: '35 m²' }
-            ],
-            price: 120
-        },
-        {
-            name: 'Executive Suite',
-            specs: [
-                { icon: <BedIcon />, label: 'King Bed + Sofa' },
-                { icon: <GuestsIcon />, label: '4 Guests' },
-                { icon: <SizeIcon />, label: '55 m²' }
-            ],
-            price: 280
-        },
-        {
-            name: 'Presidential Suite',
-            specs: [
-                { icon: <BedIcon />, label: '2 Bedrooms' },
-                { icon: <GuestsIcon />, label: '6 Guests' },
-                { icon: <SizeIcon />, label: '120 m²' }
-            ],
-            price: 650
-        }
-    ];
-
     const handleNavigateToCheckout = () => {
         navigate(`/hotel-checkout/${id}`);
     };
+
+    if (isLoadingHotel) {
+        return (
+            <div className="min-h-screen bg-white pb-20 pt-10 flex items-center justify-center">
+                <p className="text-gray-500">Loading hotel details...</p>
+            </div>
+        );
+    }
+
+    if (hotelError || !hotel) {
+        return (
+            <div className="min-h-screen bg-white pb-20 pt-10 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-500 mb-4">Error loading hotel details.</p>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="text-blue-500 hover:underline"
+                    >
+                        Back to listings
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-white pb-20 pt-10">
@@ -157,8 +186,11 @@ const HotelBookingPage = () => {
                         {/* Available Rooms */}
                         <div>
                             <h2 className="text-gray-900 text-2xl font-bold font-['Inter'] mb-6">Available Rooms</h2>
-                            <div className="flex flex-col gap-4">
-                                {rooms.map((room, index) => (
+                            {isLoadingRooms ? (
+                                <p className="text-gray-500">Loading rooms...</p>
+                            ) : (
+                                <div className="flex flex-col gap-4">
+                                    {rooms.map((room, index) => (
                                     <div key={index} className="bg-white border border-gray-100 rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 hover:shadow-md transition-shadow">
                                         <div className="flex-1">
                                             <h3 className="text-gray-900 text-lg font-semibold font-['Inter'] mb-3">{room.name}</h3>
@@ -182,8 +214,9 @@ const HotelBookingPage = () => {
                                             Select Room
                                         </button>
                                     </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 

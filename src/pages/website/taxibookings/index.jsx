@@ -1,17 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import HeroSection from './features/HeroSection';
 import TaxiCard from './features/TaxiCard';
-import { taxisData } from './data/taxisData';
 import ReusableFilter from '../../../components/ReusableFilter';
+import { useGetTaxisQuery } from '../../../services/Api';
 
 const TaxiBookingsPage = () => {
-    const [filteredTaxis, setFilteredTaxis] = useState(taxisData);
+    const { data, isLoading, error } = useGetTaxisQuery({ status: 'active' });
+    const [filteredTaxis, setFilteredTaxis] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filters, setFilters] = useState({
         vehicleType: 'all',
         priceRange: 'all',
         capacity: 'all'
     });
+    
+    // Transform API data to match component format
+    const taxisData = useMemo(() => {
+        if (!data?.data?.taxis) return [];
+        return data.data.taxis.map(taxi => ({
+            id: taxi.id,
+            name: taxi.vehicle_model || taxi.vehicle_type || 'Taxi',
+            location: taxi.location || 'Available',
+            type: taxi.vehicle_type || 'Sedan',
+            capacity: taxi.capacity || 4,
+            price: taxi.price_per_km?.toString() || taxi.base_fare?.toString() || '50',
+            image: taxi.image || 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&q=80&w=800',
+            rating: taxi.rating || '4.5',
+            available: taxi.status === 'active'
+        }));
+    }, [data]);
+
+    useEffect(() => {
+        if (taxisData.length > 0) {
+            setFilteredTaxis(taxisData);
+        }
+    }, [taxisData]);
 
     // Filter configurations
     const filterOptions = [
@@ -119,7 +142,16 @@ const TaxiBookingsPage = () => {
 
             {/* Taxi Cards Grid */}
             <div className="max-w-[1240px] w-full mt-16 px-4">
-                {filteredTaxis.length > 0 ? (
+                {isLoading ? (
+                    <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+                        <p className="text-gray-500">Loading taxis...</p>
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+                        <h3 className="text-2xl font-bold text-red-400 mb-2">Error Loading Taxis</h3>
+                        <p className="text-gray-500">Please try again later.</p>
+                    </div>
+                ) : filteredTaxis.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredTaxis.map(taxi => (
                             <TaxiCard key={taxi.id} taxi={taxi} />

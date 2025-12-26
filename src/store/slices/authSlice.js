@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import api from "../../utils/axios";
-import Swal from "sweetalert2"
+import Swal from "sweetalert2";
+import { api as rtkApi } from "../../services/Api";
 
 const initialState = {
   user: null,
@@ -44,19 +45,25 @@ const authSlice = createSlice({
 
 export const { setLoading, setError, setUser, clearUser, setUserDetails } = authSlice.actions;
 
-// Thunk for signup
+// Thunk for signup (kept for backward compatibility, but can use RTK Query directly)
 export const signup = (userData) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
 
-    const { data } = await api.post(`/api/auth/register`, userData);
+    const result = await dispatch(
+      rtkApi.endpoints.register.initiate({ data: userData })
+    ).unwrap();
 
-    return { success: true, user: data.user };
+    if (result?.data) {
+      return { success: true, user: result.data.user };
+    }
+    return { success: false, error: "Signup failed" };
   } catch (error) {
-    dispatch(setError(error.response?.data?.message || error.message || "Signup failed"));
+    const errorMessage = error?.data?.message || error?.message || "Signup failed";
+    dispatch(setError(errorMessage));
     Swal.fire({
       title: "Signup Failed",
-      text: error.response?.data?.message || error.message || "Signup failed",
+      text: errorMessage,
       icon: "error",
       confirmButtonColor: "#0370b1",
       customClass: {
@@ -64,42 +71,34 @@ export const signup = (userData) => async (dispatch) => {
       },
     });
 
-    return { success: false, error: error.message };
+    return { success: false, error: errorMessage };
   } finally {
     dispatch(setLoading(false));
   }
 };
 
-// ✅ Thunk for login (no localStorage)
+// ✅ Thunk for login (kept for backward compatibility, but can use RTK Query directly)
 export const login = (credentials) => async (dispatch) => {
-
   try {
     dispatch(setLoading(true));
 
-    const { data } = await api.post(`/api/auth/login`, credentials);
+    const result = await dispatch(
+      rtkApi.endpoints.login.initiate({ data: credentials })
+    ).unwrap();
 
-    const token = data?.data?.token;
-    const user = data?.data?.user;
+    if (result?.data) {
+      const token = result.data.token;
+      const user = result.data.user;
 
-    dispatch(setUser({ ...user, token }));
-    // Redirect using window.location
-    // window.location.href = `/${user?.role}/dashboard`;
-    return { success: true, user };
-
+      dispatch(setUser({ ...user, token }));
+      return { success: true, user };
+    }
+    return { success: false, error: "Login failed" };
   } catch (error) {
-    // console.log(error, 'data in error')
-    // Swal.fire({
-    //   title: "Login Failed",
-    //   text: error.response?.data?.message || error.message || "Login failed",
-    //   icon: "error",
-    //   confirmButtonColor: "#0370b1",
-    //   customClass: {
-    //     confirmButton: "my-swal-btn",
-    //   },
-    // });
-    console.log(error, 'data in error')
-    dispatch(setError(error.response?.data?.error || error.message || "Login failed"));
-    return { success: false, error: error.response?.data?.error };
+    const errorMessage = error?.data?.error || error?.data?.message || error?.message || "Login failed";
+    console.log(error, 'data in error');
+    dispatch(setError(errorMessage));
+    return { success: false, error: errorMessage };
   } finally {
     dispatch(setLoading(false));
   }
@@ -164,39 +163,41 @@ export const updateUser = (userData) => async (dispatch, getState) => {
   try {
     dispatch(setLoading(true));
 
-    const { data } = await api.put(`/api/auth/editUser`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const result = await dispatch(
+      rtkApi.endpoints.editUser.initiate({ data: formData })
+    ).unwrap();
 
-    // Update both user and userDetails in the state
-    dispatch(setUser({ ...data.data, token: getState().auth?.user?.token }));
-    dispatch(setUserDetails(data.data));
+    if (result?.data) {
+      // Update both user and userDetails in the state
+      dispatch(setUser({ ...result.data, token: getState().auth?.user?.token }));
+      dispatch(setUserDetails(result.data));
 
-    Swal.fire({
-      title: "Success",
-      text: "Profile updated successfully",
-      icon: "success",
-      confirmButtonColor: "#0370b1",
-      customClass: {
-        confirmButton: "my-swal-btn",
-      },
-    });
+      Swal.fire({
+        title: "Success",
+        text: "Profile updated successfully",
+        icon: "success",
+        confirmButtonColor: "#0370b1",
+        customClass: {
+          confirmButton: "my-swal-btn",
+        },
+      });
 
-    return { success: true, user: data.data };
+      return { success: true, user: result.data };
+    }
+    return { success: false, error: "Update failed" };
   } catch (error) {
+    const errorMessage = error?.data?.message || error?.message || "Failed to update profile";
     Swal.fire({
       title: "Update Failed",
-      text: error.response?.data?.message || error.message || "Failed to update profile",
+      text: errorMessage,
       icon: "error",
       confirmButtonColor: "#0370b1",
       customClass: {
         confirmButton: "my-swal-btn",
       },
     });
-    dispatch(setError(error.response?.data?.message || error.message || "Failed to update profile"));
-    return { success: false, error: error.message };
+    dispatch(setError(errorMessage));
+    return { success: false, error: errorMessage };
   } finally {
     dispatch(setLoading(false));
   }

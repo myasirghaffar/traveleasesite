@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { signup } from "../store/slices/authSlice";
+import { setUser } from "../store/slices/authSlice";
+import { useRegisterMutation } from "../services/Api";
 import { strongPasswordRegex } from "../utils/constants";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import { Check } from "lucide-react";
+import { toast } from "react-toastify";
 import loginForm from "../assets/images/login-form.png";
 
 const SignUp = () => {
@@ -14,7 +16,9 @@ const SignUp = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { auth } = useSelector((state) => state);
+  const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
 
   const {
     register,
@@ -35,16 +39,48 @@ const SignUp = () => {
   });
 
   const onSubmit = async (values) => {
-    const data = { ...values };
-    delete data.confirmPassword;
-    delete data.referralCode;
-    delete data.marketingEmails;
-    delete data.termsAccepted;
+    try {
+      const data = { 
+        full_name: values.fullName,
+        email: values.email,
+        password: values.password,
+      };
 
-    data.joinAs = "customer";
+      const result = await registerUser({ data }).unwrap();
+      
+      if (result?.data) {
+        const { user, token } = result.data;
+        
+        // Set user data in Redux store
+        dispatch(
+          setUser({
+            ...user,
+            token,
+            name: user.full_name || user.first_name || user.email,
+          })
+        );
 
-    const result = await dispatch(signup(data));
-    if (result.success) setIsSubmitted(true);
+        toast.success("Account created successfully!", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+
+        // Navigate to appropriate dashboard
+        const roleRouteMap = {
+          admin: "admin",
+          user: "website",
+        };
+        const rolePath = roleRouteMap[user.role] || "website";
+        navigate(`/${rolePath}/dashboard`);
+        setIsSubmitted(true);
+      }
+    } catch (error) {
+      const errorMessage = error?.data?.error || error?.data?.message || "Signup failed. Please try again.";
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
+    }
   };
 
   return (
@@ -285,11 +321,11 @@ const SignUp = () => {
 
             {/* Signup Button */}
             <button
-              disabled={auth.loading}
+              disabled={isRegistering || auth.loading}
               type="submit"
               className="w-full bg-gradient-to-r from-primary to-primary/80 text-white py-3 font-medium rounded-lg text-base hover:from-primary/90 hover:to-primary/70 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {auth.loading ? "Creating Account..." : "Sign Up Now"}
+              {isRegistering || auth.loading ? "Creating Account..." : "Sign Up Now"}
             </button>
 
             {/* Separator */}

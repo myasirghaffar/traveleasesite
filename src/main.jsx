@@ -7,6 +7,7 @@ import "./styles/global.css";
 import AppRouter from "./router.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import store, { persistor } from "./store";
+import { SocketProvider } from "./contexts/SocketContext";
 
 import { PersistGate } from "redux-persist/integration/react";
 import { ToastContainer } from "react-toastify";
@@ -25,17 +26,19 @@ createRoot(rootElement).render(
     {/* <Suspense fallback={<Spinner />}> */}
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <ErrorBoundary>
-          <BrowserRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true,
-            }}
-          >
-            <AppRouter />
-            <ToastContainer position="top-right" />
-          </BrowserRouter>
-        </ErrorBoundary>
+        <SocketProvider>
+          <ErrorBoundary>
+            <BrowserRouter
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true,
+              }}
+            >
+              <AppRouter />
+              <ToastContainer position="top-right" />
+            </BrowserRouter>
+          </ErrorBoundary>
+        </SocketProvider>
       </PersistGate>
     </Provider>
     {/* </Suspense> */}

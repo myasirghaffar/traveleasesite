@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Ban,
   Check,
@@ -11,66 +11,37 @@ import {
 import ReusableDataTable from "../../../components/ReusableDataTable";
 import ReusablePagination from "../../../components/ReusablePagination";
 import ReusableFilter from "../../../components/ReusableFilter";
+import { useGetUsersQuery, useDeleteUserMutation } from "../../../services/Api";
+import { toast } from "react-toastify";
 
 const ManageUsers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [itemsPerPage] = useState(10);
+  
+  const { data, isLoading, error, refetch } = useGetUsersQuery({
+    page: currentPage,
+    limit: itemsPerPage,
+    search: searchTerm,
+    status: statusFilter || undefined,
+  });
+  const [deleteUser] = useDeleteUserMutation();
 
-  // Mock User Data
-  const usersData = [
-    {
-      id: "001",
-      name: "Sarah Johnson",
-      email: "sarah.johnson@email.com",
-      phone: "+1 (555) 123-4567",
-      regDate: "Mar 15, 2024",
-      bookings: 12,
-      status: "Active",
-      image: "https://i.pravatar.cc/150?u=sarah"
-    },
-    {
-      id: "002",
-      name: "Michael Chen",
-      email: "michael.chen@email.com",
-      phone: "+1 (555) 234-5678",
-      regDate: "Mar 10, 2024",
-      bookings: 8,
-      status: "Active",
-      image: "https://i.pravatar.cc/150?u=michael"
-    },
-    {
-      id: "003",
-      name: "Emma Davis",
-      email: "emma.davis@email.com",
-      phone: "+1 (555) 345-6789",
-      regDate: "Mar 8, 2024",
-      bookings: 15,
-      status: "Blocked",
-      image: "https://i.pravatar.cc/150?u=emma"
-    },
-    {
-      id: "004",
-      name: "James Wilson",
-      email: "james.wilson@email.com",
-      phone: "+1 (555) 456-7890",
-      regDate: "Mar 5, 2024",
-      bookings: 3,
-      status: "Active",
-      image: "https://i.pravatar.cc/150?u=james"
-    },
-    {
-      id: "005",
-      name: "Lisa Anderson",
-      email: "lisa.anderson@email.com",
-      phone: "+1 (555) 567-8901",
-      regDate: "Mar 2, 2024",
-      bookings: 7,
-      status: "Active",
-      image: "https://i.pravatar.cc/150?u=lisa"
-    }
-  ];
+  // Transform API data to match component format
+  const usersData = useMemo(() => {
+    if (!data?.data?.users) return [];
+    return data.data.users.map(user => ({
+      id: user.id.toString(),
+      name: user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
+      email: user.email,
+      phone: user.phone || "N/A",
+      regDate: new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      bookings: 0, // TODO: Get from API if available
+      status: user.status === 'active' ? "Active" : "Blocked",
+      image: user.profile_picture || user.avatar_url || `https://i.pravatar.cc/150?u=${user.id}`
+    }));
+  }, [data]);
 
   // Filter Options for ReusableFilter
   const filterOptions = [
@@ -85,21 +56,14 @@ const ManageUsers = () => {
     },
   ];
 
-  // Filtering and Pagination Logic
+  // Filtering Logic (API handles pagination and search)
   const filteredData = usersData.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = !statusFilter || user.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
+    return matchesStatus;
   });
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const currentData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const totalPages = data?.data?.pagination?.totalPages || Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData;
 
   // Custom Cell Renderers
   const customCellRenderers = {
@@ -153,11 +117,30 @@ const ManageUsers = () => {
     actions: (row) => (
       <div className="flex items-center gap-4">
         {row.status === "Active" ? (
-          <button className="text-red-400 hover:text-red-600 transition-colors p-1 bg-red-50/0 hover:bg-red-50 rounded-lg">
+          <button 
+            className="text-red-400 hover:text-red-600 transition-colors p-1 bg-red-50/0 hover:bg-red-50 rounded-lg"
+            onClick={async () => {
+              if (window.confirm(`Are you sure you want to delete user ${row.name}?`)) {
+                try {
+                  await deleteUser(row.id).unwrap();
+                  toast.success('User deleted successfully');
+                  refetch();
+                } catch (error) {
+                  toast.error(error?.data?.message || 'Failed to delete user');
+                }
+              }
+            }}
+          >
             <Ban size={18} />
           </button>
         ) : (
-          <button className="text-green-500 hover:text-green-600 transition-colors p-1 bg-green-50/0 hover:bg-green-50 rounded-lg">
+          <button 
+            className="text-green-500 hover:text-green-600 transition-colors p-1 bg-green-50/0 hover:bg-green-50 rounded-lg"
+            onClick={() => {
+              // TODO: Implement unblock/activate user
+              toast.info('Activate user functionality coming soon');
+            }}
+          >
             <Check size={18} />
           </button>
         )}
@@ -213,11 +196,21 @@ const ManageUsers = () => {
 
       {/* Table Section */}
       <div className="bg-white rounded-[24px] overflow-hidden">
-        <ReusableDataTable
-          columns={columns}
-          data={currentData}
-          customCellRenderers={customCellRenderers}
-        />
+        {isLoading ? (
+          <div className="p-8 text-center">
+            <p className="text-gray-500">Loading users...</p>
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <p className="text-red-500">Error loading users. Please try again.</p>
+          </div>
+        ) : (
+          <ReusableDataTable
+            columns={columns}
+            data={currentData}
+            customCellRenderers={customCellRenderers}
+          />
+        )}
       </div>
 
       {/* Pagination Section */}
