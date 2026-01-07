@@ -6,6 +6,21 @@ import {
 } from "../../../../assets/icons/icons";
 import { X, Check } from "lucide-react";
 
+// Move these components outside to prevent recreation on each render
+const InputLabel = ({ children }) => (
+    <label className="block text-[14px] font-semibold text-slate-700 mb-2 font-['Inter']">
+        {children}
+    </label>
+);
+
+const InputField = React.memo((props) => (
+    <input
+        {...props}
+        className="w-full h-[54px] px-5 rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-slate-700 placeholder:text-slate-300 font-['Inter'] text-[15px]"
+    />
+));
+InputField.displayName = 'InputField';
+
 const AddTaxi = ({ onCancel }) => {
     const [formData, setFormData] = useState({
         vehicleName: "",
@@ -41,19 +56,6 @@ const AddTaxi = ({ onCancel }) => {
             reader.readAsDataURL(file);
         }
     };
-
-    const InputLabel = ({ children }) => (
-        <label className="block text-[14px] font-semibold text-slate-700 mb-2 font-['Inter']">
-            {children}
-        </label>
-    );
-
-    const InputField = (props) => (
-        <input
-            {...props}
-            className="w-full h-[54px] px-5 rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-slate-700 placeholder:text-slate-300 font-['Inter'] text-[15px]"
-        />
-    );
 
     return (
         <div className="w-full min-h-screen p-8 space-y-6 animate-in fade-in duration-500">

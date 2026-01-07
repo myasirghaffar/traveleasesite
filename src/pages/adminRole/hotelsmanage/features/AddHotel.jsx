@@ -25,7 +25,7 @@ import {
     Maximize2,
     X
 } from "lucide-react";
-import { useCreateHotelMutation, useUpdateHotelMutation } from "../../../../services/Api";
+import { useCreateHotelMutation, useUpdateHotelMutation, useCreateRoomMutation } from "../../../../services/Api";
 import { toast } from "react-toastify";
 import { getImageUrl } from "../../../../services/ApiEndpoints";
 
@@ -44,7 +44,45 @@ const InputField = React.memo((props) => (
 ));
 InputField.displayName = 'InputField';
 
-const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess }) => {
+// ModalInput component for AddRoomModal - moved outside to prevent recreation
+const ModalInput = React.memo(({ label, name, icon: Icon, placeholder, type = "text", isPrice = false, required = false, value, onChange, onBlur, errors, touched }) => {
+    const hasError = touched[name] && errors[name];
+    return (
+        <div className="space-y-2">
+            <label className="block text-[14px] font-semibold text-slate-800 font-['Inter']">
+                {label} {required && <span className="text-red-500">*</span>}
+            </label>
+            <div className="relative">
+                {Icon && !isPrice && (
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Icon size={18} strokeWidth={1.5} />
+                    </div>
+                )}
+                {isPrice && (
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</div>
+                )}
+                <input
+                    name={name}
+                    type={type}
+                    value={value}
+                    onChange={onChange}
+                    onBlur={onBlur}
+                    placeholder={placeholder}
+                    className={`w-full h-[54px] ${(Icon || isPrice) ? 'pl-12' : 'px-5'} ${isPrice ? 'pr-12' : 'pr-5'} rounded-[12px] border ${hasError ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'} transition-all outline-none text-slate-700 placeholder:text-slate-300 font-['Inter'] text-[15px]`}
+                />
+                {isPrice && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</div>
+                )}
+            </div>
+            {hasError && (
+                <p className="text-red-500 text-xs font-medium font-['Inter'] mt-1">{errors[name]}</p>
+            )}
+        </div>
+    );
+});
+ModalInput.displayName = 'ModalInput';
+
+const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded }) => {
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -77,9 +115,10 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess }) => {
     
     const [createHotel] = useCreateHotelMutation();
     const [updateHotel] = useUpdateHotelMutation();
+    const [createRoom] = useCreateRoomMutation();
+    const [isAddingRoom, setIsAddingRoom] = useState(false);
 
     // Load hotel data if editing
-    // Load hotel data when editing (only once when hotelData.id changes)
     useEffect(() => {
         if (isEdit && hotelData?.id) {
             setFormData({
@@ -110,7 +149,16 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess }) => {
             if (hotelData.gallery_images && hotelData.gallery_images.length > 0) {
                 setGalleryImages(hotelData.gallery_images.map(img => getImageUrl(img) || img));
             }
-            // Load rooms data if editing - only load once
+        } else if (!isEdit) {
+            // Reset rooms when not in edit mode
+            setRooms([]);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEdit, hotelData?.id]); // Only depend on hotelData.id to avoid resetting on every hotelData change
+
+    // Separate effect to sync rooms from hotelData (runs when hotelData.rooms changes)
+    useEffect(() => {
+        if (isEdit && hotelData?.id) {
             if (hotelData.rooms && hotelData.rooms.length > 0) {
                 const mappedRooms = hotelData.rooms.map(room => ({
                     id: room.id, // Include ID for existing rooms
@@ -120,17 +168,14 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess }) => {
                     roomSize: room.size || room.room_size || "",
                     price: room.price_per_night || ""
                 }));
-                console.log('Loading rooms for edit:', mappedRooms);
+                // Update rooms list when hotelData.rooms changes
                 setRooms(mappedRooms);
             } else {
                 setRooms([]);
             }
-        } else if (!isEdit) {
-            // Reset rooms when not in edit mode
-            setRooms([]);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isEdit, hotelData?.id]); // Only depend on hotelData.id to avoid resetting on every hotelData change
+    }, [isEdit, hotelData?.id, hotelData?.rooms]);
 
     const categories = [
         { value: "5", label: "5 Star" },
@@ -189,14 +234,71 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess }) => {
         setGalleryImageFiles(prev => prev.filter((_, i) => i !== index));
     };
 
-    const handleAddRoom = (roomData) => {
-        console.log('Adding room:', roomData);
-        setRooms(prev => {
-            const updated = [...prev, roomData];
-            console.log('Updated rooms state:', updated);
-            return updated;
-        });
-        setIsRoomModalOpen(false);
+    const handleAddRoom = async (roomData) => {
+        // If editing an existing hotel, call API to save room immediately
+        if (isEdit && hotelData?.id) {
+            setIsAddingRoom(true);
+            try {
+                // Extract guest count from guestType (e.g., "2 Guests" -> 2)
+                const guestCount = parseInt(roomData.guestType.toString().replace(/[^0-9]/g, '') || '2');
+                
+                // Prepare room data for API (match backend expectations)
+                // Validate available_shift - default to 'Both' if not provided or invalid
+                const validShifts = ['Day', 'Night', 'Both', '24 Hours'];
+                const requestedShift = roomData.availableShift || 'Both';
+                const finalShift = validShifts.includes(requestedShift) ? requestedShift : 'Both';
+                
+                const roomPayload = {
+                    name: roomData.roomName,
+                    bed_type: roomData.bedType,
+                    guest_capacity: guestCount,
+                    room_size: parseFloat(roomData.roomSize) || 0,
+                    price_per_night: parseFloat(roomData.price) || 0,
+                    available_shift: finalShift
+                };
+
+                // Call API to create room
+                const result = await createRoom({
+                    hotelId: hotelData.id,
+                    data: roomPayload
+                }).unwrap();
+
+                // Add room to local state with API response data
+                const newRoom = {
+                    id: result.data?.id || result.id,
+                    roomName: roomData.roomName,
+                    bedType: roomData.bedType,
+                    guestType: roomData.guestType,
+                    roomSize: roomData.roomSize,
+                    price: roomData.price
+                };
+                
+                setRooms(prev => [...prev, newRoom]);
+                setIsRoomModalOpen(false);
+                
+                // Show success message
+                toast.success('Room added successfully');
+                
+                // Notify parent to refetch hotel data to sync rooms list
+                if (onRoomAdded) {
+                    onRoomAdded();
+                }
+            } catch (error) {
+                console.error('Error adding room:', error);
+                toast.error(error?.data?.message || error?.message || 'Failed to add room. Please try again.');
+            } finally {
+                setIsAddingRoom(false);
+            }
+        } else {
+            // If creating a new hotel, just add to local state (will be saved with hotel)
+            console.log('Adding room to new hotel:', roomData);
+            setRooms(prev => {
+                const updated = [...prev, roomData];
+                console.log('Updated rooms state:', updated);
+                return updated;
+            });
+            setIsRoomModalOpen(false);
+        }
     };
 
     const handleSave = async (publish = false) => {
@@ -744,20 +846,21 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess }) => {
                 <AddRoomModal
                     onClose={() => setIsRoomModalOpen(false)}
                     onAdd={handleAddRoom}
+                    isSubmitting={isAddingRoom}
                 />
             )}
         </div>
     );
 };
 
-const AddRoomModal = ({ onClose, onAdd }) => {
+const AddRoomModal = ({ onClose, onAdd, isSubmitting = false }) => {
     const [roomData, setRoomData] = useState({
         roomName: "",
         bedType: "",
         guestType: "",
         roomSize: "",
         price: "",
-        availableShift: ""
+        availableShift: "Both" // Default to "Both" as per backend default
     });
     
     const [errors, setErrors] = useState({});
@@ -859,7 +962,7 @@ const AddRoomModal = ({ onClose, onAdd }) => {
         return isValid;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
         if (!validateForm()) {
@@ -873,55 +976,21 @@ const AddRoomModal = ({ onClose, onAdd }) => {
             guestType: `${guestCount} Guests`
         };
         
-        onAdd(formattedRoomData);
+        await onAdd(formattedRoomData);
         
-        // Reset form after adding
-        setRoomData({
-            roomName: "",
-            bedType: "",
-            guestType: "",
-            roomSize: "",
-            price: "",
-            availableShift: ""
-        });
-        setErrors({});
-        setTouched({});
-    };
-
-    const ModalInput = ({ label, name, icon: Icon, placeholder, type = "text", isPrice = false, required = false }) => {
-        const hasError = touched[name] && errors[name];
-        return (
-            <div className="space-y-2">
-                <label className="block text-[14px] font-semibold text-slate-800 font-['Inter']">
-                    {label} {required && <span className="text-red-500">*</span>}
-                </label>
-                <div className="relative">
-                    {Icon && !isPrice && (
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                            <Icon size={18} strokeWidth={1.5} />
-                        </div>
-                    )}
-                    {isPrice && (
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</div>
-                    )}
-                    <input
-                        name={name}
-                        type={type}
-                        value={roomData[name]}
-                        onChange={handleChange}
-                        onBlur={() => handleBlur(name)}
-                        placeholder={placeholder}
-                        className={`w-full h-[54px] ${(Icon || isPrice) ? 'pl-12' : 'px-5'} ${isPrice ? 'pr-12' : 'pr-5'} rounded-[12px] border ${hasError ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'} transition-all outline-none text-slate-700 placeholder:text-slate-300 font-['Inter'] text-[15px]`}
-                    />
-                    {isPrice && (
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</div>
-                    )}
-                </div>
-                {hasError && (
-                    <p className="text-red-500 text-xs font-medium font-['Inter'] mt-1">{errors[name]}</p>
-                )}
-            </div>
-        );
+        // Reset form after adding (only if not submitting - API will handle closing)
+        if (!isSubmitting) {
+            setRoomData({
+                roomName: "",
+                bedType: "",
+                guestType: "",
+                roomSize: "",
+                price: "",
+                availableShift: "Both" // Reset to default
+            });
+            setErrors({});
+            setTouched({});
+        }
     };
 
     return (
@@ -944,6 +1013,11 @@ const AddRoomModal = ({ onClose, onAdd }) => {
                             name="roomName"
                             placeholder="Deluxe King Room"
                             required={true}
+                            value={roomData.roomName}
+                            onChange={handleChange}
+                            onBlur={() => handleBlur('roomName')}
+                            errors={errors}
+                            touched={touched}
                         />
                         <ModalInput
                             label="Bed Type"
@@ -951,6 +1025,11 @@ const AddRoomModal = ({ onClose, onAdd }) => {
                             icon={BedDouble}
                             placeholder="King Bed"
                             required={true}
+                            value={roomData.bedType}
+                            onChange={handleChange}
+                            onBlur={() => handleBlur('bedType')}
+                            errors={errors}
+                            touched={touched}
                         />
                         <ModalInput
                             label="Guest Type"
@@ -958,6 +1037,11 @@ const AddRoomModal = ({ onClose, onAdd }) => {
                             icon={Users}
                             placeholder="2 Guests"
                             required={true}
+                            value={roomData.guestType}
+                            onChange={handleChange}
+                            onBlur={() => handleBlur('guestType')}
+                            errors={errors}
+                            touched={touched}
                         />
                         <ModalInput
                             label="Room Size (m²)"
@@ -966,6 +1050,11 @@ const AddRoomModal = ({ onClose, onAdd }) => {
                             placeholder="35"
                             type="number"
                             required={true}
+                            value={roomData.roomSize}
+                            onChange={handleChange}
+                            onBlur={() => handleBlur('roomSize')}
+                            errors={errors}
+                            touched={touched}
                         />
                         <ModalInput
                             label="Price per Night"
@@ -974,13 +1063,41 @@ const AddRoomModal = ({ onClose, onAdd }) => {
                             isPrice={true}
                             placeholder="120"
                             required={true}
+                            value={roomData.price}
+                            onChange={handleChange}
+                            onBlur={() => handleBlur('price')}
+                            errors={errors}
+                            touched={touched}
                         />
-                        <ModalInput
-                            label="Available Shift"
-                            name="availableShift"
-                            icon={Users}
-                            placeholder="Both"
-                        />
+                        <div className="space-y-2">
+                            <label className="block text-[14px] font-semibold text-slate-800 font-['Inter']">
+                                Available Shift
+                            </label>
+                            <div className="relative">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                    <Users size={18} strokeWidth={1.5} />
+                                </div>
+                                <select
+                                    name="availableShift"
+                                    value={roomData.availableShift}
+                                    onChange={handleChange}
+                                    onBlur={() => handleBlur('availableShift')}
+                                    className="w-full h-[54px] pl-12 pr-5 rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-slate-700 font-['Inter'] text-[15px] appearance-none bg-white"
+                                >
+                                    <option value="">Select shift</option>
+                                    <option value="Day">Day (6 AM - 6 PM)</option>
+                                    <option value="Night">Night (6 PM - 6 AM)</option>
+                                    <option value="Both">Both</option>
+                                    <option value="24 Hours">24 Hours</option>
+                                </select>
+                                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <ChevronDownIcon className="w-5 h-5 text-slate-900" />
+                                </div>
+                            </div>
+                            {touched.availableShift && errors.availableShift && (
+                                <p className="text-red-500 text-xs font-medium font-['Inter'] mt-1">{errors.availableShift}</p>
+                            )}
+                        </div>
                     </form>
                 </div>
 
@@ -995,9 +1112,10 @@ const AddRoomModal = ({ onClose, onAdd }) => {
                     <button
                         form="add-room-form"
                         type="submit"
-                        className="px-12 py-3.5 bg-blue-600 text-white rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 text-base"
+                        disabled={isSubmitting}
+                        className="px-12 py-3.5 bg-blue-600 text-white rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Add Room
+                        {isSubmitting ? 'Adding...' : 'Add Room'}
                     </button>
                 </div>
             </div>

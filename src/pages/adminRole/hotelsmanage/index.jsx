@@ -238,7 +238,7 @@ const ManageHotels = () => {
   const currentData = hotelsData;
 
   // Handle edit mode - fetch hotel data and show edit form
-  const { data: hotelData } = useGetAdminHotelByIdQuery(editingHotelId, {
+  const { data: hotelData, refetch: refetchHotelData } = useGetAdminHotelByIdQuery(editingHotelId, {
     skip: !editingHotelId
   });
 
@@ -270,7 +270,13 @@ const ManageHotels = () => {
       onSuccess={() => {
         setEditingHotelId(null);
         refetch();
-      }} 
+      }}
+      onRoomAdded={() => {
+        // Refetch hotel data after room is added to update the rooms list
+        if (refetchHotelData) {
+          refetchHotelData();
+        }
+      }}
     />;
   }
 

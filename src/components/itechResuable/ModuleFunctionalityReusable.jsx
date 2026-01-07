@@ -1,6 +1,74 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
 
+// Move these components outside to prevent recreation on each render
+const TextArea = React.memo(({ label, value, onChange, placeholder, rows = 2 }) => (
+  <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 w-full">
+    <div className="mb-3 sm:mb-4">
+      <label className="text-gray-800 font-medium text-xs sm:text-sm">{label}</label>
+    </div>
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={rows}
+      className="w-full p-2 sm:p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+      style={{ 
+        background: 'white',
+        boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.06)'
+      }}
+    />
+  </div>
+));
+TextArea.displayName = 'TextArea';
+
+const DualTextArea = React.memo(({ leftLabel, rightLabel, leftValue, rightValue, onLeftChange, onRightChange, leftPlaceholder, rightPlaceholder }) => (
+  <div className="w-full">
+    <div className="mb-3 sm:mb-4">
+      <p className="text-gray-800 font-semibold text-sm sm:text-base md:text-lg text-left" style={{ fontWeight: 600 }}>
+        Na sua opinião, quais os principais "pontos fortes" e "pontos fracos" deste curso/módulo?
+      </p>
+    </div>
+    <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div>
+        <div className="mb-2">
+          <label className="text-gray-800 font-medium text-xs sm:text-sm">{leftLabel}</label>
+        </div>
+        <textarea
+          value={leftValue}
+          onChange={(e) => onLeftChange(e.target.value)}
+          placeholder={leftPlaceholder}
+          rows={2}
+          className="w-full p-2 sm:p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+          style={{ 
+            background: 'white',
+            boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.06)'
+          }}
+        />
+      </div>
+      <div>
+        <div className="mb-2">
+          <label className="text-gray-800 font-medium text-xs sm:text-sm">{rightLabel}</label>
+        </div>
+        <textarea
+          value={rightValue}
+          onChange={(e) => onRightChange(e.target.value)}
+          placeholder={rightPlaceholder}
+          rows={2}
+          className="w-full p-2 sm:p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
+          style={{ 
+            background: 'white',
+            boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.06)'
+          }}
+        />
+      </div>
+      </div>
+    </div>
+  </div>
+));
+DualTextArea.displayName = 'DualTextArea';
+
 const ModuleFunctionalityReusable = ({
   // Module selection props
   moduleTitle = "Denominação do Módulo",
@@ -110,73 +178,6 @@ const ModuleFunctionalityReusable = ({
             {value}
           </button>
         ))}
-      </div>
-    </div>
-  );
-
-  // Text Area Component
-  const TextArea = ({ label, value, onChange, placeholder, rows = 2 }) => (
-    <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 w-full">
-      <div className="mb-3 sm:mb-4">
-        <label className="text-gray-800 font-medium text-xs sm:text-sm">{label}</label>
-      </div>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        rows={rows}
-        className="w-full p-2 sm:p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
-        style={{ 
-          background: 'white',
-          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.06)'
-        }}
-      />
-    </div>
-  );
-
-  // Dual Text Area Component (for strengths/weaknesses)
-  const DualTextArea = ({ leftLabel, rightLabel, leftValue, rightValue, onLeftChange, onRightChange, leftPlaceholder, rightPlaceholder }) => (
-    <div className="w-full">
-      <div className="mb-3 sm:mb-4">
-        <p className="text-gray-800 font-semibold text-sm sm:text-base md:text-lg text-left" style={{ fontWeight: 600 }}>
-          Na sua opinião, quais os principais "pontos fortes" e "pontos fracos" deste curso/módulo?
-        </p>
-      </div>
-      <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <div>
-          <div className="mb-2">
-            <label className="text-gray-800 font-medium text-xs sm:text-sm">{leftLabel}</label>
-          </div>
-          <textarea
-            value={leftValue}
-            onChange={(e) => onLeftChange(e.target.value)}
-            placeholder={leftPlaceholder}
-            rows={2}
-            className="w-full p-2 sm:p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
-            style={{ 
-              background: 'white',
-              boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.06)'
-            }}
-          />
-        </div>
-        <div>
-          <div className="mb-2">
-            <label className="text-gray-800 font-medium text-xs sm:text-sm">{rightLabel}</label>
-          </div>
-          <textarea
-            value={rightValue}
-            onChange={(e) => onRightChange(e.target.value)}
-            placeholder={rightPlaceholder}
-            rows={2}
-            className="w-full p-2 sm:p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs sm:text-sm"
-            style={{ 
-              background: 'white',
-              boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.06)'
-            }}
-          />
-        </div>
-        </div>
       </div>
     </div>
   );
