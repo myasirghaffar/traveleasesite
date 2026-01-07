@@ -17,61 +17,76 @@ import {
     SizeIcon,
     CheckCircleIcon
 } from '../../../../assets/icons/icons';
-import { useGetHotelByIdQuery, useGetRoomsQuery } from '../../../../services/Api';
+import { useGetHotelByIdQuery } from '../../../../services/Api';
 import { getImageUrl } from '../../../../services/ApiEndpoints';
+
+// Helper function to map amenity strings to icons
+const getAmenityIcon = (amenityName) => {
+    const lowerName = amenityName?.toLowerCase() || '';
+    if (lowerName.includes('wifi') || lowerName.includes('wi-fi') || lowerName === 'wi-fi') {
+        return <WifiIcon />;
+    } else if (lowerName.includes('parking')) {
+        return <ParkingIcon />;
+    } else if (lowerName.includes('air') || lowerName.includes('conditioning') || lowerName === 'a/c' || lowerName === 'ac') {
+        return <AirConditioningIcon />;
+    } else if (lowerName.includes('breakfast')) {
+        return <BreakfastIcon />;
+    } else if (lowerName.includes('pool')) {
+        return <PoolIcon />;
+    } else if (lowerName.includes('gym') || lowerName.includes('fitness')) {
+        return <GymIcon />;
+    } else if (lowerName.includes('shuttle') || lowerName.includes('airport')) {
+        return <AirportShuttleIcon />;
+    }
+    // Default icon if no match
+    return <WifiIcon />;
+};
 
 const HotelBookingPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     
     const { data: hotelData, isLoading: isLoadingHotel, error: hotelError } = useGetHotelByIdQuery(id);
-    const { data: roomsData, isLoading: isLoadingRooms } = useGetRoomsQuery(
-        { hotelId: id },
-        { skip: !id }
-    );
 
-    // Transform API data
-    const hotel = hotelData?.data ? {
-        id: hotelData.data.id,
-        name: hotelData.data.name,
-        location: hotelData.data.city || hotelData.data.location || 'Unknown',
-        rating: hotelData.data.rating?.toString() || '4.5',
-        reviews: hotelData.data.reviews_count?.toString() || '0',
-        price: hotelData.data.min_price?.toString() || hotelData.data.price_per_night?.toString() || '100',
-        image: getImageUrl(hotelData.data.cover_image_url) || getImageUrl(hotelData.data.gallery_images?.[0]) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
-        galleryImages: hotelData.data.gallery_images || [],
+    // Transform API data - note: API returns { data: { hotel: {...} } }
+    const hotelInfo = hotelData?.data?.hotel || hotelData?.data;
+    const hotel = hotelInfo ? {
+        id: hotelInfo.id,
+        name: hotelInfo.name || 'Hotel',
+        description: hotelInfo.description || '',
+        city: hotelInfo.city || '',
+        country: hotelInfo.country || '',
+        address: hotelInfo.address || '',
+        location: hotelInfo.address 
+            ? `${hotelInfo.address}, ${hotelInfo.city || ''}, ${hotelInfo.country || ''}`.replace(/^,\s*|,\s*$/g, '')
+            : hotelInfo.city 
+                ? `${hotelInfo.city}${hotelInfo.country ? `, ${hotelInfo.country}` : ''}`
+                : 'Unknown Location',
+        rating: hotelInfo.rating?.toString() || '0',
+        reviews: hotelInfo.total_reviews?.toString() || '0',
+        price: parseFloat(hotelInfo.price || hotelInfo.base_price_per_night || 0),
+        image: getImageUrl(hotelInfo.cover_image_url) || getImageUrl(hotelInfo.gallery_images?.[0]) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+        galleryImages: hotelInfo.gallery_images || [],
+        amenities: hotelInfo.amenities || [],
     } : null;
     
-    // Transform rooms data
-    const rooms = roomsData?.data?.rooms?.map(room => ({
+    // Transform rooms data from hotel API response
+    const rooms = hotelInfo?.rooms?.map(room => ({
+        id: room.id,
         name: room.name || 'Standard Room',
         specs: [
             { icon: <BedIcon />, label: room.bed_type || 'Standard Bed' },
-            { icon: <GuestsIcon />, label: `${room.max_occupancy || 2} Guests` },
-            { icon: <SizeIcon />, label: `${room.size || 25} m²` }
+            { icon: <GuestsIcon />, label: `${room.guest_capacity || 2} Guests` },
+            { icon: <SizeIcon />, label: `${room.room_size ? parseFloat(room.room_size).toFixed(0) : 25} m²` }
         ],
-        price: room.price_per_night || 100
-    })) || [
-        {
-            name: 'Deluxe King Room',
-            specs: [
-                { icon: <BedIcon />, label: 'King Bed' },
-                { icon: <GuestsIcon />, label: '2 Guests' },
-                { icon: <SizeIcon />, label: '35 m²' }
-            ],
-            price: 120
-        }
-    ];
+        price: parseFloat(room.price_per_night || 0)
+    })) || [];
 
-    const amenities = [
-        { icon: <WifiIcon />, label: 'Free WiFi' },
-        { icon: <ParkingIcon />, label: 'Parking' },
-        { icon: <AirConditioningIcon />, label: 'Air Conditioning' },
-        { icon: <BreakfastIcon />, label: 'Breakfast Included' },
-        { icon: <PoolIcon />, label: 'Pool' },
-        { icon: <GymIcon />, label: 'Gym' },
-        { icon: <AirportShuttleIcon />, label: 'Airport Shuttle' },
-    ];
+    // Map amenities from API to icons
+    const amenities = hotel?.amenities?.map(amenity => ({
+        icon: getAmenityIcon(amenity),
+        label: amenity
+    })) || [];
 
     const handleNavigateToCheckout = () => {
         navigate(`/hotel-checkout/${id}`);
@@ -120,7 +135,7 @@ const HotelBookingPage = () => {
                             {hotel.name}
                         </h1>
                         <p className="text-gray-600 text-lg font-normal font-['Inter'] leading-7 mb-4">
-                            Experience luxury, comfort, and world-class hospitality in the heart of the city.
+                            {hotel.description || 'Experience luxury, comfort, and world-class hospitality in the heart of the city.'}
                         </p>
                         <div className="flex flex-wrap items-center gap-6">
                             <div className="flex items-center gap-2 bg-yellow-50 px-3 py-1.5 rounded-lg">
@@ -130,7 +145,7 @@ const HotelBookingPage = () => {
                             </div>
                             <div className="flex items-center gap-2 text-gray-500">
                                 <LocationIcon className="w-3 h-4" />
-                                <span className="text-sm font-medium font-['Inter']">Downtown, New York</span>
+                                <span className="text-sm font-medium font-['Inter']">{hotel.location}</span>
                             </div>
                         </div>
                     </div>
@@ -194,27 +209,29 @@ const HotelBookingPage = () => {
                     {/* Left Column: Details */}
                     <div className="flex-1">
                         {/* Amenities */}
-                        <div className="mb-12">
-                            <h2 className="text-gray-900 text-2xl font-bold font-['Inter'] mb-6">Amenities</h2>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                {amenities.map((item, index) => (
-                                    <div key={index} className="bg-white border border-gray-100 rounded-xl p-4 flex flex-col items-start gap-3 hover:shadow-sm transition-shadow">
-                                        <div className="text-blue-500">{item.icon}</div>
-                                        <span className="text-gray-700 text-base font-medium font-['Inter'] leading-tight">{item.label}</span>
-                                    </div>
-                                ))}
+                        {amenities.length > 0 && (
+                            <div className="mb-12">
+                                <h2 className="text-gray-900 text-2xl font-bold font-['Inter'] mb-6">Amenities</h2>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                    {amenities.map((item, index) => (
+                                        <div key={index} className="bg-white border border-gray-100 rounded-xl p-4 flex flex-col items-start gap-3 hover:shadow-sm transition-shadow">
+                                            <div className="text-blue-500">{item.icon}</div>
+                                            <span className="text-gray-700 text-base font-medium font-['Inter'] leading-tight">{item.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {/* Available Rooms */}
                         <div>
                             <h2 className="text-gray-900 text-2xl font-bold font-['Inter'] mb-6">Available Rooms</h2>
-                            {isLoadingRooms ? (
+                            {isLoadingHotel ? (
                                 <p className="text-gray-500">Loading rooms...</p>
-                            ) : (
+                            ) : rooms.length > 0 ? (
                                 <div className="flex flex-col gap-4">
                                     {rooms.map((room, index) => (
-                                    <div key={index} className="bg-white border border-gray-100 rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 hover:shadow-md transition-shadow">
+                                    <div key={room.id || index} className="bg-white border border-gray-100 rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 hover:shadow-md transition-shadow">
                                         <div className="flex-1">
                                             <h3 className="text-gray-900 text-lg font-semibold font-['Inter'] mb-3">{room.name}</h3>
                                             <div className="flex flex-wrap gap-4">
@@ -226,7 +243,7 @@ const HotelBookingPage = () => {
                                                 ))}
                                             </div>
                                             <div className="mt-4 flex items-baseline gap-1">
-                                                <span className="text-gray-900 text-2xl font-bold font-['Inter']">${room.price}</span>
+                                                <span className="text-gray-900 text-2xl font-bold font-['Inter']">${room.price.toFixed(2)}</span>
                                                 <span className="text-gray-500 text-base font-normal font-['Inter']">/ night</span>
                                             </div>
                                         </div>
@@ -239,6 +256,8 @@ const HotelBookingPage = () => {
                                     </div>
                                     ))}
                                 </div>
+                            ) : (
+                                <p className="text-gray-500">No rooms available at this time.</p>
                             )}
                         </div>
                     </div>
@@ -248,7 +267,7 @@ const HotelBookingPage = () => {
                         <div className="sticky top-24 bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
                             <div className="flex justify-between items-center mb-4">
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-gray-900 text-3xl font-bold font-['Inter']">${hotel.price}</span>
+                                    <span className="text-gray-900 text-3xl font-bold font-['Inter']">${hotel.price.toFixed(2)}</span>
                                     <span className="text-gray-500 text-base font-normal font-['Inter']">/ night</span>
                                 </div>
                             </div>
@@ -276,21 +295,21 @@ const HotelBookingPage = () => {
 
                             <div className="space-y-4 mb-8">
                                 <div className="flex justify-between text-gray-600">
-                                    <span className="text-base font-normal font-['Inter']">${hotel.price} × 3 nights</span>
-                                    <span className="text-gray-900 text-base font-normal font-['Inter']">${hotel.price * 3}</span>
+                                    <span className="text-base font-normal font-['Inter']">${hotel.price.toFixed(2)} × 3 nights</span>
+                                    <span className="text-gray-900 text-base font-normal font-['Inter']">${(hotel.price * 3).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600">
                                     <span className="text-base font-normal font-['Inter']">Service fee</span>
-                                    <span className="text-gray-900 text-base font-normal font-['Inter']">$25</span>
+                                    <span className="text-gray-900 text-base font-normal font-['Inter']">$25.00</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600">
                                     <span className="text-base font-normal font-['Inter']">Taxes</span>
-                                    <span className="text-gray-900 text-base font-normal font-['Inter']">$42</span>
+                                    <span className="text-gray-900 text-base font-normal font-['Inter']">$42.00</span>
                                 </div>
                                 <hr className="border-gray-200" />
                                 <div className="flex justify-between font-bold">
                                     <span className="text-gray-900 text-lg font-semibold font-['Inter']">Total</span>
-                                    <span className="text-gray-900 text-lg font-semibold font-['Inter']">${(hotel.price * 3) + 25 + 42}</span>
+                                    <span className="text-gray-900 text-lg font-semibold font-['Inter']">${((hotel.price * 3) + 25 + 42).toFixed(2)}</span>
                                 </div>
                             </div>
 

@@ -543,7 +543,7 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                             <div className="space-y-2">
-                                <InputLabel>Base Price / Night</InputLabel>
+                                <InputLabel>Base Price / Night ($)</InputLabel>
                                 <div className="relative">
                                     <InputField
                                         name="basePrice"
@@ -551,13 +551,13 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                         value={formData.basePrice}
                                         onChange={handleInputChange}
                                         placeholder="0.00"
-                                        className="pl-10 sm:pl-[40px]"
+                                        className="!pl-14 sm:!pl-16 pr-4 sm:pr-5"
                                     />
-                                    <span className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 text-sm sm:text-base">$</span>
+                                    {/* <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm sm:text-base pointer-events-none select-none">$</span> */}
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <InputLabel>Seasonal Price (Optional)</InputLabel>
+                                <InputLabel>Seasonal Price (Optional) ($)</InputLabel>
                                 <div className="relative">
                                     <InputField
                                         name="seasonalPrice"
@@ -565,9 +565,9 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                         value={formData.seasonalPrice}
                                         onChange={handleInputChange}
                                         placeholder="0.00"
-                                        className="pl-10 sm:pl-[40px]"
+                                        className="!pl-14 sm:!pl-16 pr-4 sm:pr-5"
                                     />
-                                    <span className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 text-sm sm:text-base">$</span>
+                                    {/* <span className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm sm:text-base pointer-events-none select-none">$</span> */}
                                 </div>
                             </div>
                             <div className="space-y-2 sm:col-span-2 lg:col-span-1">
