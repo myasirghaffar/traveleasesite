@@ -6,14 +6,16 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 3004,
     strictPort: true,
-    allowedHosts: ["travel-ease.techverseo.com", "localhost"], // :white_tick: merged into one array
+    allowedHosts: ["travel-ease.techverseo.com", "localhost"],
     hmr: {
-      port: 24678, // Use a different port for HMR
+      port: 24678,
+      clientPort: 24678,
     },
     watch: {
       usePolling: true,
       interval: 1000,
     },
+    proxy: {},
   },
   plugins: [
     react({
