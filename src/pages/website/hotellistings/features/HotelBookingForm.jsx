@@ -32,6 +32,19 @@ const HotelBookingForm = () => {
         expMonth: '',
         expYear: ''
     });
+    const [paymentErrors, setPaymentErrors] = useState({
+        cardNumber: '',
+        cardType: '',
+        cvc: '',
+        expMonth: '',
+        expYear: ''
+    });
+    const [touchedFields, setTouchedFields] = useState({
+        cardNumber: false,
+        cvc: false,
+        expMonth: false,
+        expYear: false
+    });
 
     const { data: hotelData, isLoading: isLoadingHotel, error: hotelError } = useGetHotelByIdQuery(id);
     const [createBooking, { isLoading: isCreatingBooking }] = useCreateBookingMutation();
@@ -100,6 +113,18 @@ const HotelBookingForm = () => {
                     return;
                 }
 
+                // Validate payment form if credit card method is selected
+                if (formData.paymentMethod === 'credit-card') {
+                    const isValid = validatePaymentForm();
+                    if (!isValid) {
+                        toast.error('Please correct the payment information errors', {
+                            position: 'top-right',
+                            autoClose: 3000,
+                        });
+                        return;
+                    }
+                }
+
                 const bookingData = {
                     hotel_id: parseInt(id),
                     room_id: selectedRoomId,
@@ -139,6 +164,262 @@ const HotelBookingForm = () => {
     const handleBack = () => {
         if (step === 2) setStep(1);
         else navigate(-1);
+    };
+
+    // Card type detection from BIN (Bank Identification Number)
+    const detectCardType = (cardNumber) => {
+        const cleaned = cardNumber.replace(/\s/g, '');
+        if (!cleaned) return 'visa';
+
+        // Visa: starts with 4
+        if (/^4/.test(cleaned)) return 'visa';
+        // Mastercard: starts with 5
+        if (/^5[1-5]/.test(cleaned)) return 'mastercard';
+        // American Express: starts with 34 or 37
+        if (/^3[47]/.test(cleaned)) return 'amex';
+
+        return 'visa'; // Default
+    };
+
+    // Luhn algorithm validation (ISO/IEC 7812 standard)
+    const validateLuhn = (cardNumber) => {
+        const cleaned = cardNumber.replace(/\s/g, '');
+        if (!cleaned || cleaned.length < 13 || cleaned.length > 19) return false;
+
+        let sum = 0;
+        let isEven = false;
+
+        // Process digits from right to left
+        for (let i = cleaned.length - 1; i >= 0; i--) {
+            let digit = parseInt(cleaned[i], 10);
+
+            if (isEven) {
+                digit *= 2;
+                if (digit > 9) {
+                    digit -= 9;
+                }
+            }
+
+            sum += digit;
+            isEven = !isEven;
+        }
+
+        return sum % 10 === 0;
+    };
+
+    // Format card number with spaces (XXXX XXXX XXXX XXXX)
+    const formatCardNumber = (value) => {
+        const cleaned = value.replace(/\s/g, '').replace(/\D/g, '');
+        const matches = cleaned.match(/\d{1,4}/g);
+        return matches ? matches.join(' ') : cleaned;
+    };
+
+    // Validate card number
+    const validateCardNumber = (cardNumber) => {
+        const cleaned = cardNumber.replace(/\s/g, '');
+        if (!cleaned) {
+            return 'Card number is required';
+        }
+        if (cleaned.length < 13 || cleaned.length > 19) {
+            return 'Card number must be between 13 and 19 digits';
+        }
+        if (!/^\d+$/.test(cleaned)) {
+            return 'Card number must contain only digits';
+        }
+        if (!validateLuhn(cardNumber)) {
+            return 'Invalid card number. Please check and try again';
+        }
+        return '';
+    };
+
+    // Validate CVC based on card type
+    const validateCVC = (cvc, cardType) => {
+        if (!cvc) {
+            return 'CVC is required';
+        }
+        if (!/^\d+$/.test(cvc)) {
+            return 'CVC must contain only digits';
+        }
+        const expectedLength = cardType === 'amex' ? 4 : 3;
+        if (cvc.length !== expectedLength) {
+            return `CVC must be ${expectedLength} digits for ${cardType === 'amex' ? 'American Express' : 'this card type'}`;
+        }
+        return '';
+    };
+
+    // Validate expiration month
+    const validateExpMonth = (month) => {
+        if (!month) {
+            return 'Expiration month is required';
+        }
+        const monthNum = parseInt(month, 10);
+        if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+            return 'Month must be between 01 and 12';
+        }
+        if (month.length !== 2) {
+            return 'Month must be 2 digits (01-12)';
+        }
+        return '';
+    };
+
+    // Validate expiration year and combined date
+    const validateExpDate = (month, year) => {
+        if (!year) {
+            return 'Expiration year is required';
+        }
+        if (!/^\d{4}$/.test(year)) {
+            return 'Year must be 4 digits';
+        }
+        
+        const monthNum = parseInt(month, 10);
+        const yearNum = parseInt(year, 10);
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1;
+
+        if (yearNum < currentYear || (yearNum === currentYear && monthNum < currentMonth)) {
+            return 'Card has expired';
+        }
+        if (yearNum > currentYear + 20) {
+            return 'Invalid expiration year';
+        }
+        return '';
+    };
+
+    // Handle card number input
+    const handleCardNumberChange = (e) => {
+        const formatted = formatCardNumber(e.target.value);
+        const cardType = detectCardType(formatted);
+        
+        setFormData({ 
+            ...formData, 
+            cardNumber: formatted,
+            cardType: cardType
+        });
+
+        // Validate and update errors
+        if (touchedFields.cardNumber) {
+            const error = validateCardNumber(formatted);
+            setPaymentErrors({ ...paymentErrors, cardNumber: error });
+        }
+    };
+
+    // Handle CVC input
+    const handleCVCChange = (e) => {
+        const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        setFormData({ ...formData, cvc: value });
+
+        if (touchedFields.cvc) {
+            const error = validateCVC(value, formData.cardType);
+            setPaymentErrors({ ...paymentErrors, cvc: error });
+        }
+    };
+
+    // Handle expiration month input
+    const handleExpMonthChange = (e) => {
+        const value = e.target.value.replace(/\D/g, '').slice(0, 2);
+        setFormData({ ...formData, expMonth: value });
+
+        if (touchedFields.expMonth) {
+            let error = validateExpMonth(value);
+            if (!error && formData.expYear) {
+                const yearError = validateExpDate(value, formData.expYear);
+                if (yearError) {
+                    setPaymentErrors({ ...paymentErrors, expMonth: '', expYear: yearError });
+                } else {
+                    setPaymentErrors({ ...paymentErrors, expMonth: '', expYear: '' });
+                }
+            } else {
+                setPaymentErrors({ ...paymentErrors, expMonth: error });
+            }
+        }
+    };
+
+    // Handle expiration year input
+    const handleExpYearChange = (e) => {
+        const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        setFormData({ ...formData, expYear: value });
+
+        if (touchedFields.expYear) {
+            let error = validateExpDate(formData.expMonth, value);
+            setPaymentErrors({ ...paymentErrors, expYear: error });
+        }
+    };
+
+    // Handle field blur for validation
+    const handleFieldBlur = (fieldName) => {
+        setTouchedFields({ ...touchedFields, [fieldName]: true });
+        
+        let error = '';
+        switch (fieldName) {
+            case 'cardNumber':
+                error = validateCardNumber(formData.cardNumber);
+                setPaymentErrors({ ...paymentErrors, cardNumber: error });
+                break;
+            case 'cvc':
+                error = validateCVC(formData.cvc, formData.cardType);
+                setPaymentErrors({ ...paymentErrors, cvc: error });
+                break;
+            case 'expMonth':
+                error = validateExpMonth(formData.expMonth);
+                if (!error && formData.expYear) {
+                    const yearError = validateExpDate(formData.expMonth, formData.expYear);
+                    setPaymentErrors({ 
+                        ...paymentErrors, 
+                        expMonth: error,
+                        expYear: yearError || paymentErrors.expYear
+                    });
+                } else {
+                    setPaymentErrors({ ...paymentErrors, expMonth: error });
+                }
+                break;
+            case 'expYear':
+                error = validateExpDate(formData.expMonth, formData.expYear);
+                setPaymentErrors({ ...paymentErrors, expYear: error });
+                break;
+            default:
+                break;
+        }
+    };
+
+    // Check if payment form is valid (without side effects)
+    const isPaymentFormValid = () => {
+        if (formData.paymentMethod !== 'credit-card') {
+            return true; // No validation needed for other payment methods
+        }
+        
+        const errors = {
+            cardNumber: validateCardNumber(formData.cardNumber),
+            cvc: validateCVC(formData.cvc, formData.cardType),
+            expMonth: validateExpMonth(formData.expMonth),
+            expYear: validateExpDate(formData.expMonth, formData.expYear)
+        };
+
+        return !Object.values(errors).some(error => error !== '');
+    };
+
+    // Validate all payment fields and set errors/touched
+    const validatePaymentForm = () => {
+        if (formData.paymentMethod !== 'credit-card') {
+            return true; // No validation needed for other payment methods
+        }
+        
+        const errors = {
+            cardNumber: validateCardNumber(formData.cardNumber),
+            cvc: validateCVC(formData.cvc, formData.cardType),
+            expMonth: validateExpMonth(formData.expMonth),
+            expYear: validateExpDate(formData.expMonth, formData.expYear)
+        };
+        
+        setPaymentErrors(errors);
+        setTouchedFields({
+            cardNumber: true,
+            cvc: true,
+            expMonth: true,
+            expYear: true
+        });
+
+        return !Object.values(errors).some(error => error !== '');
     };
 
     const renderStep1Header = () => (
@@ -380,11 +661,13 @@ const HotelBookingForm = () => {
                                                         type="button"
                                                         onClick={() => setFormData({ ...formData, paymentMethod: method })}
                                                         className={`flex flex-col items-center justify-center p-8 rounded-2xl border-2 transition-all ${formData.paymentMethod === method ? 'border-blue-500 bg-blue-50 shadow-md shadow-blue-500/10' : 'border-gray-200 hover:border-gray-300 bg-gray-50/50'}`}
+                                                        aria-label={`Select ${method} payment method`}
+                                                        aria-pressed={formData.paymentMethod === method}
                                                     >
                                                         {method === 'stripe' && <span className="text-3xl font-bold text-[#635BFF] font-['Inter']">stripe</span>}
                                                         {method === 'paypal' && (
                                                             <div className="flex flex-col items-center gap-1">
-                                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                                                     <path d="M20.067 8.478c.492.88.556 2.014.3 3.327-.74 3.806-3.276 5.12-6.514 5.12h-.5a.805.805 0 0 0-.794.68l-.04.22-.63 3.993-.028.15a.806.806 0 0 1-.795.68H8.334a.68.68 0 0 1-.672-.78l.001-.005.002-.01.63-3.993.04-.22a.805.805 0 0 1 .794-.68h.5c3.238 0 5.774-1.314 6.514-5.12.256-1.313.192-2.446-.3-3.327z" fill="#139AD6" />
                                                                     <path d="M18.76 8.05c-.152-.043-.307-.082-.465-.117a7.374 7.374 0 0 0-1.475-.142h-4.667a.805.805 0 0 0-.794.68l-.952 6.04-.028.177a.805.805 0 0 1 .794-.68h.5c3.238 0 5.774-1.314 6.514-5.12.256-1.313.192-2.446-.3-3.327a3.995 3.995 0 0 0-.127-.51z" fill="#263B80" />
                                                                 </svg>
@@ -393,7 +676,7 @@ const HotelBookingForm = () => {
                                                         )}
                                                         {method === 'credit-card' && (
                                                             <div className="flex flex-col items-center gap-2">
-                                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-900">
+                                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-900" aria-hidden="true">
                                                                     <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
                                                                     <line x1="1" y1="10" x2="23" y2="10" />
                                                                 </svg>
@@ -405,79 +688,246 @@ const HotelBookingForm = () => {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-gray-700 text-xs font-bold font-['Inter'] uppercase tracking-wider mb-2">
-                                                        Card Number <span className="text-red-500">*</span>
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Card Number"
-                                                        required
-                                                        className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
-                                                        value={formData.cardNumber}
-                                                        onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-gray-700 text-xs font-bold font-['Inter'] uppercase tracking-wider mb-2">
-                                                        Select Card <span className="text-red-500">*</span>
-                                                    </label>
-                                                    <div className="relative group">
-                                                        <select
-                                                            className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter'] appearance-none"
-                                                            value={formData.cardType}
-                                                            onChange={(e) => setFormData({ ...formData, cardType: e.target.value })}
+                                        {/* Credit Card Form - Only show for credit-card payment method */}
+                                        {formData.paymentMethod === 'credit-card' && (
+                                            <div className="space-y-6">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label 
+                                                            htmlFor="cardNumber"
+                                                            className="block text-gray-700 text-xs font-bold font-['Inter'] uppercase tracking-wider mb-2"
                                                         >
-                                                            <option value="visa">Visa</option>
-                                                            <option value="mastercard">Mastercard</option>
-                                                            <option value="amex">American Express</option>
-                                                        </select>
-                                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
-                                                        </span>
+                                                            Card Number <span className="text-red-500">*</span>
+                                                        </label>
+                                                        <div className="relative">
+                                                            <input
+                                                                id="cardNumber"
+                                                                name="cardNumber"
+                                                                type="text"
+                                                                inputMode="numeric"
+                                                                autoComplete="cc-number"
+                                                                placeholder="1234 5678 9012 3456"
+                                                                maxLength={19}
+                                                                required
+                                                                className={`w-full bg-white border rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter'] ${
+                                                                    touchedFields.cardNumber && paymentErrors.cardNumber 
+                                                                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
+                                                                        : 'border-gray-200'
+                                                                }`}
+                                                                value={formData.cardNumber}
+                                                                onChange={handleCardNumberChange}
+                                                                onBlur={() => handleFieldBlur('cardNumber')}
+                                                                aria-invalid={touchedFields.cardNumber && !!paymentErrors.cardNumber}
+                                                                aria-describedby={touchedFields.cardNumber && paymentErrors.cardNumber ? 'cardNumber-error' : undefined}
+                                                            />
+                                                            {/* Card Type Icon Indicator */}
+                                                            {formData.cardNumber && (
+                                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">
+                                                                    {formData.cardType === 'visa' && (
+                                                                        <span className="text-xl font-bold text-[#1434CB]">VISA</span>
+                                                                    )}
+                                                                    {formData.cardType === 'mastercard' && (
+                                                                        <span className="text-xs font-bold text-[#EB001B]">MC</span>
+                                                                    )}
+                                                                    {formData.cardType === 'amex' && (
+                                                                        <span className="text-xs font-bold text-[#006FCF]">AMEX</span>
+                                                                    )}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {touchedFields.cardNumber && paymentErrors.cardNumber && (
+                                                            <p 
+                                                                id="cardNumber-error"
+                                                                className="mt-1 text-xs text-red-500 font-medium"
+                                                                role="alert"
+                                                            >
+                                                                {paymentErrors.cardNumber}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <label 
+                                                            htmlFor="cardType"
+                                                            className="block text-gray-700 text-xs font-bold font-['Inter'] uppercase tracking-wider mb-2"
+                                                        >
+                                                            Card Type <span className="text-gray-400 text-xs normal-case">(Auto-detected)</span>
+                                                        </label>
+                                                        <div className="relative group">
+                                                            <select
+                                                                id="cardType"
+                                                                name="cardType"
+                                                                autoComplete="cc-type"
+                                                                className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter'] appearance-none"
+                                                                value={formData.cardType}
+                                                                onChange={(e) => setFormData({ ...formData, cardType: e.target.value })}
+                                                                aria-label="Card type"
+                                                            >
+                                                                <option value="visa">Visa</option>
+                                                                <option value="mastercard">Mastercard</option>
+                                                                <option value="amex">American Express</option>
+                                                            </select>
+                                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" aria-hidden="true">
+                                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    <div>
+                                                        <label 
+                                                            htmlFor="cvc"
+                                                            className="block text-gray-700 text-xs font-bold font-['Inter'] uppercase tracking-wider mb-2"
+                                                        >
+                                                            {formData.cardType === 'amex' ? 'CVV' : 'CVC'} <span className="text-red-500">*</span>
+                                                        </label>
+                                                        <input
+                                                            id="cvc"
+                                                            name="cvc"
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            autoComplete="cc-csc"
+                                                            placeholder={formData.cardType === 'amex' ? '1234' : '123'}
+                                                            maxLength={4}
+                                                            required
+                                                            className={`w-full bg-white border rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter'] ${
+                                                                touchedFields.cvc && paymentErrors.cvc 
+                                                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
+                                                                    : 'border-gray-200'
+                                                            }`}
+                                                            value={formData.cvc}
+                                                            onChange={handleCVCChange}
+                                                            onBlur={() => handleFieldBlur('cvc')}
+                                                            aria-invalid={touchedFields.cvc && !!paymentErrors.cvc}
+                                                            aria-describedby={touchedFields.cvc && paymentErrors.cvc ? 'cvc-error' : undefined}
+                                                        />
+                                                        {touchedFields.cvc && paymentErrors.cvc && (
+                                                            <p 
+                                                                id="cvc-error"
+                                                                className="mt-1 text-xs text-red-500 font-medium"
+                                                                role="alert"
+                                                            >
+                                                                {paymentErrors.cvc}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <label 
+                                                            htmlFor="expMonth"
+                                                            className="block text-gray-700 text-xs font-bold font-['Inter'] uppercase tracking-wider mb-2"
+                                                        >
+                                                            Expiration Month <span className="text-red-500">*</span>
+                                                        </label>
+                                                        <input
+                                                            id="expMonth"
+                                                            name="expMonth"
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            autoComplete="cc-exp-month"
+                                                            placeholder="MM"
+                                                            maxLength={2}
+                                                            required
+                                                            className={`w-full bg-white border rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter'] ${
+                                                                touchedFields.expMonth && paymentErrors.expMonth 
+                                                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
+                                                                    : 'border-gray-200'
+                                                            }`}
+                                                            value={formData.expMonth}
+                                                            onChange={handleExpMonthChange}
+                                                            onBlur={() => handleFieldBlur('expMonth')}
+                                                            aria-invalid={touchedFields.expMonth && !!paymentErrors.expMonth}
+                                                            aria-describedby={touchedFields.expMonth && paymentErrors.expMonth ? 'expMonth-error' : undefined}
+                                                        />
+                                                        {touchedFields.expMonth && paymentErrors.expMonth && (
+                                                            <p 
+                                                                id="expMonth-error"
+                                                                className="mt-1 text-xs text-red-500 font-medium"
+                                                                role="alert"
+                                                            >
+                                                                {paymentErrors.expMonth}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <label 
+                                                            htmlFor="expYear"
+                                                            className="block text-gray-700 text-xs font-bold font-['Inter'] uppercase tracking-wider mb-2"
+                                                        >
+                                                            Expiration Year <span className="text-red-500">*</span>
+                                                        </label>
+                                                        <input
+                                                            id="expYear"
+                                                            name="expYear"
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            autoComplete="cc-exp-year"
+                                                            placeholder="YYYY"
+                                                            maxLength={4}
+                                                            required
+                                                            className={`w-full bg-white border rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter'] ${
+                                                                touchedFields.expYear && paymentErrors.expYear 
+                                                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' 
+                                                                    : 'border-gray-200'
+                                                            }`}
+                                                            value={formData.expYear}
+                                                            onChange={handleExpYearChange}
+                                                            onBlur={() => handleFieldBlur('expYear')}
+                                                            aria-invalid={touchedFields.expYear && !!paymentErrors.expYear}
+                                                            aria-describedby={touchedFields.expYear && paymentErrors.expYear ? 'expYear-error' : undefined}
+                                                        />
+                                                        {touchedFields.expYear && paymentErrors.expYear && (
+                                                            <p 
+                                                                id="expYear-error"
+                                                                className="mt-1 text-xs text-red-500 font-medium"
+                                                                role="alert"
+                                                            >
+                                                                {paymentErrors.expYear}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                                    <div className="flex items-start gap-3">
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true">
+                                                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                                        </svg>
+                                                        <div>
+                                                            <p className="text-blue-900 text-xs font-semibold mb-1">Secure Payment</p>
+                                                            <p className="text-blue-700 text-xs">Your payment information is encrypted and secure. We use industry-standard SSL encryption to protect your data.</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                        )}
 
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                <div>
-                                                    <label className="block text-gray-700 text-xs font-bold font-['Inter'] uppercase tracking-wider mb-2">CVC</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="CVC"
-                                                        className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
-                                                        value={formData.cvc}
-                                                        onChange={(e) => setFormData({ ...formData, cvc: e.target.value })}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-gray-700 text-xs font-bold font-['Inter'] uppercase tracking-wider mb-2">Expiration Month</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Month"
-                                                        className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
-                                                        value={formData.expMonth}
-                                                        onChange={(e) => setFormData({ ...formData, expMonth: e.target.value })}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-gray-700 text-xs font-bold font-['Inter'] uppercase tracking-wider mb-2">Expiration Year</label>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Year"
-                                                        className="w-full bg-white border border-gray-200 rounded-xl py-4 px-4 text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all font-['Inter']"
-                                                        value={formData.expYear}
-                                                        onChange={(e) => setFormData({ ...formData, expYear: e.target.value })}
-                                                    />
+                                        {/* Payment Gateway Info for Stripe/PayPal */}
+                                        {(formData.paymentMethod === 'stripe' || formData.paymentMethod === 'paypal') && (
+                                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                                                <div className="flex items-start gap-4">
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true">
+                                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                                    </svg>
+                                                    <div>
+                                                        <p className="text-blue-900 text-sm font-bold mb-2">
+                                                            {formData.paymentMethod === 'stripe' ? 'Stripe Secure Checkout' : 'PayPal Secure Checkout'}
+                                                        </p>
+                                                        <p className="text-blue-700 text-xs leading-relaxed">
+                                                            You will be redirected to {formData.paymentMethod === 'stripe' ? 'Stripe' : 'PayPal'} secure payment page to complete your transaction. 
+                                                            Your card details will be processed securely by {formData.paymentMethod === 'stripe' ? 'Stripe' : 'PayPal'} and are never stored on our servers.
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
+                                        )}
 
+                                        <div className="mt-6">
                                             <button
+                                                type="button"
                                                 onClick={handleNext}
-                                                disabled={isCreatingBooking}
+                                                disabled={isCreatingBooking || (formData.paymentMethod === 'credit-card' && !isPaymentFormValid())}
                                                 className="w-full md:w-auto bg-blue-500 text-white px-10 py-4 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                                                aria-label="Complete payment and submit booking"
                                             >
                                                 {isCreatingBooking ? 'Processing...' : 'Pay Now'}
                                             </button>
