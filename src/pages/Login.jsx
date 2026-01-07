@@ -169,7 +169,7 @@ const Login = () => {
           {/* Title */}
           <h1 className="text-3xl font-bold text-gray-900 mb-2">LOGIN</h1>
           <p className="text-gray-600 mb-6 text-base">
-            How to i get started lorem ipsum dolor at?
+            Welcome back! Sign in to access your account and continue planning your perfect trip.
           </p>
 
           {/* Login Form */}
@@ -284,7 +284,7 @@ const Login = () => {
             </div> */}
 
               {/* Auto Login Buttons */}
-              <div className="flex gap-2">
+              {/* <div className="flex gap-2">
                 <button
                   onClick={() =>
                     handleAutoLogin("admin@example.com", "admin123")
@@ -293,21 +293,19 @@ const Login = () => {
                 >
                   Auto Login as Admin
                 </button>
-              </div>
+              </div> */}
             </div>
 
             {/* Separator */}
-            <div className="flex items-center my-6">
+            {/* <div className="flex items-center my-6">
               <div className="flex-1 border-t border-gray-300"></div>
               <span className="px-4 text-gray-500 text-sm">
                 Login with Others
               </span>
               <div className="flex-1 border-t border-gray-300"></div>
-            </div>
+            </div> */}
 
-            {/* Social Login Buttons */}
-            <div className="space-y-3">
-              {/* Google Login Button */}
+            {/* <div className="space-y-3">
               <button className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">
                 <svg
                   width="20"
@@ -339,7 +337,6 @@ const Login = () => {
                 Login with google
               </button>
 
-              {/* Facebook Login Button */}
               <button className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">
                 <svg
                   width="20"
@@ -355,7 +352,7 @@ const Login = () => {
                 </svg>
                 Login with Facebook
               </button>
-            </div>
+            </div> */}
           </form>
 
           {/* Signup Link */}
