@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5190:5190"
+      - "3004:3004"
     environment:
       - NODE_ENV=production # ya development, jo chahiye wo rakho
     volumes:
@@ -15,7 +15,7 @@ services:
       - subdomain=te.workbrink.com
       - websiteName=travelease-frontend
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:5190" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:3004" ]
       interval: 30s
       timeout: 10s
       retries: 3
