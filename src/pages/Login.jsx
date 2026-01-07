@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../store/slices/authSlice";
 import { toast, ToastContainer } from "react-toastify";
@@ -14,6 +14,7 @@ const Login = () => {
   const { auth } = useSelector((state) => state);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
 
   // Redirect if already authenticated
@@ -118,13 +119,21 @@ const Login = () => {
           draggable: true,
         });
 
-        // Navigate to the appropriate dashboard based on role
-        const roleRouteMap = {
-          admin: "admin",
-          user: "website",
-        };
-        const rolePath = roleRouteMap[user.role] || "website";
-        navigate(`/${rolePath}/dashboard`);
+        // Check if user was redirected from a specific page (e.g., booking page)
+        const returnTo = location.state?.returnTo || location.state?.from;
+        
+        if (returnTo) {
+          // Redirect back to the original page (e.g., booking page)
+          navigate(returnTo, { replace: true });
+        } else {
+          // Navigate to the appropriate dashboard based on role
+          const roleRouteMap = {
+            admin: "admin",
+            user: "website",
+          };
+          const rolePath = roleRouteMap[user.role] || "website";
+          navigate(`/${rolePath}/dashboard`);
+        }
       }
     } catch (error) {
       const errorMessage = error?.data?.error || error?.data?.message || "An error occurred during login. Please try again.";
@@ -362,6 +371,7 @@ const Login = () => {
             </span>
             <Link
               to="/signup"
+              state={location.state}
               className="text-primary font-medium hover:text-primary/80 transition-colors"
             >
               Sign up

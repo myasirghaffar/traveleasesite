@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../store/slices/authSlice";
 import { useRegisterMutation } from "../services/Api";
@@ -17,6 +17,7 @@ const SignUp = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { auth } = useSelector((state) => state);
   const [registerUser, { isLoading: isRegistering }] = useRegisterMutation();
 
@@ -65,13 +66,21 @@ const SignUp = () => {
           autoClose: 3000,
         });
 
-        // Navigate to appropriate dashboard
-        const roleRouteMap = {
-          admin: "admin",
-          user: "website",
-        };
-        const rolePath = roleRouteMap[user.role] || "website";
-        navigate(`/${rolePath}/dashboard`);
+        // Check if user was redirected from a specific page (e.g., booking page)
+        const returnTo = location.state?.returnTo || location.state?.from;
+        
+        if (returnTo) {
+          // Redirect back to the original page (e.g., booking page)
+          navigate(returnTo, { replace: true });
+        } else {
+          // Navigate to appropriate dashboard
+          const roleRouteMap = {
+            admin: "admin",
+            user: "website",
+          };
+          const rolePath = roleRouteMap[user.role] || "website";
+          navigate(`/${rolePath}/dashboard`);
+        }
         setIsSubmitted(true);
       }
     } catch (error) {
@@ -391,6 +400,7 @@ const SignUp = () => {
             </span>
             <Link
               to="/login"
+              state={location.state}
               className="text-primary font-medium hover:text-primary/80 transition-colors"
             >
               Login

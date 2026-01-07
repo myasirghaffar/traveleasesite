@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
     StarRatingIcon,
     CheckCircleIcon,
@@ -16,6 +17,8 @@ import { toast } from 'react-toastify';
 const HotelBookingForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    const { auth } = useSelector((state) => state);
     const [step, setStep] = useState(1);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
     const [formData, setFormData] = useState({
@@ -104,6 +107,22 @@ const HotelBookingForm = () => {
             setStep(2);
         } else {
             // Final submit - create booking
+            // Check if user is authenticated
+            if (!auth.isAuthenticated || !auth.user) {
+                toast.info('Please sign up or login to complete your booking', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                });
+                // Redirect to signup page with return URL
+                navigate('/signup', {
+                    state: { 
+                        from: location.pathname,
+                        returnTo: location.pathname + location.search
+                    }
+                });
+                return;
+            }
+
             try {
                 if (!selectedRoomId) {
                     toast.error('Please select a room', {
@@ -152,6 +171,21 @@ const HotelBookingForm = () => {
                     navigate('/');
                 }
             } catch (error) {
+                // Handle 401 Unauthorized error specifically
+                if (error?.status === 401 || error?.originalStatus === 401) {
+                    toast.error('Your session has expired. Please login again.', {
+                        position: 'top-right',
+                        autoClose: 3000,
+                    });
+                    navigate('/signup', {
+                        state: { 
+                            from: location.pathname,
+                            returnTo: location.pathname + location.search
+                        }
+                    });
+                    return;
+                }
+                
                 const errorMessage = error?.data?.error || error?.data?.message || 'Failed to create booking. Please try again.';
                 toast.error(errorMessage, {
                     position: 'top-right',
