@@ -1,7 +1,46 @@
-export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-// export const BASE_URL = 'https://b0fd-139-135-36-92.ngrok-free.app'
-export const BASE_URL_IMAGE = import.meta.env.VITE_FILES_URL || '';
+// Normalize BASE_URL to ensure it has a protocol
+const getBaseUrl = () => {
+  const url = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  // If URL doesn't start with http:// or https://, add http://
+  if (url && !url.match(/^https?:\/\//i)) {
+    return `http://${url}`;
+  }
+  return url;
+};
 
+export const BASE_URL = getBaseUrl();
+// export const BASE_URL = 'https://b0fd-139-135-36-92.ngrok-free.app'
+const getBaseUrlImage = () => {
+  const url = import.meta.env.VITE_BASE_URL_IMAGE || import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  // If URL doesn't start with http:// or https://, add http://
+  if (url && !url.match(/^https?:\/\//i)) {
+    return `http://${url}`;
+  }
+  return url;
+};
+
+export const BASE_URL_IMAGE = getBaseUrlImage();
+
+/**
+ * Constructs a full image URL from a relative path
+ * @param {string} imagePath - Relative image path (e.g., '/uploads/hotels/1/cover.jpg')
+ * @returns {string} Full image URL
+ */
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  
+  // If already a full URL (http/https), return as is
+  if (imagePath.match(/^https?:\/\//i)) {
+    return imagePath;
+  }
+  
+  // Remove leading slash if present to avoid double slashes
+  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+  
+  // Construct full URL
+  const baseUrl = BASE_URL_IMAGE.endsWith('/') ? BASE_URL_IMAGE.slice(0, -1) : BASE_URL_IMAGE;
+  return `${baseUrl}/${cleanPath}`;
+};
 const VERSION_API = "v1";
 
 export const API_END_POINTS = {

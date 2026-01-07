@@ -42,7 +42,7 @@ const HotelBookingForm = () => {
         rating: hotelData.data.rating?.toString() || '4.5',
         reviews: hotelData.data.reviews_count?.toString() || '0',
         price: hotelData.data.min_price?.toString() || hotelData.data.price_per_night?.toString() || '100',
-        image: hotelData.data.cover_image || hotelData.data.images?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+        image: getImageUrl(hotelData.data.cover_image_url) || getImageUrl(hotelData.data.gallery_images?.[0]) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
     } : null;
 
     const breadcrumbItems = [

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     HotelBuildingIcon,
     PricingDollarIcon,
@@ -25,8 +25,11 @@ import {
     Maximize2,
     X
 } from "lucide-react";
+import { useCreateHotelMutation, useUpdateHotelMutation } from "../../../../services/Api";
+import { toast } from "react-toastify";
+import { getImageUrl } from "../../../../services/ApiEndpoints";
 
-const AddHotel = ({ onCancel }) => {
+const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess }) => {
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -50,9 +53,69 @@ const AddHotel = ({ onCancel }) => {
     });
 
     const [coverImage, setCoverImage] = useState(null);
+    const [coverImageFile, setCoverImageFile] = useState(null);
     const [galleryImages, setGalleryImages] = useState([]);
+    const [galleryImageFiles, setGalleryImageFiles] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    const [createHotel] = useCreateHotelMutation();
+    const [updateHotel] = useUpdateHotelMutation();
+
+    // Load hotel data if editing
+    // Load hotel data when editing (only once when hotelData.id changes)
+    useEffect(() => {
+        if (isEdit && hotelData?.id) {
+            setFormData({
+                name: hotelData.name || "",
+                description: hotelData.description || "",
+                category: hotelData.category || "",
+                city: hotelData.city || "",
+                country: hotelData.country || "",
+                address: hotelData.address || "",
+                mapLink: hotelData.map_link || hotelData.mapLink || "",
+                basePrice: hotelData.base_price || hotelData.base_price_per_night || "",
+                seasonalPrice: hotelData.seasonal_price || "",
+                roomsAvailable: hotelData.rooms_available || hotelData.total_rooms || "",
+                amenities: {
+                    wifi: hotelData.amenities?.wifi || hotelData.amenities?.includes?.('wifi') || false,
+                    breakfast: hotelData.amenities?.breakfast || hotelData.amenities?.includes?.('breakfast') || false,
+                    pool: hotelData.amenities?.pool || hotelData.amenities?.includes?.('pool') || false,
+                    parking: hotelData.amenities?.parking || hotelData.amenities?.includes?.('parking') || false,
+                    ac: hotelData.amenities?.ac || hotelData.amenities?.includes?.('ac') || false,
+                    gym: hotelData.amenities?.gym || hotelData.amenities?.includes?.('gym') || false,
+                    shuttle: hotelData.amenities?.shuttle || hotelData.amenities?.includes?.('shuttle') || false,
+                }
+            });
+            if (hotelData.cover_image || hotelData.cover_image_url) {
+                const coverImg = hotelData.cover_image || hotelData.cover_image_url;
+                setCoverImage(getImageUrl(coverImg) || coverImg);
+            }
+            if (hotelData.gallery_images && hotelData.gallery_images.length > 0) {
+                setGalleryImages(hotelData.gallery_images.map(img => getImageUrl(img) || img));
+            }
+            // Load rooms data if editing - only load once
+            if (hotelData.rooms && hotelData.rooms.length > 0) {
+                const mappedRooms = hotelData.rooms.map(room => ({
+                    id: room.id, // Include ID for existing rooms
+                    roomName: room.name || "",
+                    bedType: room.bed_type || "",
+                    guestType: `${room.max_occupancy || room.guest_capacity || 2} Guests`,
+                    roomSize: room.size || room.room_size || "",
+                    price: room.price_per_night || ""
+                }));
+                console.log('Loading rooms for edit:', mappedRooms);
+                setRooms(mappedRooms);
+            } else {
+                setRooms([]);
+            }
+        } else if (!isEdit) {
+            // Reset rooms when not in edit mode
+            setRooms([]);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEdit, hotelData?.id]); // Only depend on hotelData.id to avoid resetting on every hotelData change
 
     const categories = [
         { value: "5", label: "5 Star" },
@@ -80,6 +143,7 @@ const AddHotel = ({ onCancel }) => {
     const handleCoverUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
+            setCoverImageFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setCoverImage(reader.result);
@@ -91,10 +155,11 @@ const AddHotel = ({ onCancel }) => {
     const handleGalleryUpload = (e) => {
         const files = Array.from(e.target.files);
         if (galleryImages.length + files.length > 10) {
-            alert("Maximum 10 images allowed in gallery");
+            toast.error("Maximum 10 images allowed in gallery");
             return;
         }
 
+        setGalleryImageFiles(prev => [...prev, ...files]);
         files.forEach(file => {
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -106,11 +171,118 @@ const AddHotel = ({ onCancel }) => {
 
     const removeGalleryImage = (index) => {
         setGalleryImages(prev => prev.filter((_, i) => i !== index));
+        setGalleryImageFiles(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleAddRoom = (roomData) => {
-        setRooms(prev => [...prev, roomData]);
+        console.log('Adding room:', roomData);
+        setRooms(prev => {
+            const updated = [...prev, roomData];
+            console.log('Updated rooms state:', updated);
+            return updated;
+        });
         setIsRoomModalOpen(false);
+    };
+
+    const handleSave = async (publish = false) => {
+        // Validation
+        if (!formData.name || !formData.city || !formData.country || !formData.basePrice) {
+            toast.error("Please fill in all required fields");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const formDataToSend = new FormData();
+            
+            // Basic hotel information
+            formDataToSend.append('name', formData.name);
+            formDataToSend.append('description', formData.description || '');
+            formDataToSend.append('category', formData.category);
+            formDataToSend.append('city', formData.city);
+            formDataToSend.append('country', formData.country);
+            formDataToSend.append('address', formData.address || '');
+            if (formData.mapLink) {
+                formDataToSend.append('map_link', formData.mapLink);
+            }
+            formDataToSend.append('base_price_per_night', formData.basePrice);
+            if (formData.seasonalPrice) {
+                formDataToSend.append('seasonal_price_per_night', formData.seasonalPrice);
+            }
+            formDataToSend.append('rooms_available', formData.roomsAvailable || 0);
+            formDataToSend.append('status', publish ? 'published' : 'draft');
+
+            // Cover image
+            if (coverImageFile) {
+                formDataToSend.append('cover_image', coverImageFile);
+            }
+
+            // Gallery images
+            galleryImageFiles.forEach((file, index) => {
+                formDataToSend.append('gallery_images', file);
+            });
+
+            // Amenities
+            const amenitiesArray = Object.entries(formData.amenities)
+                .filter(([_, value]) => value)
+                .map(([key]) => key);
+            formDataToSend.append('amenities', JSON.stringify(amenitiesArray));
+
+            // Rooms data - always send rooms array (even if empty) so backend can process it
+            console.log('=== ROOMS DEBUG ===');
+            console.log('Rooms state:', rooms);
+            console.log('Rooms length:', rooms.length);
+            console.log('Rooms type:', typeof rooms, Array.isArray(rooms));
+            
+            const validRooms = rooms.filter(room => {
+                console.log('Checking room:', room);
+                const roomName = (room.roomName || room.name || '').trim();
+                const price = room.price || room.price_per_night || 0;
+                const priceNum = parseFloat(price);
+                
+                console.log('Room name:', roomName, 'Length:', roomName.length);
+                console.log('Room price:', price, 'Parsed:', priceNum);
+                console.log('Full room object:', JSON.stringify(room));
+                
+                // Validation - room name must be at least 2 characters (backend requirement)
+                // But if user entered something, let's be more lenient and allow 1 char for now
+                // Validation - room name must be at least 2 characters (backend requirement)
+                const isValid = roomName.length >= 2 && priceNum > 0;
+                if (!isValid) {
+                    console.log('❌ Invalid room filtered out:', { roomName, price, roomNameLength: roomName.length, priceNum });
+                } else {
+                    console.log('✅ Valid room:', { roomName, price: priceNum });
+                }
+                return isValid;
+            });
+            
+            console.log('Valid rooms count:', validRooms.length);
+            console.log('Valid rooms:', validRooms);
+            
+            // Always send rooms array (even if empty) so backend knows to process/delete rooms
+            formDataToSend.append('rooms', JSON.stringify(validRooms));
+            console.log('Rooms JSON stringified:', JSON.stringify(validRooms));
+            console.log('=== END ROOMS DEBUG ===');
+
+            if (isEdit && hotelData?.id) {
+                // Update hotel
+                await updateHotel({ id: hotelData.id, data: formDataToSend }).unwrap();
+                toast.success('Hotel updated successfully');
+            } else {
+                // Create hotel
+                await createHotel({ data: formDataToSend }).unwrap();
+                toast.success('Hotel created successfully');
+            }
+
+            if (onSuccess) {
+                onSuccess();
+            }
+        } catch (error) {
+            console.error('Error saving hotel:', error);
+            toast.error(error?.data?.message || `Failed to ${isEdit ? 'update' : 'create'} hotel`);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const SectionHeader = ({ icon: Icon, title }) => (
@@ -153,9 +325,13 @@ const AddHotel = ({ onCancel }) => {
                     >
                         Cancel
                     </button>
-                    <button className="flex items-center gap-2 bg-blue-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 text-sm">
+                    <button 
+                        onClick={() => handleSave(true)}
+                        disabled={isSubmitting}
+                        className="flex items-center gap-2 bg-blue-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                         <CheckCircleWhiteIcon className="w-4 h-4" />
-                        Save & Publish
+                        {isSubmitting ? 'Saving...' : 'Save & Publish'}
                     </button>
                 </div>
             </div>
@@ -516,13 +692,21 @@ const AddHotel = ({ onCancel }) => {
                         {/* Actions in Sidebar */}
                         <div className="mt-10 space-y-4">
                             <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[2px] mb-4">Quick Actions</h3>
-                            <button className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-100 transition-all active:scale-95 group">
+                            <button 
+                                onClick={() => handleSave(false)}
+                                disabled={isSubmitting}
+                                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-100 transition-all active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
                                 <DisketteSaveIcon className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
-                                Save Draft
+                                {isSubmitting ? 'Saving...' : 'Save Draft'}
                             </button>
-                            <button className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-blue-600 text-white rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95">
+                            <button 
+                                onClick={() => handleSave(true)}
+                                disabled={isSubmitting}
+                                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-blue-600 text-white rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
                                 <CheckCircleWhiteIcon className="w-4 h-4" />
-                                Save & Publish
+                                {isSubmitting ? 'Publishing...' : 'Save & Publish'}
                             </button>
                         </div>
                     </div>
@@ -573,46 +757,170 @@ const AddRoomModal = ({ onClose, onAdd }) => {
         price: "",
         availableShift: ""
     });
+    
+    const [errors, setErrors] = useState({});
+    const [touched, setTouched] = useState({});
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setRoomData(prev => ({ ...prev, [name]: value }));
+        
+        // Clear error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    };
+    
+    const handleBlur = (name) => {
+        setTouched(prev => ({ ...prev, [name]: true }));
+        validateField(name, roomData[name]);
+    };
+    
+    const validateField = (name, value) => {
+        let error = '';
+        
+        switch (name) {
+            case 'roomName': {
+                const roomName = (value || '').trim();
+                if (!roomName) {
+                    error = 'Room name is required';
+                } else if (roomName.length < 2) {
+                    error = 'Room name must be at least 2 characters';
+                } else if (roomName.length > 255) {
+                    error = 'Room name must be less than 255 characters';
+                }
+                break;
+            }
+            case 'bedType':
+                if (!value || !value.trim()) {
+                    error = 'Bed type is required';
+                }
+                break;
+            case 'guestType': {
+                if (!value || !value.trim()) {
+                    error = 'Guest type is required';
+                } else {
+                    const guestCount = parseInt(value.toString().replace(/[^0-9]/g, ''));
+                    if (!guestCount || guestCount < 1 || guestCount > 20) {
+                        error = 'Please enter a valid guest count (1-20)';
+                    }
+                }
+                break;
+            }
+            case 'roomSize': {
+                if (!value || !value.trim()) {
+                    error = 'Room size is required';
+                } else {
+                    const size = parseFloat(value);
+                    if (isNaN(size) || size <= 0 || size > 1000) {
+                        error = 'Please enter a valid room size (1-1000 m²)';
+                    }
+                }
+                break;
+            }
+            case 'price':
+                if (!value) {
+                    error = 'Price is required';
+                } else {
+                    const price = parseFloat(value);
+                    if (isNaN(price) || price <= 0) {
+                        error = 'Price must be greater than 0';
+                    }
+                }
+                break;
+        }
+        
+        if (error) {
+            setErrors(prev => ({ ...prev, [name]: error }));
+        } else {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
+        
+        return !error;
+    };
+    
+    const validateForm = () => {
+        const fields = ['roomName', 'bedType', 'guestType', 'roomSize', 'price'];
+        let isValid = true;
+        
+        fields.forEach(field => {
+            if (!validateField(field, roomData[field])) {
+                isValid = false;
+            }
+            setTouched(prev => ({ ...prev, [field]: true }));
+        });
+        
+        return isValid;
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!roomData.roomName || !roomData.price) return;
-        onAdd(roomData);
+        
+        if (!validateForm()) {
+            return;
+        }
+        
+        // Format guestType to extract number
+        const guestCount = parseInt(roomData.guestType.toString().replace(/[^0-9]/g, '') || '2');
+        const formattedRoomData = {
+            ...roomData,
+            guestType: `${guestCount} Guests`
+        };
+        
+        onAdd(formattedRoomData);
+        
+        // Reset form after adding
+        setRoomData({
+            roomName: "",
+            bedType: "",
+            guestType: "",
+            roomSize: "",
+            price: "",
+            availableShift: ""
+        });
+        setErrors({});
+        setTouched({});
     };
 
-    const ModalInput = ({ label, name, icon: Icon, placeholder, type = "text", isPrice = false }) => (
-        <div className="space-y-2">
-            <label className="block text-[14px] font-semibold text-slate-800 font-['Inter']">
-                {label}
-            </label>
-            <div className="relative">
-                {Icon && !isPrice && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <Icon size={18} strokeWidth={1.5} />
-                    </div>
-                )}
-                {isPrice && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</div>
-                )}
-                <input
-                    name={name}
-                    type={type}
-                    value={roomData[name]}
-                    onChange={handleChange}
-                    placeholder={placeholder}
-                    className={`w-full h-[54px] ${(Icon || isPrice) ? 'pl-12' : 'px-5'} ${isPrice ? 'pr-12' : 'pr-5'} rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-slate-700 placeholder:text-slate-300 font-['Inter'] text-[15px]`}
-                />
-                {isPrice && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</div>
+    const ModalInput = ({ label, name, icon: Icon, placeholder, type = "text", isPrice = false, required = false }) => {
+        const hasError = touched[name] && errors[name];
+        return (
+            <div className="space-y-2">
+                <label className="block text-[14px] font-semibold text-slate-800 font-['Inter']">
+                    {label} {required && <span className="text-red-500">*</span>}
+                </label>
+                <div className="relative">
+                    {Icon && !isPrice && (
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                            <Icon size={18} strokeWidth={1.5} />
+                        </div>
+                    )}
+                    {isPrice && (
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</div>
+                    )}
+                    <input
+                        name={name}
+                        type={type}
+                        value={roomData[name]}
+                        onChange={handleChange}
+                        onBlur={() => handleBlur(name)}
+                        placeholder={placeholder}
+                        className={`w-full h-[54px] ${(Icon || isPrice) ? 'pl-12' : 'px-5'} ${isPrice ? 'pr-12' : 'pr-5'} rounded-[12px] border ${hasError ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'} transition-all outline-none text-slate-700 placeholder:text-slate-300 font-['Inter'] text-[15px]`}
+                    />
+                    {isPrice && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</div>
+                    )}
+                </div>
+                {hasError && (
+                    <p className="text-red-500 text-xs font-medium font-['Inter'] mt-1">{errors[name]}</p>
                 )}
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
@@ -633,37 +941,43 @@ const AddRoomModal = ({ onClose, onAdd }) => {
                             label="Room Name"
                             name="roomName"
                             placeholder="Deluxe King Room"
+                            required={true}
                         />
                         <ModalInput
                             label="Bed Type"
                             name="bedType"
                             icon={BedDouble}
                             placeholder="King Bed"
+                            required={true}
                         />
                         <ModalInput
                             label="Guest Type"
                             name="guestType"
                             icon={Users}
                             placeholder="2 Guests"
+                            required={true}
                         />
                         <ModalInput
-                            label="Room Size"
+                            label="Room Size (m²)"
                             name="roomSize"
                             icon={Maximize2}
-                            placeholder="35 m²"
+                            placeholder="35"
+                            type="number"
+                            required={true}
                         />
                         <ModalInput
-                            label="Price"
+                            label="Price per Night"
                             name="price"
                             type="number"
                             isPrice={true}
                             placeholder="120"
+                            required={true}
                         />
                         <ModalInput
                             label="Available Shift"
                             name="availableShift"
                             icon={Users}
-                            placeholder="Night"
+                            placeholder="Both"
                         />
                     </form>
                 </div>

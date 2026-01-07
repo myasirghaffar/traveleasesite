@@ -1,8 +1,18 @@
 import axios from "axios";
 
+// Normalize URL to ensure it has a protocol
+const getBaseURL = () => {
+  const url = import.meta.env.VITE_API_URL || "http://localhost:4000";
+  // If URL doesn't start with http:// or https://, add http://
+  if (url && !url.match(/^https?:\/\//i)) {
+    return `http://${url}`;
+  }
+  return url;
+};
+
 // Create the API instance without store dependencies
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://api.example.com",
+  baseURL: getBaseURL(),
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",

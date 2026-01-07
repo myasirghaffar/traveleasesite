@@ -18,6 +18,7 @@ import {
     CheckCircleIcon
 } from '../../../../assets/icons/icons';
 import { useGetHotelByIdQuery, useGetRoomsQuery } from '../../../../services/Api';
+import { getImageUrl } from '../../../../services/ApiEndpoints';
 
 const HotelBookingPage = () => {
     const { id } = useParams();
@@ -37,7 +38,8 @@ const HotelBookingPage = () => {
         rating: hotelData.data.rating?.toString() || '4.5',
         reviews: hotelData.data.reviews_count?.toString() || '0',
         price: hotelData.data.min_price?.toString() || hotelData.data.price_per_night?.toString() || '100',
-        image: hotelData.data.cover_image || hotelData.data.images?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+        image: getImageUrl(hotelData.data.cover_image_url) || getImageUrl(hotelData.data.gallery_images?.[0]) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+        galleryImages: hotelData.data.gallery_images || [],
     } : null;
     
     // Transform rooms data
@@ -149,22 +151,43 @@ const HotelBookingPage = () => {
                     <div className="col-span-2 row-span-2 relative overlow-hidden">
                         <img src={hotel.image} alt="Main" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
                     </div>
-                    <div className="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&q=80&w=400" alt="Gallery" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
-                    </div>
-                    <div className="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=400" alt="Gallery" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
-                    </div>
-                    <div className="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&q=80&w=400" alt="Gallery" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
-                    </div>
-                    <div className="relative overflow-hidden group cursor-pointer">
-                        <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=400" alt="Gallery" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white transition-all group-hover:bg-black/60">
-                            <PhotoGalleryIcon className="w-8 h-8 mb-2 drop-shadow-lg" />
-                            <span className="font-bold text-sm md:text-base px-2 text-center drop-shadow-md">View 24+ Photos</span>
-                        </div>
-                    </div>
+                    {hotel.galleryImages && hotel.galleryImages.length > 0 ? (
+                        <>
+                            {hotel.galleryImages.slice(0, 3).map((img, idx) => (
+                                <div key={idx} className="relative overflow-hidden">
+                                    <img src={getImageUrl(img)} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
+                                </div>
+                            ))}
+                            {hotel.galleryImages.length > 3 && (
+                                <div className="relative overflow-hidden group cursor-pointer">
+                                    <img src={getImageUrl(hotel.galleryImages[3])} alt="Gallery" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                    <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white transition-all group-hover:bg-black/60">
+                                        <PhotoGalleryIcon className="w-8 h-8 mb-2 drop-shadow-lg" />
+                                        <span className="font-bold text-sm md:text-base px-2 text-center drop-shadow-md">View {hotel.galleryImages.length}+ Photos</span>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <div className="relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&q=80&w=400" alt="Gallery" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
+                            </div>
+                            <div className="relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&q=80&w=400" alt="Gallery" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
+                            </div>
+                            <div className="relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&q=80&w=400" alt="Gallery" className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" />
+                            </div>
+                            <div className="relative overflow-hidden group cursor-pointer">
+                                <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=400" alt="Gallery" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white transition-all group-hover:bg-black/60">
+                                    <PhotoGalleryIcon className="w-8 h-8 mb-2 drop-shadow-lg" />
+                                    <span className="font-bold text-sm md:text-base px-2 text-center drop-shadow-md">View 24+ Photos</span>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-12">

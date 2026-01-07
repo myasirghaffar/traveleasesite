@@ -1,30 +1,62 @@
 import React, { useState, useMemo } from "react";
-import { Edit, Trash2, MapPin, Star } from "lucide-react";
+import { Edit, Trash2, MapPin, Star, Eye } from "lucide-react";
 import ReusableDataTable from "../../../components/ReusableDataTable";
 import ReusablePagination from "../../../components/ReusablePagination";
 import ReusableFilter from "../../../components/ReusableFilter";
 import { PlusIcon } from "../../../assets/icons/icons";
 import AddHotel from "./features/AddHotel";
-import { useGetAdminHotelsQuery, useDeleteHotelMutation } from "../../../services/Api";
+import ViewHotel from "./features/ViewHotel";
+import {
+  useGetAdminHotelsQuery,
+  useDeleteHotelMutation,
+  useGetAdminHotelByIdQuery
+} from "../../../services/Api";
 import { toast } from "react-toastify";
+import { getImageUrl } from "../../../services/ApiEndpoints";
 
 const ManageHotels = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [filters, setFilters] = useState({
-    category: "",
-    status: "",
+    category: "all",
+    status: "all",
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [editingHotelId, setEditingHotelId] = useState(null);
+  const [viewingHotelId, setViewingHotelId] = useState(null);
   
-  const { data, isLoading, error, refetch } = useGetAdminHotelsQuery({
-    page: currentPage,
-    limit: itemsPerPage,
-    search: searchTerm,
-    status: filters.status || undefined,
-  });
+  // Build API query parameters
+  const queryParams = useMemo(() => {
+    const params = {
+      page: currentPage,
+      limit: itemsPerPage,
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    };
+    
+    if (searchTerm) {
+      params.search = searchTerm;
+    }
+    
+    if (filters.status && filters.status !== 'all') {
+      params.status = filters.status;
+    }
+    
+    if (filters.category && filters.category !== 'all') {
+      params.category = filters.category;
+    }
+    
+    return params;
+  }, [currentPage, itemsPerPage, searchTerm, filters]);
+  
+  const { data, isLoading, error, refetch } = useGetAdminHotelsQuery(queryParams);
   const [deleteHotel] = useDeleteHotelMutation();
+  
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filters.status, filters.category]);
 
   // Transform API data to match component format
   const hotelsData = useMemo(() => {
@@ -32,34 +64,44 @@ const ManageHotels = () => {
     return data.data.hotels.map(hotel => ({
       id: hotel.id,
       name: hotel.name,
-      image: hotel.cover_image || hotel.images?.[0] || "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
-      location: { city: hotel.city || "Unknown", state: hotel.state || "" },
-      rating: hotel.rating || 0,
-      price: hotel.min_price || hotel.price_per_night || 0,
-      availability: { count: hotel.available_rooms || 0, status: hotel.available_rooms > 10 ? "safe" : hotel.available_rooms > 5 ? "warning" : "danger" },
-      status: hotel.status === 'active' ? "Active" : "Inactive",
+      image: getImageUrl(hotel.cover_image) || "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
+      location: { city: hotel.city || "Unknown", country: hotel.country || "" },
+      category: hotel.category || "Standard",
+      rating: parseFloat(hotel.category?.replace(/[^0-9]/g, '') || 0) || 0,
+      price: hotel.base_price || 0,
+      availability: { 
+        count: hotel.rooms_available || hotel.total_rooms || 0, 
+        status: (hotel.rooms_available || hotel.total_rooms || 0) > 10 ? "safe" : (hotel.rooms_available || hotel.total_rooms || 0) > 5 ? "warning" : "danger" 
+      },
+      status: hotel.status === 'active' || hotel.status === 'published' ? "Active" : "Inactive",
+      total_rooms: hotel.total_rooms || 0,
+      total_bookings: hotel.total_bookings || 0,
     }));
   }, [data]);
 
-  // Mock Filter Options
+  // Filter Options
   const filterOptions = [
     {
       key: "category",
       label: "All Categories",
       options: [
-        { value: "", label: "All Categories" },
-        { value: "5", label: "5 Star" },
-        { value: "4", label: "4 Star" },
-        { value: "3", label: "3 Star" },
+        { value: "all", label: "All Categories" },
+        { value: "Luxury", label: "Luxury" },
+        { value: "Business", label: "Business" },
+        { value: "Budget", label: "Budget" },
+        { value: "Resort", label: "Resort" },
+        { value: "Boutique", label: "Boutique" },
       ],
     },
     {
       key: "status",
       label: "All Status",
       options: [
-        { value: "", label: "All Status" },
+        { value: "all", label: "All Status" },
         { value: "active", label: "Active" },
+        { value: "published", label: "Published" },
         { value: "inactive", label: "Inactive" },
+        { value: "draft", label: "Draft" },
       ],
     },
   ];
@@ -85,17 +127,20 @@ const ManageHotels = () => {
       <div className="flex items-center gap-2 text-gray-600">
         <MapPin size={16} className="text-gray-400" />
         <span className="text-sm font-['Inter']">
-          {row.location.city}, {row.location.state}
+          {row.location.city}{row.location.country ? `, ${row.location.country}` : ''}
         </span>
       </div>
     ),
     category: (row) => (
-      <div className="flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center">
+        <span className="text-gray-900 text-sm font-medium font-['Inter'] mb-1">
+          {row.category}
+        </span>
         <div className="flex">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              size={14}
+              size={12}
               className={`${i < row.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-200"
                 }`}
             />
@@ -135,11 +180,20 @@ const ManageHotels = () => {
     actions: (row) => (
       <div className="flex items-center gap-2">
         <button 
+          className="p-2 hover:bg-green-50 text-green-600 rounded-lg transition-colors"
+          onClick={() => {
+            setViewingHotelId(row.id);
+          }}
+          title="View Hotel"
+        >
+          <Eye size={18} />
+        </button>
+        <button 
           className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
           onClick={() => {
-            // TODO: Implement edit functionality
-            console.log('Edit hotel:', row.id);
+            setEditingHotelId(row.id);
           }}
+          title="Edit Hotel"
         >
           <Edit size={18} />
         </button>
@@ -156,6 +210,7 @@ const ManageHotels = () => {
               }
             }
           }}
+          title="Delete Hotel"
         >
           <Trash2 size={18} />
         </button>
@@ -177,18 +232,46 @@ const ManageHotels = () => {
 
 
 
-  // Filtering Logic (API handles pagination and search)
-  const filteredData = hotelsData.filter(hotel => {
-    const matchesCategory = !filters.category || hotel.rating.toString() === filters.category;
-    const matchesStatus = !filters.status || hotel.status.toLowerCase() === filters.status.toLowerCase();
-    return matchesCategory && matchesStatus;
+  // Use API pagination data directly (API handles all filtering)
+  const totalPages = data?.data?.pagination?.total_pages || data?.data?.pagination?.totalPages || 1;
+  const totalItems = data?.data?.pagination?.total_items || data?.data?.pagination?.totalItems || 0;
+  const currentData = hotelsData;
+
+  // Handle edit mode - fetch hotel data and show edit form
+  const { data: hotelData } = useGetAdminHotelByIdQuery(editingHotelId, {
+    skip: !editingHotelId
   });
 
-  const totalPages = data?.data?.pagination?.totalPages || Math.ceil(filteredData.length / itemsPerPage);
-  const currentData = filteredData;
-
   if (isAdding) {
-    return <AddHotel onCancel={() => setIsAdding(false)} />;
+    return <AddHotel onCancel={() => setIsAdding(false)} onSuccess={() => {
+      setIsAdding(false);
+      refetch();
+    }} />;
+  }
+
+  if (viewingHotelId) {
+    return (
+      <ViewHotel
+        hotelId={viewingHotelId}
+        onClose={() => setViewingHotelId(null)}
+        onEdit={(id) => {
+          setViewingHotelId(null);
+          setEditingHotelId(id);
+        }}
+      />
+    );
+  }
+
+  if (editingHotelId && hotelData?.data) {
+    return <AddHotel 
+      hotelData={hotelData.data.hotel || hotelData.data} 
+      isEdit={true}
+      onCancel={() => setEditingHotelId(null)} 
+      onSuccess={() => {
+        setEditingHotelId(null);
+        refetch();
+      }} 
+    />;
   }
 
   return (
@@ -211,10 +294,14 @@ const ManageHotels = () => {
           <ReusableFilter
             searchPlaceholder="Search hotels..."
             filters={filterOptions}
-            onSearchChange={setSearchTerm}
-            onFilterChange={(key, value) =>
-              setFilters((prev) => ({ ...prev, [key]: value }))
-            }
+            onSearchChange={(value) => {
+              setSearchTerm(value);
+              setCurrentPage(1); // Reset to first page on search
+            }}
+            onFilterChange={(key, value) => {
+              setFilters((prev) => ({ ...prev, [key]: value }));
+              setCurrentPage(1); // Reset to first page on filter change
+            }}
             className="shadow-none !p-0 bg-transparent"
 
           />
@@ -253,7 +340,7 @@ const ManageHotels = () => {
       {/* Pagination Section */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
         <span className="text-slate-500 text-sm font-medium font-['Inter'] text-center sm:text-left">
-          Showing {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} results
+          Showing {currentData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} results
         </span>
         <div className="w-auto">
           <ReusablePagination

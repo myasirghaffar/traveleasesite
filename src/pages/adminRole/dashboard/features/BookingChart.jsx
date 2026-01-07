@@ -1,75 +1,103 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useGetAdminRevenueDataQuery } from '../../../../services/Api';
 
+// Generate Y-axis labels based on max value
+const generateYAxisLabels = (maxValue) => {
+    const roundedMax = Math.ceil(maxValue / 1000) * 1000; // Round up to nearest thousand
+    const step = roundedMax / 5;
+    const labels = [];
+    for (let i = 0; i <= 5; i++) {
+        const value = step * i;
+        if (value >= 1000) {
+            labels.push(`${(value / 1000).toFixed(1)}k`);
+        } else {
+            labels.push(value.toString());
+        }
+    }
+    return labels;
+};
+
+// Empty data structure for loading/error states
+const getEmptyData = (period) => {
+    const defaultLabels = period === 'daily' ? 
+        ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] :
+        period === 'weekly' ? 
+        ['Week 1', 'Week 2', 'Week 3', 'Week 4'] :
+        ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    
+    return {
+        labels: defaultLabels,
+        yAxisLabels: ['0', '1k', '2k', '3k', '4k', '5k'],
+        dataPoints: defaultLabels.map(label => ({ label, value: 0, percentage: 0 })),
+        selectedIndex: Math.floor(defaultLabels.length / 2),
+        stats: { percentage: '0%', comparison: period === 'daily' ? 'VS YESTERDAY' : period === 'weekly' ? 'VS LAST WEEK' : 'VS LAST YEAR' }
+    };
+};
+
+// Transform API data to chart format
+const transformData = (apiData, period) => {
+        if (!apiData?.data?.data_points || apiData.data.data_points.length === 0) {
+            return getEmptyData(period);
+        }
+
+        const dataPoints = apiData.data.data_points;
+        const maxRevenue = Math.max(...dataPoints.map(d => d.revenue || 0), 1);
+        
+        // Format labels based on period
+        const formatLabel = (periodLabel, period) => {
+            if (period === 'daily') {
+                // Extract day name from period_label (e.g., "Jan 15" -> "Mon")
+                const date = new Date(periodLabel);
+                const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+                return days[date.getDay()] || periodLabel.toUpperCase().substring(0, 3);
+            } else if (period === 'weekly') {
+                // Extract week number (e.g., "Week 1 2024" -> "Week 1")
+                return periodLabel.replace(/Week (\d+).*/, 'Week $1').toUpperCase();
+            } else {
+                // Monthly (e.g., "JAN" -> "JAN")
+                return periodLabel.toUpperCase().substring(0, 3);
+            }
+        };
+
+        const transformedDataPoints = dataPoints.map((point) => ({
+            label: formatLabel(point.period_label || point.period, period),
+            value: Math.round(point.revenue || 0),
+            percentage: maxRevenue > 0 ? ((point.revenue || 0) / maxRevenue) * 100 : 0,
+            sales_count: point.sales_count || 0
+        }));
+
+        // Generate Y-axis labels based on max value
+        const maxValue = maxRevenue;
+        const yAxisLabels = generateYAxisLabels(maxValue);
+
+        // Calculate stats
+        const yearOverYearChange = apiData.data.summary?.year_over_year_change || 0;
+        const comparisonText = period === 'daily' ? 'VS YESTERDAY' : 
+                              period === 'weekly' ? 'VS LAST WEEK' : 'VS LAST YEAR';
+
+        return {
+            labels: transformedDataPoints.map(d => d.label),
+            yAxisLabels,
+            dataPoints: transformedDataPoints,
+            selectedIndex: Math.floor(transformedDataPoints.length / 2),
+            stats: {
+                percentage: yearOverYearChange >= 0 ? `+${yearOverYearChange.toFixed(1)}%` : `${yearOverYearChange.toFixed(1)}%`,
+                comparison: comparisonText
+            }
+        };
+    };
 
 const BookingChart = () => {
     const [activeTab, setActiveTab] = useState('annually');
+    const { data: revenueData, isLoading, error } = useGetAdminRevenueDataQuery({ period: activeTab });
 
-    // Data for different time periods
-    const dailyData = {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        yAxisLabels: ['0', '50', '100', '150', '200', '250'],
-        dataPoints: [
-            { label: 'Mon', value: 120, percentage: 48 },
-            { label: 'Tue', value: 180, percentage: 72 },
-            { label: 'Wed', value: 150, percentage: 60 },
-            { label: 'Thu', value: 200, percentage: 80 },
-            { label: 'Fri', value: 220, percentage: 88 },
-            { label: 'Sat', value: 190, percentage: 76 },
-            { label: 'Sun', value: 160, percentage: 64 },
-        ],
-        selectedIndex: 4,
-        stats: { percentage: '2.5%', comparison: 'VS YESTERDAY' }
-    };
-
-    const weeklyData = {
-        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-        yAxisLabels: ['0', '200', '400', '600', '800', '1k'],
-        dataPoints: [
-            { label: 'Week 1', value: 650, percentage: 65 },
-            { label: 'Week 2', value: 820, percentage: 82 },
-            { label: 'Week 3', value: 750, percentage: 75 },
-            { label: 'Week 4', value: 900, percentage: 90 },
-        ],
-        selectedIndex: 2,
-        stats: { percentage: '1.8%', comparison: 'VS LAST WEEK' }
-    };
-
-    const annuallyData = {
-        labels: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
-        yAxisLabels: ['0', '1k', '2k', '3k', '4k', '5k'],
-        dataPoints: [
-            { label: 'JAN', value: 3348, percentage: 65 },
-            { label: 'FEB', value: 2100, percentage: 42 },
-            { label: 'MAR', value: 2800, percentage: 56 },
-            { label: 'APR', value: 3100, percentage: 62 },
-            { label: 'MAY', value: 2600, percentage: 52 },
-            { label: 'JUN', value: 3900, percentage: 78 },
-            { label: 'JUL', value: 4200, percentage: 84 },
-            { label: 'AUG', value: 3700, percentage: 74 },
-            { label: 'SEP', value: 3000, percentage: 60 },
-            { label: 'OCT', value: 2400, percentage: 48 },
-            { label: 'NOV', value: 2900, percentage: 58 },
-            { label: 'DEC', value: 3500, percentage: 70 },
-        ],
-        selectedIndex: 5,
-        stats: { percentage: '1.3%', comparison: 'VS LAST YEAR' }
-    };
-
-    // Get current data based on active tab
-    const getCurrentData = () => {
-        switch (activeTab) {
-            case 'daily':
-                return dailyData;
-            case 'weekly':
-                return weeklyData;
-            case 'annually':
-                return annuallyData;
-            default:
-                return annuallyData;
+    // Get current data based on API response
+    const currentData = useMemo(() => {
+        if (isLoading || error || !revenueData) {
+            return getEmptyData(activeTab);
         }
-    };
-
-    const currentData = getCurrentData();
+        return transformData(revenueData, activeTab);
+    }, [revenueData, activeTab, isLoading, error]);
     const [hoveredIndex, setHoveredIndex] = useState(currentData.selectedIndex);
 
     // Update hovered index when active tab changes
@@ -124,6 +152,14 @@ const BookingChart = () => {
                         Booking Quick Summary
                     </h2>
                 </div>
+
+                {/* Loading/Error States */}
+                {isLoading && (
+                    <div className="text-sm text-gray-500">Loading revenue data...</div>
+                )}
+                {error && (
+                    <div className="text-sm text-red-500">Error loading revenue data</div>
+                )}
 
                 {/* Period Selector - Desktop Tabs */}
                 <div className="hidden md:flex gap-2 bg-slate-50 rounded-2xl p-1">
@@ -274,11 +310,16 @@ const BookingChart = () => {
                         }}
                     >
                         <div className="text-slate-200 text-[13px] font-normal font-['Inter'] mb-1 whitespace-nowrap">
-                            {activeTab === 'annually' ? `${selectedPoint.value} sales` : `${selectedPoint.value} bookings`}
+                            ${selectedPoint.value.toLocaleString()} revenue
                         </div>
                         <div className="text-white text-base font-bold font-['Inter'] whitespace-nowrap">
                             {selectedPoint.label} Summary
                         </div>
+                        {selectedPoint.sales_count > 0 && (
+                            <div className="text-slate-300 text-xs font-normal font-['Inter'] mt-1">
+                                {selectedPoint.sales_count} {selectedPoint.sales_count === 1 ? 'booking' : 'bookings'}
+                            </div>
+                        )}
                         {/* Tooltip Arrow */}
                         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
                             <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-[#1E1B39]"></div>

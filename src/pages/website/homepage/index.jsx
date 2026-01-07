@@ -9,6 +9,7 @@ import BestBookingPlatform from './features/BestBookingPlatfom';
 import Testimonials from './features/Testimonials';
 import FaqSection from './features/FaqSection';
 import { useGetHotelsQuery } from '../../../services/Api';
+import { getImageUrl } from '../../../services/ApiEndpoints';
 
 const Homepage = () => {
     const { data, isLoading, error } = useGetHotelsQuery({ limit: 6, status: 'active' });
@@ -21,7 +22,7 @@ const Homepage = () => {
         rating: hotel.rating?.toString() || '4.5',
         reviews: hotel.reviews_count?.toString() || '0',
         price: hotel.min_price?.toString() || hotel.price_per_night?.toString() || '100',
-        image: hotel.cover_image || hotel.images?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+        image: getImageUrl(hotel.cover_image_url) || getImageUrl(hotel.gallery_images?.[0]) || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
         tags: hotel.is_featured ? ['sale'] : []
     })) || [];
 
