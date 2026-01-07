@@ -29,6 +29,21 @@ import { useCreateHotelMutation, useUpdateHotelMutation } from "../../../../serv
 import { toast } from "react-toastify";
 import { getImageUrl } from "../../../../services/ApiEndpoints";
 
+// Move these components outside to prevent recreation on each render
+const InputLabel = ({ children }) => (
+    <label className="block text-[14px] font-medium text-slate-700 mb-2.5 font-['Inter']">
+        {children}
+    </label>
+);
+
+const InputField = React.memo((props) => (
+    <input
+        {...props}
+        className="w-full h-[52px] px-5 rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-slate-700 placeholder:text-slate-400 font-['Inter'] text-[15px]"
+    />
+));
+InputField.displayName = 'InputField';
+
 const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess }) => {
     const [formData, setFormData] = useState({
         name: "",
@@ -290,19 +305,6 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess }) => {
             <Icon className="w-5 h-5 text-blue-600" />
             <h2 className="text-[20px] font-bold text-slate-900 font-['Inter']">{title}</h2>
         </div>
-    );
-
-    const InputLabel = ({ children }) => (
-        <label className="block text-[14px] font-medium text-slate-700 mb-2.5 font-['Inter']">
-            {children}
-        </label>
-    );
-
-    const InputField = (props) => (
-        <input
-            {...props}
-            className="w-full h-[52px] px-5 rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-slate-700 placeholder:text-slate-400 font-['Inter'] text-[15px]"
-        />
     );
 
     return (
