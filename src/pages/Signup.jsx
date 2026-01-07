@@ -112,7 +112,7 @@ const SignUp = () => {
           {/* Title */}
           <h1 className="text-3xl font-bold text-gray-900 mb-2">SIGN UP</h1>
           <p className="text-gray-600 mb-6 text-base">
-            How to i get started lorem ipsum dolor at?
+            Create your account to start exploring amazing travel destinations and unlock exclusive deals.
           </p>
 
           {/* Signup Form */}
@@ -329,17 +329,15 @@ const SignUp = () => {
             </button>
 
             {/* Separator */}
-            <div className="flex items-center my-6">
+            {/* <div className="flex items-center my-6">
               <div className="flex-1 border-t border-gray-300"></div>
               <span className="px-4 text-gray-500 text-sm">
                 Sign up with Others
               </span>
               <div className="flex-1 border-t border-gray-300"></div>
-            </div>
+            </div> */}
 
-            {/* Social Signup Buttons */}
-            <div className="space-y-3">
-              {/* Google Signup Button */}
+            {/* <div className="space-y-3">
               <button className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">
                 <svg
                   width="20"
@@ -368,7 +366,6 @@ const SignUp = () => {
                 Sign up with Google
               </button>
 
-              {/* Facebook Signup Button */}
               <button className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors">
                 <svg
                   width="20"
@@ -384,7 +381,7 @@ const SignUp = () => {
                 </svg>
                 Sign up with Facebook
               </button>
-            </div>
+            </div> */}
           </form>
 
           {/* Login Link */}
