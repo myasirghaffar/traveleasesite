@@ -5,6 +5,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3004,
+    strictPort: true,
     allowedHosts: ["travel-ease.techverseo.com", "localhost"], // :white_tick: merged into one array
     hmr: {
       port: 24678, // Use a different port for HMR

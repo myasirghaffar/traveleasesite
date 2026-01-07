@@ -8,7 +8,9 @@ services:
     ports:
       - "3004:3004"
     environment:
-      - NODE_ENV=production # ya development, jo chahiye wo rakho
+      - NODE_ENV=development
+      - PORT=3004
+      - VITE_PORT=3004
     volumes:
       - .:/app
     labels:
