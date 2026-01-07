@@ -6,6 +6,7 @@ import ReusableFilter from "../../../components/ReusableFilter";
 import { PlusIcon } from "../../../assets/icons/icons";
 import AddHotel from "./features/AddHotel";
 import ViewHotel from "./features/ViewHotel";
+import ConfirmModal from "../../../components/ConfirmModal";
 import {
   useGetAdminHotelsQuery,
   useDeleteHotelMutation,
@@ -25,6 +26,8 @@ const ManageHotels = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingHotelId, setEditingHotelId] = useState(null);
   const [viewingHotelId, setViewingHotelId] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [hotelToDelete, setHotelToDelete] = useState(null);
   
   // Build API query parameters
   const queryParams = useMemo(() => {
@@ -51,7 +54,7 @@ const ManageHotels = () => {
   }, [currentPage, itemsPerPage, searchTerm, filters]);
   
   const { data, isLoading, error, refetch } = useGetAdminHotelsQuery(queryParams);
-  const [deleteHotel] = useDeleteHotelMutation();
+  const [deleteHotel, { isLoading: isDeleting }] = useDeleteHotelMutation();
   
   // Reset to page 1 when filters change
   React.useEffect(() => {
@@ -199,16 +202,9 @@ const ManageHotels = () => {
         </button>
         <button 
           className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-          onClick={async () => {
-            if (window.confirm(`Are you sure you want to delete ${row.name}?`)) {
-              try {
-                await deleteHotel(row.id).unwrap();
-                toast.success('Hotel deleted successfully');
-                refetch();
-              } catch (error) {
-                toast.error(error?.data?.message || 'Failed to delete hotel');
-              }
-            }
+          onClick={() => {
+            setHotelToDelete(row);
+            setDeleteModalOpen(true);
           }}
           title="Delete Hotel"
         >
@@ -357,6 +353,37 @@ const ManageHotels = () => {
           />
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        open={deleteModalOpen}
+        onClose={() => {
+          if (!isDeleting) {
+            setDeleteModalOpen(false);
+            setHotelToDelete(null);
+          }
+        }}
+        onConfirm={async () => {
+          if (hotelToDelete) {
+            try {
+              await deleteHotel(hotelToDelete.id).unwrap();
+              toast.success('Hotel deleted successfully');
+              refetch();
+              setDeleteModalOpen(false);
+              setHotelToDelete(null);
+            } catch (error) {
+              toast.error(error?.data?.message || 'Failed to delete hotel');
+            }
+          }
+        }}
+        loading={isDeleting}
+        title="Delete Hotel?"
+        message={`Are you sure you want to delete ${hotelToDelete?.name}? This action cannot be undone and all associated data will be permanently removed.`}
+        icon="delete"
+        confirmText="Yes, delete it"
+        cancelText="Cancel"
+        confirmColor="bg-red-600"
+      />
     </div>
   );
 };
