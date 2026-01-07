@@ -31,7 +31,7 @@ import { getImageUrl } from "../../../../services/ApiEndpoints";
 
 // Move these components outside to prevent recreation on each render
 const InputLabel = ({ children }) => (
-    <label className="block text-[14px] font-medium text-slate-700 mb-2.5 font-['Inter']">
+    <label className="block text-[13px] sm:text-[14px] font-medium text-slate-700 mb-2 sm:mb-2.5 font-['Inter']">
         {children}
     </label>
 );
@@ -39,7 +39,7 @@ const InputLabel = ({ children }) => (
 const InputField = React.memo((props) => (
     <input
         {...props}
-        className="w-full h-[52px] px-5 rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-slate-700 placeholder:text-slate-400 font-['Inter'] text-[15px]"
+        className="w-full h-[48px] sm:h-[52px] px-4 sm:px-5 rounded-[10px] sm:rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-slate-700 placeholder:text-slate-400 font-['Inter'] text-[14px] sm:text-[15px] touch-manipulation"
     />
 ));
 InputField.displayName = 'InputField';
@@ -49,17 +49,17 @@ const ModalInput = React.memo(({ label, name, icon: Icon, placeholder, type = "t
     const hasError = touched[name] && errors[name];
     return (
         <div className="space-y-2">
-            <label className="block text-[14px] font-semibold text-slate-800 font-['Inter']">
+            <label className="block text-[13px] sm:text-[14px] font-semibold text-slate-800 font-['Inter']">
                 {label} {required && <span className="text-red-500">*</span>}
             </label>
             <div className="relative">
                 {Icon && !isPrice && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <Icon size={18} strokeWidth={1.5} />
+                    <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Icon size={16} strokeWidth={1.5} className="sm:w-[18px] sm:h-[18px]" />
                     </div>
                 )}
                 {isPrice && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</div>
+                    <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm sm:text-base">$</div>
                 )}
                 <input
                     name={name}
@@ -68,14 +68,14 @@ const ModalInput = React.memo(({ label, name, icon: Icon, placeholder, type = "t
                     onChange={onChange}
                     onBlur={onBlur}
                     placeholder={placeholder}
-                    className={`w-full h-[54px] ${(Icon || isPrice) ? 'pl-12' : 'px-5'} ${isPrice ? 'pr-12' : 'pr-5'} rounded-[12px] border ${hasError ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'} transition-all outline-none text-slate-700 placeholder:text-slate-300 font-['Inter'] text-[15px]`}
+                    className={`w-full h-[48px] sm:h-[54px] ${(Icon || isPrice) ? 'pl-10 sm:pl-12' : 'px-4 sm:px-5'} ${isPrice ? 'pr-10 sm:pr-12' : 'pr-4 sm:pr-5'} rounded-[10px] sm:rounded-[12px] border ${hasError ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'} transition-all outline-none text-slate-700 placeholder:text-slate-300 font-['Inter'] text-[14px] sm:text-[15px] touch-manipulation`}
                 />
                 {isPrice && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</div>
+                    <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm sm:text-base">$</div>
                 )}
             </div>
             {hasError && (
-                <p className="text-red-500 text-xs font-medium font-['Inter'] mt-1">{errors[name]}</p>
+                <p className="text-red-500 text-[11px] sm:text-xs font-medium font-['Inter'] mt-1">{errors[name]}</p>
             )}
         </div>
     );
@@ -335,13 +335,13 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
             }
 
             // Gallery images
-            galleryImageFiles.forEach((file, index) => {
+            galleryImageFiles.forEach((file) => {
                 formDataToSend.append('gallery_images', file);
             });
 
             // Amenities
             const amenitiesArray = Object.entries(formData.amenities)
-                .filter(([_, value]) => value)
+                .filter(([, value]) => value)
                 .map(([key]) => key);
             formDataToSend.append('amenities', JSON.stringify(amenitiesArray));
 
@@ -402,37 +402,40 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
         }
     };
 
-    const SectionHeader = ({ icon: Icon, title }) => (
-        <div className="flex items-center gap-2.5 mb-8">
-            <Icon className="w-5 h-5 text-blue-600" />
-            <h2 className="text-[20px] font-bold text-slate-900 font-['Inter']">{title}</h2>
-        </div>
-    );
+    const SectionHeader = ({ icon: Icon, title }) => {
+        const IconComponent = Icon;
+        return (
+            <div className="flex items-center gap-2 sm:gap-2.5 mb-6 sm:mb-8">
+                <IconComponent className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                <h2 className="text-[18px] sm:text-[20px] font-bold text-slate-900 font-['Inter']">{title}</h2>
+            </div>
+        );
+    };
 
     return (
-        <div className="w-full min-h-screen p-8 space-y-10 animate-in fade-in duration-500">
+        <div className="w-full min-h-screen p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 lg:space-y-10 animate-in fade-in duration-500">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
                 <div className="space-y-1">
-                    <h1 className="text-slate-900 text-3xl font-extrabold font-['Inter']">
+                    <h1 className="text-slate-900 text-2xl sm:text-3xl font-extrabold font-['Inter']">
                         Manage Hotels
                     </h1>
-                    <p className="text-slate-500 text-sm font-medium">
+                    <p className="text-slate-500 text-xs sm:text-sm font-medium">
                         View, edit, and add new hotels to the platform.
                     </p>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
                     <button
                         onClick={onCancel}
-                        className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all active:scale-95 text-sm"
+                        className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all active:scale-95 text-sm touch-manipulation"
                     >
                         Cancel
                     </button>
                     <button 
                         onClick={() => handleSave(true)}
                         disabled={isSubmitting}
-                        className="flex items-center gap-2 bg-blue-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-6 sm:px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 text-sm disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                     >
                         <CheckCircleWhiteIcon className="w-4 h-4" />
                         {isSubmitting ? 'Saving...' : 'Save & Publish'}
@@ -440,15 +443,15 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-10">
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-6 sm:gap-8 lg:gap-10">
                 {/* Left Column - Main Form */}
-                <div className="space-y-8">
+                <div className="space-y-6 sm:space-y-8">
 
                     {/* Hotel Information Section */}
-                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200">
+                    <section className="bg-white rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] p-4 sm:p-6 lg:p-10 shadow-sm border border-slate-200">
                         <SectionHeader icon={HotelBuildingIcon} title="Hotel Information" />
 
-                        <div className="space-y-8">
+                        <div className="space-y-6 sm:space-y-8">
                             <div className="space-y-2">
                                 <InputLabel>Hotel Name</InputLabel>
                                 <InputField
@@ -459,18 +462,18 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                 />
                             </div>
 
-                            <div className="space-y-2">
+                                <div className="space-y-2">
                                 <InputLabel>Description</InputLabel>
                                 <textarea
                                     name="description"
                                     value={formData.description}
                                     onChange={handleInputChange}
                                     placeholder="Describe your hotel..."
-                                    className="w-full h-[160px] p-5 rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none resize-none text-slate-700 placeholder:text-slate-400 font-['Inter'] text-[15px]"
+                                    className="w-full h-[120px] sm:h-[140px] lg:h-[160px] p-4 sm:p-5 rounded-[10px] sm:rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none resize-none text-slate-700 placeholder:text-slate-400 font-['Inter'] text-[14px] sm:text-[15px] touch-manipulation"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                                 <div className="space-y-2">
                                     <InputLabel>Category</InputLabel>
                                     <div className="relative">
@@ -478,15 +481,15 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                             name="category"
                                             value={formData.category}
                                             onChange={handleInputChange}
-                                            className="w-full h-[52px] px-5 pr-12 rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none appearance-none text-slate-700 bg-white font-['Inter'] text-[15px]"
+                                            className="w-full h-[48px] sm:h-[52px] px-4 sm:px-5 pr-10 sm:pr-12 rounded-[10px] sm:rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none appearance-none text-slate-700 bg-white font-['Inter'] text-[14px] sm:text-[15px] touch-manipulation"
                                         >
                                             <option value="" disabled>Select category</option>
                                             {categories.map(cat => (
                                                 <option key={cat.value} value={cat.value}>{cat.label}</option>
                                             ))}
                                         </select>
-                                        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-                                            <ChevronDownIcon className="w-5 h-5 text-slate-900" />
+                                        <div className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+                                            <ChevronDownIcon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900" />
                                         </div>
                                     </div>
                                 </div>
@@ -501,7 +504,7 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                                 <div className="space-y-2">
                                     <InputLabel>Country</InputLabel>
                                     <InputField
@@ -535,10 +538,10 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                     </section>
 
                     {/* Pricing & Availability Section */}
-                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200">
+                    <section className="bg-white rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] p-4 sm:p-6 lg:p-10 shadow-sm border border-slate-200">
                         <SectionHeader icon={PricingDollarIcon} title="Pricing & Availability" />
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                             <div className="space-y-2">
                                 <InputLabel>Base Price / Night</InputLabel>
                                 <div className="relative">
@@ -548,9 +551,9 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                         value={formData.basePrice}
                                         onChange={handleInputChange}
                                         placeholder="0.00"
-                                        style={{ paddingLeft: '40px' }}
+                                        className="pl-10 sm:pl-[40px]"
                                     />
-                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                                    <span className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 text-sm sm:text-base">$</span>
                                 </div>
                             </div>
                             <div className="space-y-2">
@@ -562,12 +565,12 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                         value={formData.seasonalPrice}
                                         onChange={handleInputChange}
                                         placeholder="0.00"
-                                        style={{ paddingLeft: '40px' }}
+                                        className="pl-10 sm:pl-[40px]"
                                     />
-                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400">$</span>
+                                    <span className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 text-sm sm:text-base">$</span>
                                 </div>
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2 sm:col-span-2 lg:col-span-1">
                                 <InputLabel>Rooms Available</InputLabel>
                                 <InputField
                                     name="roomsAvailable"
@@ -581,15 +584,15 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                     </section>
 
                     {/* Images Section */}
-                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200">
+                    <section className="bg-white rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] p-4 sm:p-6 lg:p-10 shadow-sm border border-slate-200">
                         <SectionHeader icon={MediaImageIcon} title="Images" />
 
-                        <div className="space-y-8">
+                        <div className="space-y-6 sm:space-y-8">
                             <div className="space-y-3">
                                 <InputLabel>Cover Image</InputLabel>
                                 <div
                                     onClick={() => document.getElementById('cover-upload').click()}
-                                    className="relative border-2 border-dashed border-slate-200 rounded-[20px] h-[240px] flex flex-col items-center justify-center bg-slate-50/30 hover:bg-slate-50 transition-colors cursor-pointer group overflow-hidden"
+                                    className="relative border-2 border-dashed border-slate-200 rounded-[16px] sm:rounded-[20px] h-[180px] sm:h-[200px] lg:h-[240px] flex flex-col items-center justify-center bg-slate-50/30 hover:bg-slate-50 active:bg-slate-50 transition-colors cursor-pointer group overflow-hidden touch-manipulation"
                                 >
                                     <input
                                         id="cover-upload"
@@ -601,17 +604,17 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                     {coverImage ? (
                                         <>
                                             <img src={coverImage} alt="Cover Preview" className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <p className="text-white font-bold">Change Cover Image</p>
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity flex items-center justify-center">
+                                                <p className="text-white font-bold text-sm sm:text-base px-4 text-center">Change Cover Image</p>
                                             </div>
                                         </>
                                     ) : (
                                         <>
-                                            <div className="p-5 bg-white rounded-2xl shadow-sm mb-5 group-hover:scale-110 transition-transform border border-slate-200">
-                                                <CloudUploadIcon className="w-10 h-10 text-blue-500" />
+                                            <div className="p-4 sm:p-5 bg-white rounded-xl sm:rounded-2xl shadow-sm mb-3 sm:mb-5 group-hover:scale-110 group-active:scale-110 transition-transform border border-slate-200">
+                                                <CloudUploadIcon className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" />
                                             </div>
-                                            <p className="text-slate-900 font-bold text-lg mb-1">Upload Hotel Image</p>
-                                            <p className="text-slate-400 text-sm text-center px-6">Drag and drop your cover image here or click to browse</p>
+                                            <p className="text-slate-900 font-bold text-base sm:text-lg mb-1 px-2 text-center">Upload Hotel Image</p>
+                                            <p className="text-slate-400 text-xs sm:text-sm text-center px-4 sm:px-6">Drag and drop your cover image here or click to browse</p>
                                         </>
                                     )}
                                 </div>
@@ -619,25 +622,26 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
 
                             <div className="space-y-4">
                                 <InputLabel>Gallery Images (Up to 10)</InputLabel>
-                                <div className="flex flex-wrap gap-5 mt-2">
+                                <div className="flex flex-wrap gap-3 sm:gap-4 lg:gap-5 mt-2">
                                     {galleryImages.map((img, idx) => (
-                                        <div key={idx} className="relative w-36 h-36 rounded-2xl overflow-hidden border border-slate-200 group">
+                                        <div key={idx} className="relative w-24 h-24 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-xl sm:rounded-2xl overflow-hidden border border-slate-200 group">
                                             <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     removeGalleryImage(idx);
                                                 }}
-                                                className="absolute top-2 right-2 p-1 bg-white/90 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+                                                className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 p-1 sm:p-1.5 bg-white/90 rounded-full shadow-sm opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-white touch-manipulation"
+                                                aria-label="Remove image"
                                             >
-                                                <XIcon className="w-3.5 h-3.5 text-red-500" />
+                                                <XIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-500" />
                                             </button>
                                         </div>
                                     ))}
                                     {galleryImages.length < 10 && (
                                         <div
                                             onClick={() => document.getElementById('gallery-upload').click()}
-                                            className="w-36 h-36 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center bg-slate-50/20 hover:bg-slate-50 transition-all cursor-pointer group"
+                                            className="w-24 h-24 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-xl sm:rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center bg-slate-50/20 hover:bg-slate-50 active:bg-slate-50 transition-all cursor-pointer group touch-manipulation"
                                         >
                                             <input
                                                 id="gallery-upload"
@@ -647,8 +651,8 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                                 accept="image/*"
                                                 onChange={handleGalleryUpload}
                                             />
-                                            <PlusIcon className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                                            <span className="text-xs text-slate-400 mt-2 font-bold group-hover:text-blue-500 transition-colors">Add Image</span>
+                                            <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-hover:text-blue-500 group-active:text-blue-500 transition-colors" />
+                                            <span className="text-[10px] sm:text-xs text-slate-400 mt-1.5 sm:mt-2 font-bold group-hover:text-blue-500 group-active:text-blue-500 transition-colors">Add Image</span>
                                         </div>
                                     )}
                                 </div>
@@ -658,55 +662,56 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
 
 
                     {/* Rooms Section */}
-                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200 space-y-8">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                                <StarRatingIcon className="w-5 h-5 text-blue-600" />
-                                <h2 className="text-[20px] font-bold text-slate-900 font-['Inter']">Rooms</h2>
+                    <section className="bg-white rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] p-4 sm:p-6 lg:p-10 shadow-sm border border-slate-200 space-y-6 sm:space-y-8">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-2 sm:gap-2.5">
+                                <StarRatingIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                                <h2 className="text-[18px] sm:text-[20px] font-bold text-slate-900 font-['Inter']">Rooms</h2>
                             </div>
                             <button
                                 onClick={() => setIsRoomModalOpen(true)}
-                                className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 text-sm"
+                                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 text-sm touch-manipulation"
                             >
                                 Add Rooms
                             </button>
                         </div>
 
                         {rooms.length > 0 && (
-                            <div className="p-8 rounded-[24px] border border-slate-200 bg-slate-50/20">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="p-4 sm:p-6 lg:p-8 rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] border border-slate-200 bg-slate-50/20">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                     {rooms.map((room, idx) => (
-                                        <div key={idx} className="p-6 rounded-[16px] bg-white border border-slate-200 shadow-sm relative group">
+                                        <div key={idx} className="p-4 sm:p-6 rounded-[12px] sm:rounded-[16px] bg-white border border-slate-200 shadow-sm relative group">
                                             <button
                                                 onClick={() => setRooms(prev => prev.filter((_, i) => i !== idx))}
-                                                className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors"
+                                                className="absolute top-3 right-3 sm:top-4 sm:right-4 text-slate-400 hover:text-red-500 active:text-red-500 transition-colors touch-manipulation p-1"
+                                                aria-label="Remove room"
                                             >
-                                                <X size={18} strokeWidth={1.5} />
+                                                <X size={16} strokeWidth={1.5} className="sm:w-[18px] sm:h-[18px]" />
                                             </button>
 
-                                            <div className="space-y-4">
-                                                <h4 className="text-[17px] font-bold text-[#1E293B] font-['Inter']">
+                                            <div className="space-y-3 sm:space-y-4 pr-8">
+                                                <h4 className="text-[15px] sm:text-[17px] font-bold text-[#1E293B] font-['Inter'] leading-tight">
                                                     {room.roomName}
                                                 </h4>
 
-                                                <div className="flex items-center gap-6 text-[13px] text-slate-500 font-medium font-['Inter']">
-                                                    <div className="flex items-center gap-2">
-                                                        <BedDouble size={16} className="text-slate-400" strokeWidth={1.5} />
-                                                        {room.bedType}
+                                                <div className="flex flex-wrap items-center gap-3 sm:gap-4 lg:gap-6 text-[12px] sm:text-[13px] text-slate-500 font-medium font-['Inter']">
+                                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                                        <BedDouble size={14} strokeWidth={1.5} className="text-slate-400 sm:w-4 sm:h-4" />
+                                                        <span className="break-words">{room.bedType}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Users size={16} className="text-slate-400" strokeWidth={1.5} />
-                                                        {room.guestType}
+                                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                                        <Users size={14} strokeWidth={1.5} className="text-slate-400 sm:w-4 sm:h-4" />
+                                                        <span>{room.guestType}</span>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <Maximize2 size={16} className="text-slate-400" strokeWidth={1.5} />
-                                                        {room.roomSize} m²
+                                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                                        <Maximize2 size={14} strokeWidth={1.5} className="text-slate-400 sm:w-4 sm:h-4" />
+                                                        <span>{room.roomSize} m²</span>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex items-baseline gap-1.5">
-                                                    <span className="text-[20px] font-bold text-slate-900 font-['Inter']">${room.price}</span>
-                                                    <span className="text-[13px] text-slate-400 font-medium font-['Inter']">/ night</span>
+                                                    <span className="text-[18px] sm:text-[20px] font-bold text-slate-900 font-['Inter']">${room.price}</span>
+                                                    <span className="text-[12px] sm:text-[13px] text-slate-400 font-medium font-['Inter']">/ night</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -717,10 +722,10 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                     </section>
 
                     {/* Amenities Section */}
-                    <section className="bg-white rounded-[24px] p-10 shadow-sm border border-slate-200">
+                    <section className="bg-white rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] p-4 sm:p-6 lg:p-10 shadow-sm border border-slate-200">
                         <SectionHeader icon={AmenitiesStarIcon} title="Amenities" />
 
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
                             {[
                                 { key: 'wifi', icon: WifiIcon, label: 'WiFi' },
                                 { key: 'breakfast', icon: BreakfastIcon, label: 'Breakfast' },
@@ -733,13 +738,13 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                 <button
                                     key={amenity.key}
                                     onClick={() => handleAmenityToggle(amenity.key)}
-                                    className={`flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all ${formData.amenities[amenity.key]
+                                    className={`flex flex-col items-center gap-2 sm:gap-3 p-4 sm:p-5 lg:p-6 rounded-xl sm:rounded-2xl border-2 transition-all touch-manipulation min-h-[88px] sm:min-h-[100px] ${formData.amenities[amenity.key]
                                         ? 'border-blue-500 bg-blue-50/50 text-blue-700'
-                                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-200 hover:bg-slate-50'
+                                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-200 hover:bg-slate-50 active:bg-slate-50'
                                         }`}
                                 >
-                                    <amenity.icon className={`w-6 h-6 ${formData.amenities[amenity.key] ? 'text-blue-600' : 'text-slate-400'}`} />
-                                    <span className="font-bold text-xs">{amenity.label}</span>
+                                    <amenity.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${formData.amenities[amenity.key] ? 'text-blue-600' : 'text-slate-400'}`} />
+                                    <span className="font-bold text-[11px] sm:text-xs">{amenity.label}</span>
                                 </button>
                             ))}
                         </div>
@@ -749,26 +754,26 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                 </div>
 
                 {/* Right Column - Sidebar */}
-                <div className="space-y-8 h-fit sticky top-8">
+                <div className="space-y-6 sm:space-y-8 h-fit xl:sticky xl:top-8">
 
                     {/* Card Preview */}
-                    <div className="bg-white rounded-[24px] p-8 shadow-sm border border-slate-200">
-                        <h3 className="text-xl font-bold text-slate-900 border-b border-slate-50 pb-6 mb-8">Preview</h3>
+                    <div className="bg-white rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] p-4 sm:p-6 lg:p-8 shadow-sm border border-slate-200">
+                        <h3 className="text-lg sm:text-xl font-bold text-slate-900 border-b border-slate-50 pb-4 sm:pb-6 mb-6 sm:mb-8">Preview</h3>
 
-                        <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/40">
-                            <div className="h-48 bg-slate-100 flex items-center justify-center overflow-hidden">
+                        <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-slate-200/40">
+                            <div className="h-40 sm:h-48 bg-slate-100 flex items-center justify-center overflow-hidden">
                                 {coverImage ? (
                                     <img src={coverImage} alt="Preview" className="w-full h-full object-cover" />
                                 ) : (
-                                    <MediaImageIcon className="w-14 h-14 text-slate-300" />
+                                    <MediaImageIcon className="w-12 h-12 sm:w-14 sm:h-14 text-slate-300" />
                                 )}
                             </div>
-                            <div className="p-6 space-y-4">
+                            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
                                 <div>
-                                    <h4 className="text-lg font-bold text-slate-900 leading-tight">
+                                    <h4 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
                                         {formData.name || 'Hotel Name'}
                                     </h4>
-                                    <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-1 font-medium">
+                                    <p className="text-xs text-slate-500 mt-1 sm:mt-1.5 flex items-center gap-1 font-medium">
                                         {formData.city || 'City'}, {formData.country || 'Country'}
                                     </p>
                                 </div>
@@ -776,17 +781,17 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                                 <div className="flex items-center gap-2">
                                     <div className="flex gap-0.5">
                                         {[1, 2, 3, 4, 5].map(star => (
-                                            <StarRatingIcon key={star} className="w-4 h-4 text-yellow-400" />
+                                            <StarRatingIcon key={star} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-400" />
                                         ))}
                                     </div>
                                     <span className="text-xs font-bold text-slate-400 mt-1">4.0</span>
                                 </div>
 
-                                <div className="pt-4 border-t border-slate-50 flex items-end justify-between">
+                                <div className="pt-3 sm:pt-4 border-t border-slate-50 flex items-end justify-between">
                                     <div className="space-y-1">
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Price Starts From</p>
-                                        <p className="text-blue-600 font-black text-2xl">
-                                            ${formData.basePrice || '0'} <span className="text-[10px] text-slate-400 font-normal uppercase">/ night</span>
+                                        <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider">Price Starts From</p>
+                                        <p className="text-blue-600 font-black text-xl sm:text-2xl">
+                                            ${formData.basePrice || '0'} <span className="text-[9px] sm:text-[10px] text-slate-400 font-normal uppercase">/ night</span>
                                         </p>
                                     </div>
                                 </div>
@@ -794,12 +799,12 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                         </div>
 
                         {/* Actions in Sidebar */}
-                        <div className="mt-10 space-y-4">
-                            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[2px] mb-4">Quick Actions</h3>
+                        <div className="mt-6 sm:mt-8 lg:mt-10 space-y-3 sm:space-y-4">
+                            <h3 className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-[2px] mb-3 sm:mb-4">Quick Actions</h3>
                             <button 
                                 onClick={() => handleSave(false)}
                                 disabled={isSubmitting}
-                                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-100 transition-all active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-100 transition-all active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation text-sm sm:text-base"
                             >
                                 <DisketteSaveIcon className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
                                 {isSubmitting ? 'Saving...' : 'Save Draft'}
@@ -807,7 +812,7 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                             <button 
                                 onClick={() => handleSave(true)}
                                 disabled={isSubmitting}
-                                className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-blue-600 text-white rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-blue-600 text-white rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation text-sm sm:text-base"
                             >
                                 <CheckCircleWhiteIcon className="w-4 h-4" />
                                 {isSubmitting ? 'Publishing...' : 'Save & Publish'}
@@ -816,22 +821,22 @@ const AddHotel = ({ onCancel, hotelData, isEdit = false, onSuccess, onRoomAdded 
                     </div>
 
                     {/* Publishing Tips */}
-                    <div className="bg-blue-600 rounded-[24px] p-8 text-white relative overflow-hidden shadow-xl shadow-blue-200">
-                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <HotelBuildingIcon className="w-32 h-32" />
+                    <div className="bg-blue-600 rounded-[16px] sm:rounded-[20px] lg:rounded-[24px] p-4 sm:p-6 lg:p-8 text-white relative overflow-hidden shadow-xl shadow-blue-200">
+                        <div className="absolute top-0 right-0 p-2 sm:p-4 opacity-10">
+                            <HotelBuildingIcon className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32" />
                         </div>
-                        <h4 className="text-lg font-bold mb-4 relative z-10">Publishing Tips</h4>
-                        <ul className="space-y-4 relative z-10">
+                        <h4 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 relative z-10">Publishing Tips</h4>
+                        <ul className="space-y-3 sm:space-y-4 relative z-10">
                             {[
                                 { title: 'Imagery', desc: 'Use high-resolution photos' },
                                 { title: 'Details', desc: 'Fill all required attributes' },
                                 { title: 'Pricing', desc: 'Set competitive market rates' }
                             ].map((tip, idx) => (
-                                <li key={idx} className="flex gap-3">
+                                <li key={idx} className="flex gap-2 sm:gap-3">
                                     <div className="w-1.5 h-1.5 rounded-full bg-blue-300 mt-2 shrink-0" />
                                     <div className="space-y-0.5">
-                                        <p className="font-bold text-sm leading-none">{tip.title}</p>
-                                        <p className="text-blue-100 text-[11px] font-medium leading-tight">{tip.desc}</p>
+                                        <p className="font-bold text-xs sm:text-sm leading-none">{tip.title}</p>
+                                        <p className="text-blue-100 text-[10px] sm:text-[11px] font-medium leading-tight">{tip.desc}</p>
                                     </div>
                                 </li>
                             ))}
@@ -994,20 +999,21 @@ const AddRoomModal = ({ onClose, onAdd, isSubmitting = false }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-white w-full max-w-[600px] max-h-[85vh] rounded-[32px] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-                <div className="px-10 pt-10 pb-6 flex items-center justify-between shrink-0 border-b border-slate-50">
-                    <h2 className="text-3xl font-bold text-slate-900 font-['Inter']">Add room</h2>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-white w-full max-w-[600px] max-h-[90vh] sm:max-h-[85vh] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 m-4">
+                <div className="px-4 sm:px-6 lg:px-10 pt-6 sm:pt-8 lg:pt-10 pb-4 sm:pb-6 flex items-center justify-between shrink-0 border-b border-slate-50">
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 font-['Inter']">Add room</h2>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                        className="p-2 hover:bg-slate-100 active:bg-slate-100 rounded-full transition-colors touch-manipulation"
+                        aria-label="Close modal"
                     >
-                        <X size={28} className="text-slate-900" />
+                        <X size={24} className="text-slate-900 sm:w-7 sm:h-7" />
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-10 py-6 custom-scrollbar">
-                    <form id="add-room-form" onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-4 sm:py-6 custom-scrollbar">
+                    <form id="add-room-form" onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                         <ModalInput
                             label="Room Name"
                             name="roomName"
@@ -1070,19 +1076,19 @@ const AddRoomModal = ({ onClose, onAdd, isSubmitting = false }) => {
                             touched={touched}
                         />
                         <div className="space-y-2">
-                            <label className="block text-[14px] font-semibold text-slate-800 font-['Inter']">
+                            <label className="block text-[13px] sm:text-[14px] font-semibold text-slate-800 font-['Inter']">
                                 Available Shift
                             </label>
                             <div className="relative">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                    <Users size={18} strokeWidth={1.5} />
+                                <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                    <Users size={16} strokeWidth={1.5} className="sm:w-[18px] sm:h-[18px]" />
                                 </div>
                                 <select
                                     name="availableShift"
                                     value={roomData.availableShift}
                                     onChange={handleChange}
                                     onBlur={() => handleBlur('availableShift')}
-                                    className="w-full h-[54px] pl-12 pr-5 rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-slate-700 font-['Inter'] text-[15px] appearance-none bg-white"
+                                    className="w-full h-[48px] sm:h-[54px] pl-10 sm:pl-12 pr-10 sm:pr-12 rounded-[10px] sm:rounded-[12px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-slate-700 font-['Inter'] text-[14px] sm:text-[15px] appearance-none bg-white touch-manipulation"
                                 >
                                     <option value="">Select shift</option>
                                     <option value="Day">Day (6 AM - 6 PM)</option>
@@ -1090,22 +1096,22 @@ const AddRoomModal = ({ onClose, onAdd, isSubmitting = false }) => {
                                     <option value="Both">Both</option>
                                     <option value="24 Hours">24 Hours</option>
                                 </select>
-                                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-                                    <ChevronDownIcon className="w-5 h-5 text-slate-900" />
+                                <div className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <ChevronDownIcon className="w-4 h-4 sm:w-5 sm:h-5 text-slate-900" />
                                 </div>
                             </div>
                             {touched.availableShift && errors.availableShift && (
-                                <p className="text-red-500 text-xs font-medium font-['Inter'] mt-1">{errors.availableShift}</p>
+                                <p className="text-red-500 text-[11px] sm:text-xs font-medium font-['Inter'] mt-1">{errors.availableShift}</p>
                             )}
                         </div>
                     </form>
                 </div>
 
-                <div className="px-10 py-8 border-t border-slate-50 flex items-center justify-end gap-4 shrink-0 bg-white">
+                <div className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 lg:py-8 border-t border-slate-50 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 shrink-0 bg-white">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-10 py-3.5 rounded-xl border border-slate-200 text-slate-400 font-bold hover:bg-slate-50 transition-all text-base"
+                        className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-3.5 rounded-xl border border-slate-200 text-slate-400 font-bold hover:bg-slate-50 active:bg-slate-50 transition-all text-sm sm:text-base touch-manipulation"
                     >
                         Cancel
                     </button>
@@ -1113,7 +1119,7 @@ const AddRoomModal = ({ onClose, onAdd, isSubmitting = false }) => {
                         form="add-room-form"
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-12 py-3.5 bg-blue-600 text-white rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-3.5 bg-blue-600 text-white rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                     >
                         {isSubmitting ? 'Adding...' : 'Add Room'}
                     </button>
