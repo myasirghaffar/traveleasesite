@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import ReusableDataTable from "../../../components/ReusableDataTable";
 import ReusablePagination from "../../../components/ReusablePagination";
-import { useGetAdminBookingsQuery, useDeleteBookingMutation } from "../../../services/Api";
+import ConfirmModal from "../../../components/ConfirmModal";
+import { useGetAdminBookingsQuery, useDeleteBookingMutation, useUpdateBookingStatusMutation, useUpdateBookingMutation } from "../../../services/Api";
 import { toast } from "react-toastify";
 
 const HotelBookings = () => {
@@ -20,6 +21,7 @@ const HotelBookings = () => {
     toDate: "",
     payment: ""
   });
+  const [deleteModal, setDeleteModal] = useState({ open: false, bookingId: null });
   
   const { data, isLoading, error, refetch } = useGetAdminBookingsQuery({
     page: currentPage,
@@ -28,7 +30,9 @@ const HotelBookings = () => {
     startDate: filters.fromDate || undefined,
     endDate: filters.toDate || undefined,
   });
-  const [deleteBooking] = useDeleteBookingMutation();
+  const [deleteBooking, { isLoading: isDeleting }] = useDeleteBookingMutation();
+  const [updateBookingStatus] = useUpdateBookingStatusMutation();
+  const [updateBooking] = useUpdateBookingMutation();
 
   // Transform API data to match component format
   const bookingsData = useMemo(() => {
@@ -40,11 +44,53 @@ const HotelBookings = () => {
       hotelName: booking.hotel?.name || "Unknown Hotel",
       checkIn: new Date(booking.check_in_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       checkOut: new Date(booking.check_out_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      totalPrice: parseFloat(booking.total_amount || 0),
-      status: booking.status?.charAt(0).toUpperCase() + booking.status?.slice(1) || "Pending",
-      payment: booking.payment_status === 'paid' ? "Paid" : booking.payment_status === 'pending' ? "Pending" : "Refunded"
+      totalPrice: parseFloat(booking.total_price || 0),
+      status: booking.status || "pending",
+      payment: booking.payment_status || "pending"
     }));
   }, [data]);
+
+  // Handle status change
+  const handleStatusChange = async (bookingId, newStatus) => {
+    try {
+      await updateBookingStatus({
+        id: bookingId,
+        data: { status: newStatus }
+      }).unwrap();
+      toast.success('Booking status updated successfully');
+      refetch();
+    } catch (error) {
+      toast.error(error?.data?.message || 'Failed to update booking status');
+    }
+  };
+
+  // Handle payment status change
+  const handlePaymentStatusChange = async (bookingId, newPaymentStatus) => {
+    try {
+      await updateBooking({
+        id: bookingId,
+        data: { payment_status: newPaymentStatus }
+      }).unwrap();
+      toast.success('Payment status updated successfully');
+      refetch();
+    } catch (error) {
+      toast.error(error?.data?.message || 'Failed to update payment status');
+    }
+  };
+
+  // Handle delete booking
+  const handleDeleteBooking = async () => {
+    if (!deleteModal.bookingId) return;
+    
+    try {
+      await deleteBooking(deleteModal.bookingId).unwrap();
+      toast.success('Booking deleted successfully');
+      setDeleteModal({ open: false, bookingId: null });
+      refetch();
+    } catch (error) {
+      toast.error(error?.data?.message || 'Failed to delete booking');
+    }
+  };
 
   // Custom Cell Renderers
   const customCellRenderers = {
@@ -81,44 +127,80 @@ const HotelBookings = () => {
         ${row.totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </span>
     ),
-    status: (row) => (
-      <span
-        className={`px-3 py-1 rounded-full text-[12px] font-bold font-['Inter'] ${row.status === "Confirmed"
-          ? "bg-green-50 text-green-500"
-          : row.status === "Pending"
-            ? "bg-yellow-50 text-yellow-500"
-            : "bg-red-50 text-red-400"
+    status: (row) => {
+      const statusValue = row.status?.toLowerCase() || 'pending';
+      const statusLabels = {
+        'pending': 'Pending',
+        'confirmed': 'Confirmed',
+        'cancelled': 'Cancelled',
+        'checked_in': 'Checked In',
+        'checked_out': 'Checked Out',
+        'completed': 'Completed'
+      };
+      const statusLabel = statusLabels[statusValue] || row.status;
+      
+      return (
+        <select
+          value={statusValue}
+          onChange={(e) => handleStatusChange(row.id, e.target.value)}
+          className={`px-3 py-1 rounded-full text-[12px] font-bold font-['Inter'] border-none outline-none cursor-pointer appearance-none text-center ${
+            statusValue === "confirmed"
+              ? "bg-green-50 text-green-500"
+              : statusValue === "pending"
+                ? "bg-yellow-50 text-yellow-500"
+                : statusValue === "cancelled"
+                  ? "bg-red-50 text-red-400"
+                  : statusValue === "checked_in" || statusValue === "checked_out"
+                    ? "bg-blue-50 text-blue-500"
+                    : "bg-gray-50 text-gray-500"
           }`}
-      >
-        {row.status}
-      </span>
-    ),
-    payment: (row) => (
-      <span
-        className={`px-3 py-1 rounded-full text-[12px] font-bold font-['Inter'] ${row.payment === "Paid"
-          ? "bg-green-50 text-green-500"
-          : row.payment === "Pending"
-            ? "bg-yellow-50 text-yellow-500"
-            : "bg-red-50 text-red-400"
+          style={{ minWidth: '100px' }}
+        >
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="checked_in">Checked In</option>
+          <option value="checked_out">Checked Out</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      );
+    },
+    payment: (row) => {
+      const paymentValue = row.payment?.toLowerCase() || 'pending';
+      const paymentLabels = {
+        'pending': 'Pending',
+        'paid': 'Paid',
+        'refunded': 'Refunded',
+        'failed': 'Failed'
+      };
+      const paymentLabel = paymentLabels[paymentValue] || row.payment;
+      
+      return (
+        <select
+          value={paymentValue}
+          onChange={(e) => handlePaymentStatusChange(row.id, e.target.value)}
+          className={`px-3 py-1 rounded-full text-[12px] font-bold font-['Inter'] border-none outline-none cursor-pointer appearance-none text-center ${
+            paymentValue === "paid"
+              ? "bg-green-50 text-green-500"
+              : paymentValue === "pending"
+                ? "bg-yellow-50 text-yellow-500"
+                : paymentValue === "refunded"
+                  ? "bg-blue-50 text-blue-500"
+                  : "bg-red-50 text-red-400"
           }`}
-      >
-        {row.payment}
-      </span>
-    ),
+          style={{ minWidth: '100px' }}
+        >
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="refunded">Refunded</option>
+          <option value="failed">Failed</option>
+        </select>
+      );
+    },
     actions: (row) => (
       <button 
         className="text-red-400 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"
-        onClick={async () => {
-          if (window.confirm(`Are you sure you want to delete booking #${row.id}?`)) {
-            try {
-              await deleteBooking(row.id).unwrap();
-              toast.success('Booking deleted successfully');
-              refetch();
-            } catch (error) {
-              toast.error(error?.data?.message || 'Failed to delete booking');
-            }
-          }
-        }}
+        onClick={() => setDeleteModal({ open: true, bookingId: row.id })}
       >
         <X size={18} strokeWidth={2.5} />
       </button>
@@ -173,9 +255,12 @@ const HotelBookings = () => {
               className="w-full h-[50px] px-5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-sm focus:border-blue-500 outline-none transition-all"
             >
               <option value="">All Statuses</option>
-              <option value="Confirmed">Confirmed</option>
-              <option value="Pending">Pending</option>
-              <option value="Cancelled">Cancelled</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="checked_in">Checked In</option>
+              <option value="checked_out">Checked Out</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
           <div className="space-y-2">
@@ -204,9 +289,10 @@ const HotelBookings = () => {
               className="w-full h-[50px] px-5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-sm focus:border-blue-500 outline-none transition-all"
             >
               <option value="">All Payments</option>
-              <option value="Paid">Paid</option>
-              <option value="Pending">Pending</option>
-              <option value="Refunded">Refunded</option>
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="refunded">Refunded</option>
+              <option value="failed">Failed</option>
             </select>
           </div>
         </div>
@@ -266,6 +352,19 @@ const HotelBookings = () => {
           />
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        open={deleteModal.open}
+        onClose={() => setDeleteModal({ open: false, bookingId: null })}
+        onConfirm={handleDeleteBooking}
+        loading={isDeleting}
+        title="Delete Booking"
+        message={`Are you sure you want to delete booking #${deleteModal.bookingId}? This action cannot be undone.`}
+        icon="delete"
+        confirmText="Yes, delete it!"
+        cancelText="Cancel"
+      />
     </div>
   );
 };
