@@ -27,8 +27,9 @@ const HotelBookings = () => {
     page: currentPage,
     limit: 10,
     status: filters.status || undefined,
-    startDate: filters.fromDate || undefined,
-    endDate: filters.toDate || undefined,
+    payment_status: filters.payment || undefined,
+    date_from: filters.fromDate || undefined,
+    date_to: filters.toDate || undefined,
   });
   const [deleteBooking, { isLoading: isDeleting }] = useDeleteBookingMutation();
   const [updateBookingStatus] = useUpdateBookingStatusMutation();
