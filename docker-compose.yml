@@ -15,7 +15,8 @@ services:
       - subdomain=te.workbrink.com
       - websiteName=travelease-frontend
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3004" ]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3004', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s

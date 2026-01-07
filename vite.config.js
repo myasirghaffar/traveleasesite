@@ -4,8 +4,8 @@ export default defineConfig({
   base: "/",
   server: {
     host: "0.0.0.0",
-    port: 5190,
-    allowedHosts: ["te.workbrink.com", "localhost"], // :white_tick: merged into one array
+    port: 3004,
+    allowedHosts: ["travel-ease.techverseo.com", "localhost"], // :white_tick: merged into one array
     hmr: {
       port: 24678, // Use a different port for HMR
     },
