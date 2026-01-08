@@ -2,6 +2,8 @@ import React from 'react';
 import HeroBanner from './features/HeroBanner';
 import StatCard from './features/StatCard';
 import BookingChart from './features/BookingChart';
+import RecentBookings from './features/RecentBookings';
+import RecentUsers from './features/RecentUsers';
 import { useGetAdminDashboardStatsQuery } from '../../../services/Api';
 
 // Icon components (using the SVGs from the provided code)
@@ -60,26 +62,29 @@ const TaxiActiveIcon = ({ className }) => (
 const Dashboard = () => {
   const { data, isLoading, error } = useGetAdminDashboardStatsQuery();
   
+  // Get summary data from API response - handle both old and new structure
+  const summary = data?.data?.summary || data?.data || {};
+  
   // Transform API data to match component format
   const statsData = [
     {
       icon: HotelIcon,
       title: 'Total Hotels',
-      value: data?.data?.total_hotels?.toString() || '0',
+      value: summary?.total_hotels?.toString() || '0',
       bgColor: 'bg-blue-100',
       iconColor: 'text-blue-600',
     },
     {
       icon: BookingIcon,
       title: 'Active Bookings',
-      value: data?.data?.active_bookings?.toString() || data?.data?.total_bookings?.toString() || '0',
+      value: summary?.active_bookings?.toString() || summary?.total_bookings?.toString() || '0',
       bgColor: 'bg-purple-100',
       iconColor: 'text-purple-600',
     },
     {
       icon: TaxiPendingIcon,
       title: 'Pending Taxi Rides',
-      value: data?.data?.pending_taxi_rides?.toString() || '0',
+      value: summary?.pending_taxi_rides?.toString() || '0',
       bgColor: 'bg-amber-100',
       iconColor: 'text-amber-600',
       badge: {
@@ -91,7 +96,7 @@ const Dashboard = () => {
     {
       icon: TaxiActiveIcon,
       title: 'Total Taxi Rides',
-      value: data?.data?.total_taxi_rides?.toString() || '0',
+      value: summary?.total_taxi_rides?.toString() || '0',
       bgColor: 'bg-red-600/20',
       iconColor: 'text-red-600',
       badge: {
@@ -101,6 +106,10 @@ const Dashboard = () => {
       },
     },
   ];
+
+  // Get recent bookings and users from API response
+  const recentBookings = data?.data?.recent_bookings || [];
+  const recentUsers = data?.data?.recent_users || [];
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -142,6 +151,15 @@ const Dashboard = () => {
 
         {/* Booking Chart */}
         <BookingChart />
+
+        {/* Dynamic Content Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          {/* Recent Bookings */}
+          <RecentBookings bookings={recentBookings} isLoading={isLoading} />
+
+          {/* Recent Users */}
+          <RecentUsers users={recentUsers} isLoading={isLoading} />
+        </div>
       </div>
     </div>
   );

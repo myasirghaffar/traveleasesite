@@ -38,7 +38,7 @@ const AuthGuard = ({ children }) => {
     if (currentPath.startsWith("/admin")) {
       if (userRole !== "admin") {
         // Show error toast
-        toast.error("You do not have permission to access admin pages. Admin role required.", {
+        toast.error("Only admin can access the dashboard.", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -47,8 +47,11 @@ const AuthGuard = ({ children }) => {
           draggable: true,
         });
 
-        // Redirect to unauthorized page or home
-        navigate("/unauthorized", { replace: true });
+        // Redirect to unauthorized page with state indicating admin access issue
+        navigate("/unauthorized", { 
+          replace: true,
+          state: { reason: "admin_access_required", attemptedPath: currentPath }
+        });
         return;
       }
     }

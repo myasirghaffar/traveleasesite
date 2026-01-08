@@ -14,7 +14,11 @@ const RoleProtectedRoute = ({ allowedRoles, children }) => {
     }
 
     if (!allowedRoles.includes(user)) {
-        return <Navigate to="/unauthorized" replace />;
+        // Check if this is an admin route access attempt
+        const isAdminRoute = location.pathname.startsWith("/admin");
+        const reason = isAdminRoute ? "admin_access_required" : "insufficient_permissions";
+        
+        return <Navigate to="/unauthorized" state={{ reason, attemptedPath: location.pathname, requiredRoles: allowedRoles }} replace />;
     }
 
     return children;
