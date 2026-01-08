@@ -34,6 +34,25 @@ const AuthGuard = ({ children }) => {
     const currentPath = location.pathname;
     const userRole = user.role;
 
+    // Check if accessing admin routes - require admin role
+    if (currentPath.startsWith("/admin")) {
+      if (userRole !== "admin") {
+        // Show error toast
+        toast.error("You do not have permission to access admin pages. Admin role required.", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+
+        // Redirect to unauthorized page or home
+        navigate("/unauthorized", { replace: true });
+        return;
+      }
+    }
+
     // Map roles to their expected route prefixes (only include routes that actually exist)
     const roleRouteMap = {
       "admin": "/admin",
@@ -63,6 +82,14 @@ const AuthGuard = ({ children }) => {
   // If not authenticated, don't render children
   if (!isAuthenticated || !user) {
     return null;
+  }
+
+  // Check if accessing admin routes - require admin role (additional check before rendering)
+  const currentPath = location.pathname;
+  const userRole = user.role;
+  
+  if (currentPath.startsWith("/admin") && userRole !== "admin") {
+    return null; // Will be handled by useEffect redirect
   }
 
   // If authenticated and authorized, render children

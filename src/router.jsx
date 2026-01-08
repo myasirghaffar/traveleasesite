@@ -12,6 +12,7 @@ import UnauthorizedPage from "./pages/Unauthor";
 import AuthGuard from "./components/AuthGuard";
 import AuthRedirect from "./utils/AuthRedirect";
 import ScrollToTop from "./components/ScrollToTop";
+import RoleProtectedRoute from "./utils/RoleProtectedRoute";
 
 // Dashboard imports
 import AdminDashboard from "./pages/adminRole/dashboard";
@@ -58,7 +59,9 @@ const AppRouter = () => {
           path="/admin"
           element={
             <AuthGuard>
-              <AppLayout />
+              <RoleProtectedRoute allowedRoles={["admin"]}>
+                <AppLayout />
+              </RoleProtectedRoute>
             </AuthGuard>
           }
         >
