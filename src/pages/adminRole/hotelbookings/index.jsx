@@ -41,7 +41,8 @@ const HotelBookings = () => {
     return data.data.bookings.map(booking => ({
       id: booking.id.toString(),
       userName: booking.user?.full_name || booking.user?.email || "Unknown User",
-      userImage: booking.user?.profile_picture || booking.user?.avatar_url || `https://i.pravatar.cc/150?u=${booking.user_id}`,
+      userImage: booking.user?.profile_picture || booking.user?.avatar_url || null,
+      hasProfilePicture: !!(booking.user?.profile_picture || booking.user?.avatar_url),
       hotelName: booking.hotel?.name || "Unknown Hotel",
       checkIn: new Date(booking.check_in_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       checkOut: new Date(booking.check_out_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
@@ -97,21 +98,34 @@ const HotelBookings = () => {
   const customCellRenderers = {
     id: (row) => (
       <span className="text-slate-900 font-bold text-[14px] font-['Inter']">
-        #{row.id}
+        {row.id}
       </span>
     ),
-    userName: (row) => (
-      <div className="flex items-center gap-3 py-2">
-        <img
-          src={row.userImage}
-          alt={row.userName}
-          className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm"
-        />
-        <span className="text-slate-700 font-bold text-[14px] font-['Inter']">
-          {row.userName}
-        </span>
-      </div>
-    ),
+    userName: (row) => {
+      const firstInitial = row.userName?.charAt(0)?.toUpperCase() || '?';
+      const hasImage = row.hasProfilePicture && row.userImage;
+      
+      return (
+        <div className="flex items-center gap-3 py-2">
+          {hasImage ? (
+            <img
+              src={row.userImage}
+              alt={row.userName}
+              className="w-10 h-10 rounded-full object-cover border border-slate-200 shadow-sm"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-blue-500 border border-slate-200 shadow-sm flex items-center justify-center">
+              <span className="text-white font-bold text-[14px] font-['Inter']">
+                {firstInitial}
+              </span>
+            </div>
+          )}
+          <span className="text-slate-700 font-bold text-[14px] font-['Inter']">
+            {row.userName}
+          </span>
+        </div>
+      );
+    },
     hotelName: (row) => (
       <span className="text-slate-600 text-[14px] font-medium font-['Inter']">
         {row.hotelName}

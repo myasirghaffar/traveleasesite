@@ -1,16 +1,32 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
+import { persistor } from '../../store';
 import mainLogo from "../../assets/logos/main_logo.svg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = () => {
+    dispatch(logout());
+    persistor.purge(); // Clear all persisted Redux state from localStorage
+    localStorage.removeItem('auth_token'); // Remove auth_token if exists
+    localStorage.removeItem('persist:auth'); // Remove persisted auth state
+    localStorage.removeItem('persist:booking'); // Remove persisted booking state
+    navigate('/');
+    setIsMenuOpen(false);
+  };
 
   return (
     <header className="w-full flex flex-col items-center bg-white relative z-50 shadow-sm">
@@ -75,13 +91,22 @@ const Header = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-neutral-600 text-xs font-semibold font-display">Need Help?</span>
-              <span className="text-stone-950 text-sm font-semibold font-poppins font-bold">+91 345 533 865</span>
+              <span className="text-stone-950 text-sm font-bold font-poppins">+91 345 533 865</span>
             </div>
           </div>
 
-          <Link to="/taxi-listing" className="w-40 h-10 bg-blue-500 rounded-[10px] flex items-center justify-center hover:bg-blue-600 transition-colors">
-            <span className="text-white text-base font-semibold font-poppins leading-4 tracking-wide">Book Now</span>
-          </Link>
+          {isAuthenticated ? (
+            <button 
+              onClick={handleLogout}
+              className="w-40 h-10 bg-red-500 rounded-[10px] flex items-center justify-center hover:bg-red-600 transition-colors"
+            >
+              <span className="text-white text-base font-semibold font-poppins leading-4 tracking-wide">Logout</span>
+            </button>
+          ) : (
+            <Link to="/taxi-listing" className="w-40 h-10 bg-blue-500 rounded-[10px] flex items-center justify-center hover:bg-blue-600 transition-colors">
+              <span className="text-white text-base font-semibold font-poppins leading-4 tracking-wide">Book Now</span>
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -111,9 +136,18 @@ const Header = () => {
             <span className="text-stone-950 text-base font-bold font-poppins">+91 345 533 865</span>
           </div>
 
-          <Link to="/taxi-listing" onClick={() => setIsMenuOpen(false)} className="w-full h-12 bg-blue-500 rounded-[10px] flex items-center justify-center hover:bg-blue-600 transition-colors mt-2">
-            <span className="text-white text-base font-semibold font-poppins">Book Now</span>
-          </Link>
+          {isAuthenticated ? (
+            <button 
+              onClick={handleLogout}
+              className="w-full h-12 bg-red-500 rounded-[10px] flex items-center justify-center hover:bg-red-600 transition-colors mt-2"
+            >
+              <span className="text-white text-base font-semibold font-poppins">Logout</span>
+            </button>
+          ) : (
+            <Link to="/taxi-listing" onClick={() => setIsMenuOpen(false)} className="w-full h-12 bg-blue-500 rounded-[10px] flex items-center justify-center hover:bg-blue-600 transition-colors mt-2">
+              <span className="text-white text-base font-semibold font-poppins">Book Now</span>
+            </Link>
+          )}
         </div>
       )}
     </header>
